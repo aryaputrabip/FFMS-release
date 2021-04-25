@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Session\Session;
 use Yajra\DataTables\DataTables;
 
 class MemberDataController extends Controller
@@ -128,7 +129,7 @@ class MemberDataController extends Controller
 //                    }
 
                     return '<div class="text-center">
-                            <button class="btn btn-sm btn-dark" data-toggle="modal" data-target="#modal-action" onclick="modalMember(\''.$data->member_id.'\'); requestAction(\''.$data->member_id.'\')">
+                            <button class="btn btn-sm btn-dark" data-toggle="modal" data-target="#modal-action" onclick="modalMember(\''.$data->member_id.'\'); requestAction(\''.$data->member_id.'\', '.$data->duration.')">
                                 <i class="fas fa-eye fa-sm"></i>
                             </button>
                             </div>';
@@ -178,7 +179,7 @@ class MemberDataController extends Controller
                                 <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
                             </a>';
                 }else if($data['data']->status == 2){
-                    return '<button href="#" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="activateMember(`'.$r->id.'`)">
+                    return '<button href="#" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="activateMember(`'.$r->id.'`, '.$r->duration.')">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Aktivasi Member
                             </button>
                             <hr>
@@ -388,8 +389,8 @@ class MemberDataController extends Controller
             $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
             $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
 
-            $data['marketingList'] = MarketingModel::get();
-            $data['ptList'] = PersonalTrainerModel::get();
+            $data['marketingList'] = MarketingModel::where('status', 1)->get();
+            $data['ptList'] = PersonalTrainerModel::where('status', 1)->get();
 
             $data['title'] = 'Ubah Data Member';
             $data['role'] = $this->checkAuth();
@@ -444,8 +445,14 @@ class MemberDataController extends Controller
         ]);
 
         $role = Auth::user()->role_id;
-        Session::put('success', 'Data Member Berhasil Diubah');
-        session(['success', 'Data Member Berhasil Diubah']);
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.index')->with(['success' => 'Data Member Berhasil Diubah']);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.index')->with(['success' => 'Data Member Berhasil Diubah']);
+        }
     }
 
     function asRupiah($value) {
@@ -456,12 +463,12 @@ class MemberDataController extends Controller
     public function aktivasi(Request $r){
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
+        $date_end = Carbon::now()->addMonths($r->duration)->toDateString();
 
         $data = MemberModel::where('member_id', $r->id)->update([
             'status' => 1,
             'm_startdate' => $date_now,
-            'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'm_enddate' => $date_end,
         ]);
 
         if($this->checkAuth() == 1){
