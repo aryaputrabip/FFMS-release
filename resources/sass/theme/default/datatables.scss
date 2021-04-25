@@ -1,0 +1,64 @@
+// Variables
+@import 'variables';
+
+//DataTable Added New Element
+.datatable-custom-entries{
+    border-radius: 2px;
+    float: left;
+    margin-top: 0.5rem;
+    height: 31px;
+    cursor: default;
+}
+.datatable-custom-search{
+    background-color: $white;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    height: 31px;
+    cursor:default;
+}
+
+//DataTable Customization
+.dataTables_filter label input{
+    padding: 4px 10px;
+    height: 31px;
+    border-radius: 0;
+    font-size: 1rem;
+    margin-top: 0.5rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.dataTables_wrapper .dataTables_info{
+    padding-top: 0.5rem !important;
+    margin-left: 0.5rem !important;
+}
+
+.dataTables_wrapper .row:first-child{
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.dataTables_wrapper .row:last-child{
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.dataTables_length label{
+    margin-top: 0.5rem !important;
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+}
+
+.dataTables_length label{
+    margin-left: 0 !important;
+}
+
+ul.pagination{
+    margin: 0 !important;
+}
+
+.page-item:first-child .page-link{
+    border-radius: 0 !important;
+}
+
+.page-item:last-child .page-link{
+    border-radius: 0 !important;
+}

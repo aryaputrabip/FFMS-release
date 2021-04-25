@@ -1,0 +1,56 @@
+// Variables
+@import 'variables';
+
+//ADMINLTE Customization
+    //Sidebar (sidenav) customized style
+    .sidebar{
+        max-height: calc(100vh - 75px);
+    }
+
+    .sidebar-collapse .sidebar-no-expand{
+        width: 4rem !important;
+    }
+    .nav-header{
+        padding-top: 1.0rem !important;
+        padding-bottom: 0 !important;
+    }
+    .nav-link {
+        display: block;
+        padding: 0.6rem !important;
+    }
+    .sidebar-collapse .main-content{
+        margin-top: calc(3.5rem + 1px);
+        margin-left: 4rem;
+    }
+
+    .brand-image{
+        margin-top: 0 !important;
+        margin-left: .5rem !important;
+    }
+
+    //CARDS Customized Style
+    .card{
+        border: 1px solid #dde0e6 !important;
+        border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0 !important;
+        box-shadow: none !important;
+    }
+
+    //Content-Wrapper Customized Style
+    .content-wrapper{
+        max-height: calc(100vh - 60px); //For Page Scrolling
+        overflow-y: auto;
+        min-height: 0 !important;
+    }
+
+    //Media States
+    @media (min-width: 992px) {
+        //Header customized style
+        .sidebar-mini.sidebar-collapse .main-header {
+            margin-left: 4rem !important;
+        }
+
+        //Content Wrapper or Page Content Customized Style
+        .sidebar-mini.sidebar-collapse .content-wrapper{
+            margin-left: 4rem !important;
+        }
+    }
