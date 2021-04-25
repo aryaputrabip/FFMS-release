@@ -47,9 +47,9 @@ class CSDashboardController extends Controller
     }
 
     public function getMemberToday(){
-        $data = MemberModel::whereDate('created_at', '=', Carbon::today())->count();
+        $data = MemberModel::whereDate('created_at', '=', Carbon::today()->toDateString())->count();
 
-        return 'IN_PROGRESS';
+        return $data;
     }
 
     public function getActivityToday(){
