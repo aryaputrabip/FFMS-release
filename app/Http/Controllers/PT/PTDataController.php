@@ -69,7 +69,7 @@ class PTDataController extends Controller
                     return '<div class="text-left">'.$data->gender.'</div>';
                 })
                 ->addColumn('join_from', function ($data) {
-                    return '<div class="text-left">'.date('d/m/Y', strtotime($data->join_from)).'</div>';
+                    return '<div class="text-left">'.date('d M Y', strtotime($data->join_from)).'</div>';
                 })
                 ->addColumn('ptStatus', function ($data) {
                     if($data->status == 1){

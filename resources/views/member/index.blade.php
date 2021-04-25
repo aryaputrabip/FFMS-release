@@ -217,14 +217,15 @@
         messagingInfoCustom('ID Member disalin ke clipboard!');
     }
 
-    function requestAction(id){
+    function requestAction(id, duration){
         $("#modal-action-content").html("<div class='text-center'><i class='fas fa-sync fa-spin'></i></div>");
 
         $.ajax({
             type: 'GET',
             url: '{{ route('member.requestModalAction') }}',
             data:{
-                id:id
+                id:id,
+                duration:duration
             },
             success: function (data) {
                 $("#modal-action-content").html(data);
@@ -235,7 +236,7 @@
         });
     }
 
-    function activateMember(id){
+    function activateMember(id, duration){
         var token = '{{ csrf_token() }}';
 
         const DestroySwal = Swal.mixin({
@@ -258,7 +259,7 @@
             ) {
                 return false;
             }else{
-                $.post("{{ route('member.aktivasi') }}", { id:id, _token:token}, function(data){
+                $.post("{{ route('member.aktivasi') }}", { id:id, _token:token, duration:duration}, function(data){
                     location.reload();
                 });
             }

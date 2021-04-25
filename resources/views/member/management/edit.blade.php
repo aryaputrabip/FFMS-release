@@ -86,18 +86,40 @@
                                         <h6 class="mt-2"><b>Marketing</b></h6>
                                         <select class="form-control select2" style="width: 100%;" id="dataMarketing" name="dataMarketing">
                                             <option value="nothing" @if(isset($marketing)) @else selected @endisset> - </option>
+                                            @if(isset($marketing))
+                                                <option value="{{ $marketing->mark_id }}" data-name="{{ $marketing->name }}" selected>{{ $marketing->name }}</option>
+                                            @endisset
+
                                             <?php
                                             foreach($marketingList as $marketing_boy){?>
-                                            <option value="{{ $marketing_boy->mark_id }}" @if(isset($marketing)) @if($marketing_boy->mark_id == $marketing->mark_id) selected @endif @endisset data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option><?php
+                                            @if(isset($marketing))
+                                                @if($marketing_boy->mark_id != $marketing->mark_id)
+                                                    <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
+                                                @endif
+                                            @else
+                                                <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
+                                            @endisset
+                                             <?php
                                             }?>
                                         </select><br>
 
                                         <h6><b>Personal Trainer</b></h6>
                                         <select class="form-control select2" style="width: 100%;" id="dataPT" name="dataPT">
                                             <option value="nothing" @if(isset($pt)) @else selected @endisset> - </option>
+                                            @if(isset($pt))
+                                                <option value="{{ $pt->pt_id }}" data-name="{{ $pt->name }}" selected>{{ $pt->name }}</option>
+                                            @endisset
+
                                             <?php
                                             foreach($ptList as $pt_boy){?>
-                                            <option value="{{ $pt_boy->pt_id }}" @if(isset($pt)) @if($pt_boy->pt_id == $pt->pt_id) selected @endif @endisset data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option><?php
+                                            @if(isset($pt))
+                                                @if($pt_boy->pt_id != $pt->pt_id)
+                                                    <option value="{{ $pt_boy->pt_id }}" data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option>
+                                                @endif
+                                            @else
+                                                <option value="{{ $pt_boy->pt_id }}" data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option>
+                                            @endisset
+                                            <?php
                                             }?>
                                         </select>
                                     </div>
