@@ -1,0 +1,55 @@
+// Variables
+@import 'variables';
+
+//Background Colors
+.bg-default-light{
+    background-color: $default-light;
+}
+
+//Colors
+.text-dark-default{
+    color: $default-dark-inverse !important;
+}
+
+//Sidebar (sidenav) Style
+.sidebar-default-color{
+    background: $default-dark;
+}
+
+.user-card .card-section-dark{
+    background-color: #212529;
+    color: #FFFFFF;
+    padding: 4px 8px 6px 8px;
+    border-radius: 4px;
+}
+
+.user-card .card-section-light{
+    background-color: #212529;
+    color: #FFFFFF;
+    padding: 4px 8px 6px 8px;
+    border-radius: 4px;
+}
+
+.user-card .dropdown-menu .dropdown-item{
+    padding: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.info-box-value{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.member_id_copier:hover{
+    color: #5a89e0;
+    text-decoration: underline;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.container-wrapper{
+    max-height: calc(100vh - 108px); //For Page Scrolling
+    overflow-y: auto;
+    min-height: 0 !important;
+}
