@@ -46,6 +46,9 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
     Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('/', 'MarketingDataController@index')->name('index');
     });
+    Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+        Route::get('/', 'CutiController@index')->name('index');
+    });
 });
 
 Route::prefix('cs')->name('cs.')->group(function (){
@@ -61,6 +64,10 @@ Route::prefix('cs')->name('cs.')->group(function (){
             Route::get('/', 'MemberRegisterController@index')->name('index');
             Route::get('complete', 'MemberRegisterController@complete')->name('complete');
         });
+    });
+
+    Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+        Route::get('/', 'CutiController@index')->name('index');
     });
 });
 

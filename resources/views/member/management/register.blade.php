@@ -243,7 +243,7 @@
                                         <div class="attachment-text"><b>Durasi: </b> <span id="membership-{{ $mship->mship_id }}-duration">{{ $mship->duration }}</span> Bulan</div>
                                         <div class="attachment-text"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
                                         <input type="hidden" id="membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
-                                  f  </div><?php
+                                    </div><?php
                                     }?>
                                 </div>
                                 <input type="hidden" id="cacheMembershipID" name="cacheMembershipID" readonly>
@@ -773,6 +773,13 @@
                         }
                     }
 
+                    $("#confirm_name").html($("#dataUserNama").val());
+                    $("#confirm_gender").html($("#dataUserGender").val());
+                    $("#confirm_phone").html($("#dataUserPhone").val());
+                    $("#confirm_email").html($("#dataUserEmail").val());
+                    $("#confirm_job").html($("#dataUserJob").val());
+                    $("#confirm_agency").html($("#dataUserCompany").val());
+                    
                     return true;
                 }
                 break;
