@@ -13,3 +13,4 @@
 
 <!-- RESOURCES -->
 <script src="{{ asset('/js/custom-script.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

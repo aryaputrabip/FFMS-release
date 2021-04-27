@@ -39,7 +39,7 @@
                 <b>{{ $title }}</b>
             </div>
             <div class="card-body p-0">
-                <form action="{{route('adm.report.dataReg')}}">
+                <form action="{{route('report.dataReg')}}">
                     
                 </form>
                 <canvas id="reg"> </canvas>
@@ -49,7 +49,7 @@
 </div>
 
 <!-- INIT SCRIPTS -->
-@include('theme.default.source.js_source')
+@include('theme.default.source.script_source')
 @include('theme.default.import.modular.datatables.script')
 
 <!-- page script -->
