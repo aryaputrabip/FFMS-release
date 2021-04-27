@@ -113,3 +113,8 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
     Route::post('update', 'MarketingDataController@update')->name('update');
     Route::post('destroy', 'MarketingDataController@destroy')->name('destroy');
 });
+
+Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
+    Route::get('/','reportController@index')->name('index');
+    Route::post('/dataReg','reportController@index')->name('dataReg');
+});

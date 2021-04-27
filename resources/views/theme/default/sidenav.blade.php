@@ -76,10 +76,10 @@
                     @if($role == 1 || $role == 2)
                         <li class="text-dark-default nav-header">Laporan</li>
                         <li class="nav-item">
-                            <button href="#" class="btn btn-link nav-link text-dark-default" disabled>
+                            <a href="{{route('report.index')}}" class="btn btn-link nav-link text-dark-default">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Laporan</p>
-                            </button>>
+                            </a>>
                         </li>
                     @endif
 
