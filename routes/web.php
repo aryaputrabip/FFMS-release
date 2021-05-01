@@ -116,5 +116,5 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
 
 Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
     Route::get('/','reportController@index')->name('index');
-    Route::post('/dataReg','reportController@index')->name('dataReg');
+    Route::post('/dataReg','reportController@dataReg')->name('dataReg');
 });
