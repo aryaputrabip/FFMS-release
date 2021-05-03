@@ -22,6 +22,15 @@ class reportController extends Controller
         $data['board'] = "";
         $data['username'] = Auth::user()->name;
         $data['role'] = Auth::user()->role_id;
+
+        for ($i = 1; $i <= 12; $i++) {
+            $dt = date("F", mktime(0, 0, 0, $i, 10));
+            $data['bulan'][] = $dt . ' ' . $i;
+        }/* 
+        foreach ($data['bulan'] as $b) {
+            dd(explode(' ', $b));
+        } */
+        //dd($data);
         return view('report.index2', $data);
     }
 
@@ -31,15 +40,27 @@ class reportController extends Controller
         $tglAkhir = $r->tglAkhir;
         //dd($tglMulai);
         //$data['alldata'] = [];
-        $data['alldata'] = DB::table('logmember')
-            ->when($tglMulai, function ($query, $tglMulai) {
-                return $query->where('date', '>', $tglMulai)->get();
-            })
-            ->when($tglAkhir, function ($query, $tglAkhir) {
-                return $query->where('date', '<', $tglAkhir)->get();
-            })
-            ->where('aksi', 'register')
-            ->get();
+        if ($tglMulai) {
+            $data['alldata'] = DB::table('logmember')
+                ->where('date', '>', $tglMulai)
+                ->where('aksi', 'register')
+                ->get();
+        } else if ($tglAkhir) {
+            $data['alldata'] = DB::table('logmember')
+                ->where('date', '<', $tglAkhir)
+                ->where('aksi', 'register')
+                ->get();
+        } else if ($tglMulai && $tglAkhir) {
+            $data['alldata'] = DB::table('logmember')
+                ->where('date', '<', $tglAkhir)
+                ->where('date', '>', $tglMulai)
+                ->where('aksi', 'register')
+                ->get();
+        } else {
+            $data['alldata'] = DB::table('logmember')
+                ->where('aksi', 'register')
+                ->get();
+        }
 
         $month = [];
         $dataMonth = [];
@@ -51,9 +72,9 @@ class reportController extends Controller
                 ->whereRaw("extract(month from date) = " . $i)
                 ->count();
             $dpm = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
-            $dayPerMonth[] = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
+            //$dayPerMonth[] = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
             for ($j = 1; $j <= $dpm; $j++) {
-                $dataPerDay[$dt][] = MemberLogModel::where('aksi', 'register')
+                $dataPerDay[$i][$j] = MemberLogModel::where('aksi', 'register')
                     ->whereRaw("extract(month from date) = " . $i)
                     ->whereRaw('extract(day from date) = ' . $j)
                     ->count();
@@ -62,7 +83,7 @@ class reportController extends Controller
 
         $data['month'] = $month;
         $data['dataMonth'] = $dataMonth;
-        $data['dayPerMonth'] = $dayPerMonth;
+        //$data['dayPerMonth'] = $dayPerMonth;
         $data['dataPerDay'] = $dataPerDay;
         //dd($data);
         return json_encode($data);
