@@ -29,7 +29,18 @@
         <div class="container-fluid">
             <div class="tab">
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'hariReg', 'reg')">Hari</button>
-                <button class="tablinks btn btn-info" onclick="openCity(event, 'bulanReg', 'reg')">Bulan</button>
+                <div class="btn-group">
+                    <button type="button" class="tablinks btn btn-info" onclick="openCity(event, 'bulanReg', 'reg')">Bulan</button>
+                    <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        @foreach ($bulan as $b)
+                        <?php $bln = explode(' ', $b) ?>
+                        <a class="dropdown-item" onclick="dataRegDay()"> {{$bln[0]}}</a>
+                        @endforeach
+                    </div>
+                </div>
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'tahunReg', 'reg')">Tahun</button>
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'filterReg', 'reg')">Filter</button>
             </div>
@@ -52,13 +63,13 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
 <script>
     //Regis doang
     var sel = document.getElementById('reg').getContext('2d');
     var selday = document.getElementById('regday').getContext('2d');
     var form = $('#dataReg');
-    var bulan = 1;
+    var bulan = new Date().getMonth() + 1;
     var chartMonth;
     var chartDay;
     $.post("{{route('report.dataReg')}}", form.serialize(), function(response) {
