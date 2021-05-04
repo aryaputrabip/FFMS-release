@@ -8,6 +8,7 @@
     <title>{{ $title }}</title>
 
     <!-- INIT STYLE -->
+    @include('theme.default.source.script_source')
     @include('theme.default.source.css_source')
     @yield('import_css')
 
@@ -35,7 +36,6 @@
     </section>
 
     <!-- INIT SCRIPTS -->
-    @include('theme.default.source.script_source')
     @yield('import_script')
 
     <script>

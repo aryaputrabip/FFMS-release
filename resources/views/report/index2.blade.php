@@ -29,18 +29,21 @@
         <div class="container-fluid">
             <div class="tab">
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'hariReg', 'reg')">Hari</button>
+
                 <div class="btn-group">
                     <button type="button" class="tablinks btn btn-info" onclick="openCity(event, 'bulanReg', 'reg')">Bulan</button>
                     <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
-                    <div class="dropdown-menu">
+
+                    <div class="dropdown-menu" >
                         @foreach ($bulan as $b)
                         <?php $bln = explode(' ', $b) ?>
-                        <a class="dropdown-item" onclick="dataRegDay()"> {{$bln[0]}}</a>
+                        <a class="dropdown-item" onclick="dataRegDay('{{$bln[1]}}')"> {{$bln[0]}}</a>
                         @endforeach
                     </div>
                 </div>
+
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'tahunReg', 'reg')">Tahun</button>
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'filterReg', 'reg')">Filter</button>
             </div>
@@ -63,7 +66,6 @@
         </div>
     </div>
 </div>
-
 <script>
     //Regis doang
     var sel = document.getElementById('reg').getContext('2d');
