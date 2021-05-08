@@ -15,3 +15,14 @@
 
 <!-- RESOURCES -->
 <script src="{{ asset('/js/custom-script.js') }}"></script>
+
+
+<script>
+    $(function () {
+        $.ajax({
+            type: 'GET',
+            dataType: 'html',
+            url: "{{ route('member.dataChecking') }}"
+        });
+    });
+</script>
