@@ -47,7 +47,7 @@
                 <div class="float-right">
                     <div class='input-group'>
                         <a @if($role == 1) href="{{ route('suadmin.member.registration.index') }}" @elseif($role == 2) href="#"
-                           @elseif($role == 3) href="{{ route('cs.member.registration.index') }}" @endif class="btn btn-sm btn-primary mt-2 mr-3" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
+                           @elseif($role == 3) href="{{ route('cs.member.index') }}" @endif class="btn btn-sm btn-primary mt-2 mr-3" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
                             <i class="fas fa-plus fa-xs mr-1"></i> Tambah Member
                         </a>
 
