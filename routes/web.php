@@ -46,6 +46,9 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
     Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('/', 'MarketingDataController@index')->name('index');
     });
+    Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+        Route::get('/', 'CutiController@index')->name('index');
+    });
 });
 
 Route::prefix('cs')->name('cs.')->group(function (){
@@ -62,6 +65,10 @@ Route::prefix('cs')->name('cs.')->group(function (){
             Route::get('complete', 'MemberRegisterController@complete')->name('complete');
         });
     });
+
+    Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+        Route::get('/', 'CutiController@index')->name('index');
+    });
 });
 
 Route::namespace('member')->prefix('member')->name('member.')->group(function () {
@@ -76,6 +83,13 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::post('aktivasi', 'MemberDataController@aktivasi')->name('aktivasi');
     Route::get('preview', 'MemberCheckinController@preview')->name('preview');
     Route::post('checkin', 'MemberCheckinController@checkin')->name('checkin');
+
+    Route::post('addTransaction', 'MemberDataController@addTransaction')->name('addTransaction');
+
+    Route::get('dataChecking', 'MemberDataController@dataChecking')->name('dataChecking');
+    Route::get('printPembelianSesi/{id}', 'MemberDataController@printPembelianSesi')->name('printPembelianSesi');
+
+    Route::post('changePT', 'MemberDataController@changePT')->name('changePT');
 
     Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
         Route::post('store', 'MemberRegisterController@store')->name('store');
@@ -105,4 +119,13 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
     Route::get('edit', 'MarketingDataController@edit')->name('edit');
     Route::post('update', 'MarketingDataController@update')->name('update');
     Route::post('destroy', 'MarketingDataController@destroy')->name('destroy');
+});
+
+Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+    Route::get('getCutiData', 'CutiController@getCutiData')->name('getCutiData');
+    Route::get('preview', 'CutiController@preview')->name('preview');
+    Route::get('checkCapability', 'CutiController@checkCapability')->name('checkCapability');
+    Route::get('abortCuti', 'CutiController@abortCuti')->name('abortCuti');
+    Route::post('approve', 'CutiController@approve')->name('approve');
+    Route::post('remove', 'CutiController@remove')->name('remove');
 });

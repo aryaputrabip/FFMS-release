@@ -83,24 +83,54 @@ function asRupiah($value) {
     <tr>
         <td class="text-center pl-1 pr-1"><h6><b style="font-weight: normal">1</b></h6></td>
         <td class="pl-1 pr-1"><h6><b style="font-weight: normal">{{$desc_title}} {{ $data->membership }} ({{ $data->type }})</b></h6></td>
-        <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($data->membershipPrice); ?></b></h6></td>
-        <td class="text-center"><h6><b style="font-weight: normal"></b> - </h6></td>
-        <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($data->membershipPrice); ?></b></h6></td>
+        @if(isset($log->t_membership))
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($log->t_membership); ?></b></h6></td>
+            <td class="text-center"><h6><b style="font-weight: normal"></b> - </h6></td>
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($log->t_membership); ?></b></h6></td>
+        @else
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($data->membershipPrice); ?></b></h6></td>
+            <td class="text-center"><h6><b style="font-weight: normal"></b> - </h6></td>
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($data->membershipPrice); ?></b></h6></td>
+        @endisset
+
     </tr>
-    @if($data->session_reg != null)
+    @if(isset($log->t_sesi))
         <tr>
             <td class="text-center pl-1 pr-1"><h6><b style="font-weight: normal">2</b></h6></td>
             <td class="pl-1 pr-1"><h6><b style="font-weight: normal">{{$pt_title}}</b></h6></td>
-            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($session->session_price); ?></b></h6></td>
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($log->t_sesi); ?></b></h6></td>
             <td class="text-center"><h6><b style="font-weight: normal"></b> - </h6></td>
-            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($session->session_price); ?></b></h6></td>
+            <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($log->t_sesi); ?></b></h6></td>
         </tr>
+    @else
+        @if(isset($data->session_reg))
+            <tr>
+                <td class="text-center pl-1 pr-1"><h6><b style="font-weight: normal">2</b></h6></td>
+                <td class="pl-1 pr-1"><h6><b style="font-weight: normal">{{$pt_title}}</b></h6></td>
+                <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($session->session_price); ?></b></h6></td>
+                <td class="text-center"><h6><b style="font-weight: normal"></b> - </h6></td>
+                <td class="text-right pl-1 pr-1"><h6><b style="font-weight: normal"><?php echo asRupiah($session->session_price); ?></b></h6></td>
+            </tr>
+        @endisset
     @endisset
+
     <tr>
         <td colspan="2" style="border-bottom: 1px solid #FFFFFF; border-left: 1px solid #FFFFFF; border-bottom: 1px solid #FFFFFF;"></td>
         <td colspan="2" class="pl-1 pr-1"><h6><b>SUBTOTAL</b></h6></td>
-        <td class="text-right"><h6><b style="font-weight: normal;">@if($data->session_reg != null) <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?> @else <?php echo asRupiah(($data->membershipPrice)); ?> @endif</b></h6></td>
-    </tr>
+        @if(isset($log->t_sesi))
+            <td class="text-right"><h6><b style="font-weight: normal;">
+                <?php echo asRupiah(($log->t_membership + $log->t_sesi)); ?>
+            </td>
+        @else
+            <td class="text-right"><h6><b style="font-weight: normal;">
+                        @if($data->session_reg != null)
+                            <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?>
+                        @else
+                            <?php echo asRupiah(($data->membershipPrice)); ?>
+                        @endif</b></h6>
+            </td>
+        @endisset
+        </tr>
     <tr>
         <td colspan="2" style="border-bottom: 1px solid #FFFFFF; border-left: 1px solid #FFFFFF; border-bottom: 1px solid #FFFFFF; border-top: 1px solid #FFFFFF;"></td>
         <td colspan="2" class="pl-1 pr-1"><h6><b>PPN</b></h6></td>
@@ -109,7 +139,19 @@ function asRupiah($value) {
     <tr>
         <td colspan="2" style="border-bottom: 1px solid #FFFFFF; border-left: 1px solid #FFFFFF; border-bottom: 1px solid #FFFFFF; border-top: 1px solid #FFFFFF;"></td>
         <td colspan="2" class="pl-1 pr-1"><h6><b>GRAND TOTAL</b></h6></td>
-        <td class="text-right"><h6><b>@if($data->session_reg != null) <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?> @else <?php echo asRupiah(($data->membershipPrice)); ?> @endif</b></h6></td>
+        <td class="text-right"><h6><b>
+            @if(isset($log->t_sesi))
+                <td class="text-right"><h6><b style="font-weight: normal;">
+                    <?php echo asRupiah(($log->t_membership + $log->t_sesi)); ?>
+                </td>
+            @else
+                @if($data->session_reg != null)
+                    <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?>
+                @else
+                    <?php echo asRupiah(($data->membershipPrice)); ?>
+                @endif</b></h6>
+            @endisset
+        </td>
     </tr>
     </tbody>
 </table>

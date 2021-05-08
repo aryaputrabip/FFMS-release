@@ -80,7 +80,7 @@
                                         <h6 class="mb-3">@if(isset($cache->id_marketing)) {{ $marketing->name }} @else - @endisset</h6>
 
                                         <h6><b>Personal Trainer</b></h6>
-                                        <h6 class="mb-3">@if(isset($cache->pt)) {{ $pt->name }} @else - @endisset</h6>
+                                        <h6 class="mb-3">@if(isset($pt)) {{ $pt->name }} @else - @endisset</h6>
                                     </div>
                                 </div>
                             </div>
