@@ -279,7 +279,7 @@
                                 <div class="col-sm-6">
                                     <select class="form-control select2 mb-4" style="width: 100%;" id="dataUserPTSession" name="dataUserPTSession" disabled="true"><?php
                                         foreach($session as $session_list){?>
-                                        <option value="{{ $session_list->duration }}" data-price="{{ $session_list->price }}" data-title="{{ $session_list->title }}">{{ $session_list->duration }} Sesi</option>
+                                        <option value="{{ $session_list->duration }}" data-price="{{ $session_list->price }}" data-title="{{ $session_list->title }}">@if($session_list->title != null){{ $session_list->title }} - @endif{{ $session_list->duration }} Sesi</option>
                                         <?php
                                         }
                                         ?>
@@ -404,6 +404,7 @@
                                         <div class="attachment-block clearfix" id="container_confirm_pt" style="padding: 5px 10px; display: block;">
                                             <h5 class="attachment-heading">Personal Trainer</h5>
                                             <div class="attachment-text"><b>(<span id="confirm_pt_name">Belum Ditentukan</span>)</b></div>
+                                            <div class="attachment-text"><b>Jenis Sesi:</b> <span id="confirm_pt_session_title"> - </span></div>
                                             <div class="attachment-text"><b>Total Sesi:</b> <span id="confirm_pt_session"> - </span></div>
                                         </div>
                                         <div class="attachment-block clearfix" id="container_confirm_marketing" style="padding: 5px 10px; display: block;">
@@ -685,7 +686,13 @@
         $("#confirm_membership_duration").html($("#cacheMembershipDuration").val() + " Bulan");
 
         if($("#dataUserPTToggler").prop("checked")){
-            $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            if($("#dataUserPTSession").find(':selected').data('title') != ""){
+                $("#confirm_pt_session_title").html($("#dataUserPTSession").find(':selected').data('title'));
+                $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            }else{
+                $("#confirm_pt_session_title").html(" Regular ");
+                $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            }
 
             if($("#dataUserPT").val() == "nothing"){
                 $("#confirm_pt_name").html("Belum Ditentukan");
@@ -779,7 +786,7 @@
                     $("#confirm_email").html($("#dataUserEmail").val());
                     $("#confirm_job").html($("#dataUserJob").val());
                     $("#confirm_agency").html($("#dataUserCompany").val());
-                    
+
                     return true;
                 }
                 break;

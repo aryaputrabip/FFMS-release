@@ -235,6 +235,8 @@ class MemberRegisterController extends Controller
                 'author' => $data->member_id,
                 'additional' => $r->cachepaymentType,
                 'reg_no' => $nSystemNum,
+                't_membership' => $membershipPrice,
+                't_sesi' => $sessionPrice,
                 'aksi' => 'register'
             ]);
         }else{
@@ -247,6 +249,8 @@ class MemberRegisterController extends Controller
                 'author' => $data->member_id,
                 'additional' => $r->cachePaymentModel,
                 'reg_no' => $nSystemNum,
+                't_membership' => $membershipPrice,
+                't_sesi' => $sessionPrice,
                 'aksi' => 'register'
             ]);
         }
