@@ -70,7 +70,7 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-lg">
-                        <a href="{{ route('cs.member.checkin') }}" class="dropdown-item mt-2 mb-2 font-weight-bold">
+                        <a href="#" class="dropdown-item mt-2 mb-2 font-weight-bold disabled">
                             <i class="fas fa-calendar-check fa-sm mr-2"></i> Check-In
                         </a>
                         <div class="dropdown-divider"></div>
@@ -97,16 +97,16 @@
                 </li>
                 <li class="nav-item menu-border"></li>
                 <li class="nav-item menu-item">
-                    <a class="nav-link text-dark" data-toggle="dropdown">
+                    <a class="nav-link text-dark" data-toggle="dropdown" href="#">
                         <span class="fas fa-calendar-minus fa-sm mr-1"></span> Cuti Member
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-lg">
-                        <a href="{{ route('cs.cuti.index') }}" class="dropdown-item mt-2 mb-2 font-weight-bold">
+                        <a href="#" class="dropdown-item mt-2 mb-2 font-weight-bold disabled">
                             <i class="fas fa-user-plus fa-sm mr-2"></i> Pengajuan Cuti Member
                         </a>
                         <div class="dropdown-divider"></div>
-                        <a href="{{ route('cs.cuti.index') }}" class="dropdown-item mt-2 mb-2">
+                        <a href="#" class="dropdown-item mt-2 mb-2">
                             <i class="fas fa-calendar-minus fa-sm mr-2"></i> Data Cuti Member
                         </a>
                     </div>

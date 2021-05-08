@@ -68,11 +68,10 @@
 
                     <li class="text-dark-default nav-header">Member</li>
                     <li class="nav-item">
-                        <a @if($role == 1) href="{{ route('suadmin.cuti.index') }}" @elseif($role == 2) href="#"
-                           @elseif($role == 3) href="{{ route('cs.cuti.index') }}" @endif class="nav-link text-dark-default">
+                        <button href="#" class="btn btn-link nav-link text-dark-default" disabled>
                             <i class="nav-icon fas fa-calendar-minus"></i>
                             <p>Data Cuti Member</p>
-                        </a>
+                        </button>
                     </li>
 
                     @if($role == 1 || $role == 2)

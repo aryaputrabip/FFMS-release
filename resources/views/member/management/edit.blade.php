@@ -6,18 +6,6 @@
         -ms-flex: 0 0 270px;
         flex: 0 0 270px;
     }
-
-    .attachment-block-selector:hover{
-        background-color: #e8e8e8;
-    }
-
-    .block_active:hover{
-        background-color: #dcedff !important;
-    }
-
-    .block_active{
-        background-color: #dcedff;
-    }
     @endsection
 </style>
 
@@ -115,11 +103,30 @@
                                             }?>
                                         </select><br>
 
+                                        <h6><b>Personal Trainer</b></h6>
+                                        <select class="form-control select2" style="width: 100%;" id="dataPT" name="dataPT">
+                                            <option value="nothing" @if(isset($pt)) @else selected @endisset> - </option>
+                                            @if(isset($pt))
+                                                <option value="{{ $pt->pt_id }}" data-name="{{ $pt->name }}" selected>{{ $pt->name }}</option>
+                                            @endisset
 
+                                            <?php
+                                            foreach($ptList as $pt_boy){?>
+                                            @if(isset($pt))
+                                                @if($pt_boy->pt_id != $pt->pt_id)
+                                                    <option value="{{ $pt_boy->pt_id }}" data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option>
+                                                @endif
+                                            @else
+                                                <option value="{{ $pt_boy->pt_id }}" data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option>
+                                            @endisset
+                                            <?php
+                                            }?>
+                                        </select>
                                     </div>
 
                                     <input type="hidden" id="photoFile" name="photoFile" value="{{ $data->photo }}" readonly>
                                     <input type="hidden" id="cacheMarketing" name="cacheMarketing" readonly>
+                                    <input type="hidden" id="cachePT" name="cachePT" readonly>
                                 </form>
                             </div>
                             <div class="tab-pane fade" id="member-manage-membership" role="tabpanel" aria-labelledby="member-manage-membership-tab">
@@ -128,13 +135,10 @@
                                         <h3 class="text-left mt-0 mb-2 col-12 mb-2">Paket Member</h3>
                                     </div>
                                     <div class="col-4 text-right">
-                                        <button type="button" class="btn btn-dark mt-1"
-                                                data-toggle="modal" data-target="#modal-membership">
-                                            <i class="fas fa-edit fa-sm"></i>
-                                        </button>
+                                        <button type="button" class="btn btn-secondary mt-0 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Perpanjang</button>
                                     </div>
                                     <div class="col-12">
-                                        <hr class="mt-0">
+                                        <hr>
                                         <table id="membershipTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">
                                             <thead>
                                             <tr>
@@ -153,13 +157,10 @@
                                         <h3 class="text-left mt-3 mb-2 col-12 mb-2">Personal Trainer & Sesi Latihan</h3>
                                     </div>
                                     <div class="col-4 text-right">
-                                        <button type="button" class="btn btn-dark mt-3"
-                                                data-toggle="modal" data-target="#modal-pt">
-                                            <i class="fas fa-edit fa-sm"></i>
-                                        </button>
+                                        <button type="button" class="btn btn-secondary mt-3 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Tambah Sesi</button>
                                     </div>
                                     <div class="col-12">
-                                        <hr class="mt-0">
+                                        <hr>
                                         <table id="ptTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">
                                             <thead>
                                             <tr>
@@ -208,35 +209,10 @@
 
 @section('modal')
     @include('member.plugin.webcam')
-    @include('member.modal.modal_edit')
 @endsection
 
 @section('import_script')
     @include('theme.default.import.modular.datatables.script')
-@endsection
-
-@section('message')
-    @if(Session::has('success'))
-        <script type="text/javascript">
-            Swal.fire({
-                icon: 'success',
-                button: false,
-                html: '{{Session::get("success")}}'
-            })
-        </script>
-        <?php Session::forget('success') ?>
-    @endif
-
-    @if(Session::has('failed'))
-        <script type="text/javascript">
-            Swal.fire({
-                icon: 'warning',
-                button: false,
-                html: '{{Session::get("failed")}}'
-            })
-        </script>
-        <?php Session::forget('failed') ?>
-    @endif
 @endsection
 
 <script>
@@ -312,45 +288,7 @@
         });
 
         $("#dataPT").on("change", function() {
-            $("#cachePT").val($(this).val());
-        });
-
-        $("#addSessionConfirm").on("click", function() {
-            extendSession();
-            $("#modal-s-add").modal("hide");
-            $("#modal-f-payment").modal("show");
-            $("#payment-title").html("+ " + $("#dataUserPTSession option:selected").val() + " Sesi");
-            $("#total_payment").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
-            $("#total_price").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
-
-            $("#confirmPayment").data("action", 'extend-session');
-        });
-
-        $('#paymentDebitModal').on('hide.bs.modal', function() {
-            toggleModal('modal-f-payment');
-        });
-
-        $('#paymentCreditModal').on('hide.bs.modal', function() {
-            toggleModal('modal-f-payment');
-        });
-
-        $("#confirmPayment").on("click", function(){
-            verifyPaymentRequirement($(this).data("action"));
-        });
-
-        $("#payMembershipChange").on("click", function(){
-           checkRequiredData('membership');
-        });
-
-        $("#payMembershipExtend").on("click", function(){
-            $("#modal-m-extend").modal("hide");
-            $("#modal-f-payment").modal("show");
-
-            $("#payment-title").html("Paket Member <br>" + `{{ $membership->duration }}` + " Bulan<br>(" + $("#extend-membership-type").html() + ")");
-            $("#total_payment").html(`<?php echo asRupiah($membership->price); ?>`);
-            $("#total_price").html(`<?php echo asRupiah($membership->price); ?>`);
-
-            $("#confirmPayment").data("action", 'extend-membership');
+            $("#cachePT").val($(this).find(':selected').data('name'));
         });
     });
 
@@ -408,10 +346,6 @@
                 messagingErrorCustom('Format Email Tidak Sesuai!');
             }
         }
-    }
-
-    function extendSession(){
-
     }
 
     function openWebcam(){
@@ -473,271 +407,6 @@
 
         var data = canvas.toDataURL('image/png');
         photo.setAttribute('src', data);
-    }
-
-    function tambahSesi(){
-        $("#modal-pt").modal("hide");
-        $("#modal-s-add").modal("show");
-    }
-
-    function ubahPT(){
-        $("#modal-pt").modal("hide");
-        $("#modal-pt-change").modal("show");
-    }
-
-    function selectPaymentModel(type, element){
-        reselectPaymentCard(type);
-        $("#cachePaymentModel").val($(element).data('payment'));
-        $("#cachePaymentType").val("");
-
-        switch(type){
-            case 2:
-                $('#paymentDebitModal').modal('show');
-                toggleModal('modal-f-payment');
-                break;
-
-            case 3:
-                $('#paymentCreditModal').modal('show');
-                toggleModal('modal-f-payment');
-                break;
-        }
-    }
-
-    function toggleModal(modal){
-        if(modal == 'payment-return'){
-            if($("#confirmPayment").data("action") == 'extend-session'){
-                $("#modal-s-add").modal("show");
-            }else if($("#confirmPayment").data("action") == 'change-membership'){
-                $("#modal-m-change").modal("show");
-            }
-        }else{
-            $("#"+modal).modal("toggle");
-        }
-    }
-
-    function selectPaymentType(type, element){
-        reselectPaymentBank(type);
-        $("#cachePaymentType").val($(element).data('bank'));
-    }
-
-    var selectedBank;
-    function reselectPaymentBank(selected) {
-        $("#bank-"+selected).addClass('block_active');
-
-        if(selectedBank != null){
-            $(selectedBank).removeClass('block_active');
-        }
-        selectedBank = "#bank-"+selected;
-    }
-
-    var selectedPayment;
-    function reselectPaymentCard(selected){
-        $("#payment-"+selected).addClass('block_active');
-
-        if(selectedPayment != null){
-            $(selectedPayment).removeClass('block_active');
-        }
-        selectedPayment = "#payment-"+selected;
-    }
-
-    function verifyPaymentRequirement(action){
-
-        if($("#cachePaymentModel").val() == ""){
-            messagingErrorCustom('Jenis Pembayaran Belum Dipilih!');
-        }else{
-            if($("#cachePaymentModel").val() == "Cash"){
-                notifyConfirmPayment(action);
-            }else{
-                if($("#cachePaymentType").val() != ""){
-                    notifyConfirmPayment(action);
-                }else{
-                    messagingErrorCustom('Bank Pembayaran Belum Dipilih!');
-                }
-            }
-        }
-    }
-
-    function notifyConfirmPayment(action){
-        var token = '{{ csrf_token() }}';
-
-        const ConfirmSwal = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary mr-2',
-                cancelButton: 'btn btn-danger mr-2'
-            },buttonsStyling: false
-        });
-
-        ConfirmSwal.fire({
-            icon: 'warning',
-            html: 'Konfirmasi Transaksi ?',
-            showCancelButton: true,
-            cancelButtonText: `<i class="fas fa-times fa-sm mr-1"></i> Tidak`,
-            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Iya`,
-            reverseButtons: true
-        }).then((result) => {
-            if (result.dismiss === Swal.DismissReason.confirm){
-                setPaymentLoad();
-
-                $("#sTransaction").val($("#confirmPayment").data("action"));
-                $("#nPayment").val($("#cachePaymentType").val());
-                $("#nBank").val($("#cachePaymentModel").val());
-
-                if($("#confirmPayment").data("action") == 'extend-session'){
-                    $("#nSession").val($("#dataUserPTSession option:selected").val());
-                    $("#nPrice").val($("#dataUserPTSession option:selected").data("price"));
-                    $("#nTitle").val($("#dataUserPTSession option:selected").data("title"));
-                }else if($("#confirmPayment").data("action") == 'change-membership'){
-                    $("#mShipID").val($("#cacheMembershipID").val());
-                    $("#mShipName").val($("#cacheMembership").val());
-                    $("#mShipPrice").val($("#cacheMembershipPrice").val());
-                    $("#mShipDuration").val($("#cacheMembershipDuration").val());
-                    $("#mShipType").val($("#cacheMembershipType").val());
-                    $("#mShipCategory").val($("#cacheMembershipCategory").val());
-                }
-
-                $("#sAddForm").submit();
-            }else{
-                return false;
-            }
-        });
-    }
-
-    function setPaymentLoad(){
-        $("#modal-f-payment-content").append(
-            '<div class="overlay d-flex justify-content-center align-items-center">' +
-            '   <i class="fas fa-2x fa-sync fa-spin"></i>' +
-            '</div>'
-        );
-    }
-
-    function setEditPTLoad(){
-        $("#modal-pt-change-content").append(
-            '<div class="overlay d-flex justify-content-center align-items-center">' +
-            '   <i class="fas fa-2x fa-sync fa-spin"></i>' +
-            '</div>'
-        );
-    }
-
-    function asRupiah(value){
-        var formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'IDR',
-        });
-
-        var split = formatter.format(value).split(".00");
-        var splitCurrency = split[0].split("IDR");
-
-        return splitCurrency[1];
-    }
-
-    function editPTNameConfirm(){
-        const ConfirmSwal = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary mr-2',
-                cancelButton: 'btn btn-danger mr-2'
-            },buttonsStyling: false
-        });
-
-        ConfirmSwal.fire({
-            icon: 'warning',
-            html: 'Apakah Anda yakin ingin mengubah Persnal Trainer Member ini ?',
-            showCancelButton: true,
-            cancelButtonText: `<i class="fas fa-times fa-sm mr-1"></i> Tidak`,
-            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Iya`,
-            reverseButtons: true
-        }).then((result) => {
-            if (result.dismiss === Swal.DismissReason.confirm){
-                setEditPTLoad();
-
-                $("#cachePT").val($("#dataPT").val());
-
-                $("#ptEditForm").submit();
-            }else{
-                return false;
-            }
-        });
-    }
-
-    function activatePaket(id, duration){
-        var token = '{{ csrf_token() }}';
-
-        const DestroySwal = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-success mr-2',
-                cancelButton: 'btn btn-outline-dark mr-2'
-            },
-            buttonsStyling: false
-        })
-
-        DestroySwal.fire({
-            icon: 'warning',
-            html: 'Apakah Anda yakin ingin melakukan Aktivasi untuk member ini ?</small>',
-            showCancelButton: true,
-            cancelButtonText: '<i class="fas fa-times fa-sm mr-1"></i> Batal',
-            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Aktivasi`,
-            reverseButtons: true
-        }).then((result) => {
-            if (result.dismiss === Swal.DismissReason.cancel
-            ) {
-                return false;
-            }else{
-                $.post("{{ route('member.aktivasi') }}", {
-                    id:id, _token:token, duration:duration}, function(data){
-                    location.reload();
-                });
-            }
-        });
-    }
-
-    function extendPaket(){
-        $("#modal-m-extend").modal("show");
-        $("#cacheMembershipAction").val("extend-membership");
-    }
-
-    function ubahPaket(){
-        $("#modal-m-change").modal("show");
-        $("#cacheMembershipAction").val("change-membership");
-    }
-
-    var selectedMembership;
-    function selectMembership(selected){
-        $("#cacheMembership").val($("#membership-"+selected+"-name").html());
-        $("#cacheMembershipID").val(selected);
-        $("#cacheMembershipDuration").val($("#membership-"+selected+"-duration").html());
-        $("#cacheMembershipType").val($("#membership-"+selected+"-type").html());
-        $("#cacheMembershipPrice").val($("#membership-"+selected+"-price").data('price'));
-        $("#cacheMembershipCategory").val($("#membership-"+selected+"-category").val());
-
-        reselectMembershipCard(selected);
-    }
-
-    function reselectMembershipCard(selected){
-        $("#membership-"+selected).addClass('block_active');
-
-        if(selectedMembership != null){
-            $(selectedMembership).removeClass('block_active');
-        }
-        selectedMembership = "#membership-"+selected;
-    }
-
-    function checkRequiredData(type){
-        switch(type){
-            case "membership":
-                if($("#cacheMembershipID").val() == ""){
-                    messagingErrorCustom("Paket Member Belum Dipilih!");
-                }else{
-                    $("#modal-m-change").modal("hide");
-                    $("#modal-f-payment").modal("show");
-
-                    $("#payment-title").html("Paket Member <br>" + $("#cacheMembershipDuration").val() + " Bulan <br>" + "("+$("#cacheMembershipType").val()+")");
-                    $("#total_payment").html(asRupiah($("#cacheMembershipPrice").val()));
-                    $("#total_price").html(asRupiah($("#cacheMembershipPrice").val()));
-
-                    $("#confirmPayment").data("action", 'change-membership');
-
-                }
-                break;
-        }
     }
 
     function isEmail(email){
