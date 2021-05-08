@@ -14,6 +14,7 @@
                 <div class="col-12 my-2"><input type="date" class="form-control " name="tglAkhir" id="tglAkhir" style="width: 100%;"></div>
             </form>
             <div class="col-12 my-2">Bulan</div>
+            <div class="col-12 my-2"> <button class="btn btn-success" onclick="dataReg()" style="width: 100%;"> search </button> </div>
             <div class="col-12 my-2">
                 <select id="bulan" name="bulan" onchange="dataRegDay(this.value)" class="custom-select">
                     @foreach ($bulan as $b)
@@ -22,7 +23,6 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-12 my-2"> <button class="btn btn-success" onclick="dataReg()" style="width: 100%;"> search </button> </div>
         </div>
     </div>
     <div class="col-md-9">
@@ -35,6 +35,7 @@
                     <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
+
                     <div class="dropdown-menu" >
                         @foreach ($bulan as $b)
                         <?php $bln = explode(' ', $b) ?>
@@ -43,22 +44,11 @@
                     </div>
                 </div>
 
-                <div class="btn-group">
-                    <button class="tablinks btn btn-info" onclick="openCity(event, 'tahunReg', 'reg')">Tahun</button>
-                    <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <div class="dropdown-menu" >
-                        @foreach ($tahun as $t)
-                        <a class="dropdown-item" onclick="dataRegYear('{{$t->year}}')"> {{$t->year}}</a>
-                        @endforeach
-                    </div>
-                </div>
-                
+                <button class="tablinks btn btn-info" onclick="openCity(event, 'tahunReg', 'reg')">Tahun</button>
                 <button class="tablinks btn btn-info" onclick="openCity(event, 'filterReg', 'reg')">Filter</button>
             </div>
 
-            <div id="bulanReg" class="reg" style="width: 100%; min-height: 300px ;display:none">
+            <div id="bulanReg" class="reg" style="width: 100%; min-height: 300px">
                 <canvas id="reg"> </canvas>
             </div>
 
@@ -66,8 +56,8 @@
                 <canvas id="regday"> </canvas>
             </div>
 
-            <div id="tahunReg" class="reg" style="width: 100%; min-height: 300px">
-                <canvas id="regyear"></canvas>
+            <div id="tahunReg" class="reg" style="width: 100%; min-height: 300px ;display:none">
+
             </div>
 
             <div id="filterRegs" class="reg" style="width: 100%; min-height: 300px; display:none;">
@@ -80,11 +70,8 @@
     //Regis doang
     var sel = document.getElementById('reg').getContext('2d');
     var selday = document.getElementById('regday').getContext('2d');
-    var selyear = document.getElementById('regyear').getContext('2d');
-
     var form = $('#dataReg');
     var bulan = new Date().getMonth() + 1;
-    var tahun = "{{ $tahun->last()->year }}";
     var chartMonth;
     var chartDay;
     $.post("{{route('report.dataReg')}}", form.serialize(), function(response) {
@@ -93,26 +80,7 @@
         var res = JSON.parse(res)
         console.log(res);
         drawReg(res, bulan);
-        GrafikTahunan(res);
-        dataRegYear(tahun)
     });
-
-    function GrafikTahunan(res) {
-        chartYear = new Chart(selyear, {
-            type: 'bar',
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            },
-            data: {
-                labels: res.year,
-                datasets: [{
-                    label: 'Peserta Terdaftar',
-                    data: res.dataPerYear
-                }]
-            }
-        })
-    }
 
     function drawReg(res, bln) {
         var form = $('#dataReg');
@@ -129,7 +97,7 @@
             data: {
                 labels: res.month,
                 datasets: [{
-                    label: 'Peserta Terdaftar Tahun ' + tahun,
+                    label: 'Peserta Terdaftar',
                     data: res.dataMonth
                 }]
             }
@@ -149,7 +117,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Peserta Terdaftar ' + res.month[bulan-1] + ' ' + tahun,
+                    label: 'Peserta Terdaftar',
                     data: res.dataPerDay[bulan]
                 }]
             }
@@ -171,28 +139,12 @@
     function dataRegDay(bln) {
         chartDay.destroy();
         chartMonth.destroy();
-        formData = form.serialize()+ "&tahun=" + tahun;
-        $.post("{{route('report.dataReg')}}", formData, function(response) {
+        $.post("{{route('report.dataReg')}}", form.serialize(), function(response) {
             var res = JSON.parse(response)
         }).done(function(res) {
             var res = JSON.parse(res)
             console.log(res);
             drawReg(res, bln);
-        });
-    }
-    
-    function dataRegYear(year) {
-        tahun = year;
-        chartDay.destroy();
-        chartMonth.destroy();
-        formData = form.serialize()+ "&tahun=" + year;
-        console.log(formData);
-        $.post("{{route('report.dataReg')}}", formData, function(response) {
-            var res = JSON.parse(response)
-        }).done(function(res) {
-            var res = JSON.parse(res)
-            console.log(res);
-            drawReg(res);
         });
     }
     //sampe sini regis nya 
