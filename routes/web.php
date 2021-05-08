@@ -118,3 +118,5 @@ Route::namespace('report')->prefix('report/')->name('report.')->group(function()
     Route::get('/','reportController@index')->name('index');
     Route::post('/dataReg','reportController@dataReg')->name('dataReg');
 });
+
+//
