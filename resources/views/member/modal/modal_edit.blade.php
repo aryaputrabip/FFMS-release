@@ -52,10 +52,11 @@
             <div class="modal-body">
                 <h6>Paket Member Aktif</h6>
                 <div class="attachment-block clearfix" style="padding: 15px;">
-                    <h5 class="attachment-heading">{{ $membership->name }}</h5>
-                    <div class="attachment-text"><b>Durasi: </b> {{ $membership->duration }} Bulan</div>
+                    <input type="hidden" id="extend-membership-id" value="{{ $membership->mship_id }}" readonly>
+                    <h5 class="attachment-heading" id="extend-membership-name">{{ $membership->name }}</h5>
+                    <div class="attachment-text"><b>Durasi: </b> <span id="extend-membership-duration">{{ $membership->duration }}</span> Bulan</div>
                     <div class="attachment-text"><b>Tipe: </b> <span id="extend-membership-type"> @if($membership->type == 1) GYM Only @else All Access @endif </span> </div>
-                    <div class="attachment-text mt-2"><b>Harga: </b><?php echo asRupiah($membership->price); ?></span></div>
+                    <div class="attachment-text mt-2"><b>Harga: </b><span id="extend-membership-price" data-price="{{ $membership->price }}"><?php echo asRupiah($membership->price); ?></span></div>
                 </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #dde0e6!important;">
@@ -79,7 +80,33 @@
                 </button>
             </div>
             <div class="modal-body">
+                <h6><b>Personal Trainer</b></h6>
+                <select class="form-control select2 mb-2" style="width: 100%;" id="dataPTReg" name="dataPTReg">
+                    <option value="nothing" selected> - </option>
+                    <?php
+                    foreach($ptList as $pt_boy){?>
+                    <option value="{{ $pt_boy->pt_id }}" data-name="{{ $pt_boy->name }}">{{ $pt_boy->name }}</option>
+                    <?php
+                    }?>
+                </select>
 
+                <select class="form-control select2 mb-4" style="width: 100%;" id="dataPTRegSession" name="dataPTRegSession"><?php
+                    foreach($session as $session_list){?>
+                    <option value="{{ $session_list->duration }}" data-price="{{ $session_list->price }}" data-title="{{ $session_list->title }}">
+                        @if($session_list->title != null){{ $session_list->title }} - @endif{{ $session_list->duration }} Sesi</option>
+                    <?php
+                    }
+                    ?>
+                </select>
+
+                <button type="button" class="btn btn-primary w-100" id="payPTRegister">
+                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
+                </button>
+
+                <input type="hidden" id="cacheRegPTID" name="cacheRegPTID" readonly>
+                <input type="hidden" id="cacheRegSessionPrice" name="cacheRegSessionPrice" readonly>
+                <input type="hidden" id="cacheRegSessionDuration" name="cacheRegSessionDuration" readonly>
+                <input type="hidden" id="cacheRegSessionGroup" name="cacheRegSessionGroup" readonly>
             </div>
         </div>
     </div>
@@ -132,7 +159,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="modal-s-add" data-backdrop="static">
     <div class="modal-dialog">
@@ -256,7 +282,7 @@
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary w-100" id="confirmPayment" data-action="">
+                        <button type="button" class="btn btn-primary w-100" data-dismiss="modal" aria-label="Close" onclick="toggleModal('notesModal')">
                             <i class="fas fa-check fa-sm mr-1"></i> Selesai
                         </button>
                     </div>
@@ -264,29 +290,56 @@
 
                 <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>
                 <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <form id="sAddForm" name="sAddForm" method="POST" action="{{ route('member.addTransaction') }}">
-                    {{ csrf_field() }}
+<div class="modal fade" id="notesModal" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-plus fa-sm mr-1"></i> Catatan
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('modal-f-payment')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 300px; overflow-y: auto;">
+                <div class="row">
+                    <textarea class="form-control w-100 ml-2 mr-2" id="dataNote" name="dataNote" rows="6" placeholder="Tambah Catatan (optional)..."></textarea>
 
-                    <input type="hidden" id="sHiddenID" name="sHiddenID" value="{{ $data->member_id }}" readonly>
-                    <input type="hidden" id="sName" name="sName" value="{{ $data->name }}" readonly>
-                    <input type="hidden" id="sTransaction" name="sTransaction" readonly>
-                    <input type="hidden" id="sOld" name="sOld" value="{{ $data->session }}" readonly>
-                    <input type="hidden" id="lOld" name="lOld" value="{{ $data->session_reg }}" readonly>
-                    <input type="hidden" id="nSession" name="nSession" readonly>
-                    <input type="hidden" id="nPrice" name="nPrice" readonly>
-                    <input type="hidden" id="nTitle" name="nTitle" readonly>
-                    <input type="hidden" id="nPayment" name="nPayment" readonly>
-                    <input type="hidden" id="nBank" name="nBank" readonly>
-                    <input type="hidden" id="nRegNo" name="nRegNo" value="{{ $reg_no }}" readonly>
+                    <form id="sAddForm" name="sAddForm" method="POST" action="{{ route('member.addTransaction') }}">
+                        {{ csrf_field() }}
 
-                    <input type="hidden" id="mShipID" name="mShipID" readonly>
-                    <input type="hidden" id="mShipName" name="mShipName" readonly>
-                    <input type="hidden" id="mShipPrice" name="mShipPrice" readonly>
-                    <input type="hidden" id="mShipDuration" name="mShipDuration" readonly>
-                    <input type="hidden" id="mShipType" name="mShipType" readonly>
-                    <input type="hidden" id="mShipCategory" name="mShipCategory" readonly>
-                </form>
+                        <input type="hidden" id="sHiddenID" name="sHiddenID" value="{{ $data->member_id }}" readonly>
+                        <input type="hidden" id="sName" name="sName" value="{{ $data->name }}" readonly>
+                        <input type="hidden" id="sTransaction" name="sTransaction" readonly>
+                        <input type="hidden" id="sOld" name="sOld" value="{{ $data->session }}" readonly>
+                        <input type="hidden" id="lOld" name="lOld" value="{{ $data->session_reg }}" readonly>
+                        <input type="hidden" id="nSession" name="nSession" readonly>
+                        <input type="hidden" id="nPT" name="nPT" readonly>
+                        <input type="hidden" id="nPrice" name="nPrice" readonly>
+                        <input type="hidden" id="nTitle" name="nTitle" readonly>
+                        <input type="hidden" id="nPayment" name="nPayment" readonly>
+                        <input type="hidden" id="nBank" name="nBank" readonly>
+                        <input type="hidden" id="nRegNo" name="nRegNo" value="{{ $reg_no }}" readonly>
+                        <input type="hidden" id="nNotes" name="nNotes" readonly>
+
+                        <input type="hidden" id="mShipID" name="mShipID" readonly>
+                        <input type="hidden" id="mShipName" name="mShipName" readonly>
+                        <input type="hidden" id="mShipPrice" name="mShipPrice" readonly>
+                        <input type="hidden" id="mShipDuration" name="mShipDuration" readonly>
+                        <input type="hidden" id="mShipType" name="mShipType" readonly>
+                        <input type="hidden" id="mShipCategory" name="mShipCategory" readonly>
+                        <input type="hidden" id="mShipApproval" name="mShipApproval" readonly>
+                    </form>
+
+                    <button type="button" class="btn btn-primary w-100 ml-2 mr-2 mt-2" id="confirmPayment" data-action="">
+                        <i class="fas fa-check fa-sm mr-1"></i> Selesai
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -418,14 +471,53 @@
                             <input type="hidden" id="cacheMembershipAction" name="cacheMembershipAction" readonly>
                         </div>
 
-                        <button type="button" class="btn btn-primary w-100" id="payMembershipChange">
-                            <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
-                        </button>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-danger w-100" id="changeApprovalBtn" data-target="#approvalModal" data-toggle="modal" disabled="true">
+                                    <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary w-100" id="payMembershipChange">
+                                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
 {{--                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>--}}
 {{--                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>--}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="approvalModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga By Approval
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('modal-m-change');">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-1">
+                        <h6 class="pt-1">Rp. </h6>
+                    </div>
+                    <div class="col">
+                        <input type="number" id="approvalPrice" name="approvalPrice" class="form-control" autocomplete="off" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer pt-1 pb-1" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-dark pt-1 pb-1" data-dismiss="modal" onclick="setApprovalPrice();">
+                    <i class="fas fa-check fa-sm mr-1"></i> Ok
+                </button>
             </div>
         </div>
     </div>

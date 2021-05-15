@@ -205,7 +205,8 @@ class MemberRegisterController extends Controller
             'created_by' => Auth::user()->role_id,
             'created_at' => $date_now,
             'visitlog' => 0,
-            'photo' =>$r->photoFile
+            'photo' => $r->photoFile,
+            'member_notes' => $r->dataNote
         ]);
 
         //CREATE DATA FOR FAMILY
@@ -237,7 +238,8 @@ class MemberRegisterController extends Controller
                 'reg_no' => $nSystemNum,
                 't_membership' => $membershipPrice,
                 't_sesi' => $sessionPrice,
-                'aksi' => 'register'
+                'aksi' => 'register',
+                'notes' => $r->dataNote
             ]);
         }else{
             $startLog = MemberLogModel::create([
@@ -251,7 +253,8 @@ class MemberRegisterController extends Controller
                 'reg_no' => $nSystemNum,
                 't_membership' => $membershipPrice,
                 't_sesi' => $sessionPrice,
-                'aksi' => 'register'
+                'aksi' => 'register',
+                'notes' => $r->dataNote
             ]);
         }
 
@@ -331,7 +334,9 @@ class MemberRegisterController extends Controller
                 'PK.date as LOG_DATE',
                 'PK.reg_no as PO_ID',
                 'PK.transaction',
-                'PK.additional')
+                'PK.additional',
+                'PK.notes'
+            )
             ->where("PK.author", $id)
             ->first();
 

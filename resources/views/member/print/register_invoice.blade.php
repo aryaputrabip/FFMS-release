@@ -163,6 +163,7 @@ function asRupiah($value) {
             <div class="col-3">
                 <h6><small><i><b>Metode</b></i></small></h6>
                 <h6><small><i><b>Bank Name</b></i></small></h6>
+                <br>
             </div>
             <div class="col-8" style="padding-left: 150px;">
                 <h6><small><i><b>: {{ $metodeBayar }}</b></i></small></h6>
@@ -170,15 +171,37 @@ function asRupiah($value) {
             </div>
         </div>
     </div>
+{{--    <br>--}}
+{{--    <div class="col-5">--}}
+{{--        <h6 class="mt-2"><small><i><b>Catatan :</b></i></small></h6>--}}
+{{--        @if(isset($log->notes))--}}
+{{--            <h6 style="font-weight: normal;">{{ $log->notes }}</h6>--}}
+{{--        @else--}}
+{{--            <h6 style="font-weight: normal;"> - </h6>--}}
+{{--        @endisset--}}
+{{--    </div>--}}
     <div class="col-3 text-center" style="float: right;">
         <h6 style="font-weight: normal;">Prepared by,</h6><br><br>
         <h6 style="font-weight: normal;">(
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            )</h6>
+            )
+        </h6>
     </div>
 </div>
+@if(isset($log->notes))
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="attachment-block">
+                <h6 class="mb-0 pl-1 pr-1"><b>Catatan :</b></h6>
+                <h6 class="pl-1 pr-1" style="font-weight: normal; text-align: justify">
+                    {{ $log->notes }}
+                </h6>
+            </div>
+        </div>
+    </div>
+@endisset
 
 {{--    <div class="page-break"></div>--}}
 {{--    <div class="row">--}}

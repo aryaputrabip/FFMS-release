@@ -288,6 +288,7 @@
             serverSide: true,
             ajax: "{{ route('member.getMemberLog', $data->member_id ) }}",
             iDisplayLength: 10,
+            "order": [[ 0, "desc" ]],
             columns: [
                 { data: 'date', name: 'date' },
                 { data: 'desc', name: 'desc' },
@@ -326,6 +327,14 @@
             $("#confirmPayment").data("action", 'extend-session');
         });
 
+        $("#modal-membership").on('show.bs.modal', function() {
+            resetMembershipTransaction();
+        });
+
+        $("#modal-pt").on('show.bs.modal', function() {
+           resetPTTransaction();
+        });
+
         $('#paymentDebitModal').on('hide.bs.modal', function() {
             toggleModal('modal-f-payment');
         });
@@ -347,10 +356,41 @@
             $("#modal-f-payment").modal("show");
 
             $("#payment-title").html("Paket Member <br>" + `{{ $membership->duration }}` + " Bulan<br>(" + $("#extend-membership-type").html() + ")");
-            $("#total_payment").html(`<?php echo asRupiah($membership->price); ?>`);
-            $("#total_price").html(`<?php echo asRupiah($membership->price); ?>`);
+            $("#total_payment").html(asRupiah({{ $membership->price }}));
+            $("#total_price").html(asRupiah({{ $membership->price }}));
 
             $("#confirmPayment").data("action", 'extend-membership');
+        });
+
+        $("#changeApprovalBtn").on("click", function() {
+           toggleModal("modal-m-change");
+        });
+
+        $("#payPTRegister").on("click", function() {
+           if($("#dataPTRegSession").find(':selected').val() == null || $("#dataPTRegSession").find(':selected').val() == ""){
+               messagingErrorCustom("Sesi Belum Dipilih!");
+           }else{
+               $("#modal-pt-add").modal("hide");
+               $("#modal-f-payment").modal("show");
+
+               var currentSessionTitle = $("#dataPTRegSession").find(':selected');
+
+               $("#cacheRegPTID").val($("#dataPTReg").find(':selected').val());
+               $("#cacheRegSessionDuration").val(currentSessionTitle.val());
+               $("#cacheRegSessionGroup").val(currentSessionTitle.data("title"));
+               $("#cacheRegSessionPrice").val(currentSessionTitle.data("price"));
+
+               if(currentSessionTitle.data("title") == null || currentSessionTitle.data("title") == ""){
+                   $("#payment-title").html("Paket PT <br>" + "("+ currentSessionTitle.val() +" Sesi)");
+               }else{
+                   $("#payment-title").html("Paket PT <br>" + "("+ currentSessionTitle.data("title") + " - <br>" + currentSessionTitle.val() +" Sesi)");
+               }
+
+               $("#total_payment").html(asRupiah(currentSessionTitle.data("price")));
+               $("#total_price").html(asRupiah(currentSessionTitle.data("price")));
+
+               $("#confirmPayment").data("action", 'register-session');
+           }
         });
     });
 
@@ -485,6 +525,11 @@
         $("#modal-pt-change").modal("show");
     }
 
+    function registerPT(){
+        $("#modal-pt").modal("hide");
+        $("#modal-pt-add").modal("show");
+    }
+
     function selectPaymentModel(type, element){
         reselectPaymentCard(type);
         $("#cachePaymentModel").val($(element).data('payment'));
@@ -509,6 +554,8 @@
                 $("#modal-s-add").modal("show");
             }else if($("#confirmPayment").data("action") == 'change-membership'){
                 $("#modal-m-change").modal("show");
+            }else if($("#confirmPayment").data("action") == 'register-session'){
+                $("#modal-pt-add").modal("show");
             }
         }else{
             $("#"+modal).modal("toggle");
@@ -582,10 +629,15 @@
                 $("#nPayment").val($("#cachePaymentType").val());
                 $("#nBank").val($("#cachePaymentModel").val());
 
-                if($("#confirmPayment").data("action") == 'extend-session'){
+                if($("#confirmPayment").data("action") == 'extend-session') {
                     $("#nSession").val($("#dataUserPTSession option:selected").val());
                     $("#nPrice").val($("#dataUserPTSession option:selected").data("price"));
                     $("#nTitle").val($("#dataUserPTSession option:selected").data("title"));
+                }else if($("#confirmPayment").data("action") == 'register-session'){
+                    $("#nSession").val($("#dataPTRegSession option:selected").val());
+                    $("#nPrice").val($("#dataPTRegSession option:selected").data("price"));
+                    $("#nTitle").val($("#dataPTRegSession option:selected").data("title"));
+                    $("#nPT").val($("#dataPTReg option:selected").val());
                 }else if($("#confirmPayment").data("action") == 'change-membership'){
                     $("#mShipID").val($("#cacheMembershipID").val());
                     $("#mShipName").val($("#cacheMembership").val());
@@ -593,8 +645,16 @@
                     $("#mShipDuration").val($("#cacheMembershipDuration").val());
                     $("#mShipType").val($("#cacheMembershipType").val());
                     $("#mShipCategory").val($("#cacheMembershipCategory").val());
+                    $("#mShipApproval").val(mShipApprovalPrice);
+                }else if($("#confirmPayment").data("action") == 'extend-membership'){
+                    $("#mShipID").val($("#extend-membership-id").val());
+                    $("#mShipName").val($("#extend-membership-name").html());
+                    $("#mShipPrice").val($("#extend-membership-price").data("price"));
+                    $("#mShipDuration").val($("#extend-membership-duration").html());
+                    $("#mShipType").val($("#extend-membership-type").html());
                 }
 
+                $("#nNotes").val($("#dataNote").val());
                 $("#sAddForm").submit();
             }else{
                 return false;
@@ -616,6 +676,63 @@
             '   <i class="fas fa-2x fa-sync fa-spin"></i>' +
             '</div>'
         );
+    }
+
+    var mShipApprovalPrice;
+    function setApprovalPrice(){
+        $("#changeApprovalBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalPrice").val()));
+        mShipApprovalPrice = $("#approvalPrice").val();
+
+        toggleModal('modal-m-change');
+    }
+
+    function resetMembershipTransaction(){
+        $("#cacheMembershipID").val("");
+        $("#cacheMembership").val("");
+        $("#cacheMembershipPrice").val("");
+        $("#cacheMembershipDuration").val("");
+        $("#cacheMembershipType").val("");
+        $("#cacheMembershipCategory").val("");
+
+        $("#cacheMembershipAction").val("");
+
+        $(".attachment-block-selector").removeClass("block_active");
+        $("#changeApprovalBtn").prop("disabled", true);
+
+        resetPayment();
+        resetRequestTransaction();
+    }
+
+    function resetPTTransaction(){
+        $("#cachePT").val("");
+        $("#cacheRegSessionPrice").val("");
+        $("#cacheRegSessionGroup").val("");
+        $("#cacheRegPTID").val("");
+        $("#cacheRegSessionDuration").val("");
+
+        resetPayment();
+        resetRequestTransaction();
+    }
+
+    function resetPayment(){
+        $("#cachePaymentModel").val("");
+        $("#cachePaymentType").val("");
+    }
+
+    function resetRequestTransaction(){
+        $("#sTransaction").val("");
+        $("#nSession").val("");
+        $("#nPrice").val("");
+        $("#nTitle").val("");
+        $("#nPayment").val("");
+        $("#nBank").val("");
+        $("#nNotes").val("");
+        $("#mShipID").val("");
+        $("#mShipName").val("");
+        $("#mShipPrice").val("");
+        $("#mShipDuration").val("");
+        $("#mShipType").val("");
+        $("#mShipCategory").val("");
     }
 
     function asRupiah(value){
@@ -640,7 +757,7 @@
 
         ConfirmSwal.fire({
             icon: 'warning',
-            html: 'Apakah Anda yakin ingin mengubah Persnal Trainer Member ini ?',
+            html: 'Apakah Anda yakin ingin mengubah Personal Trainer Member ini ?',
             showCancelButton: true,
             cancelButtonText: `<i class="fas fa-times fa-sm mr-1"></i> Tidak`,
             confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Iya`,
@@ -707,17 +824,26 @@
         $("#cacheMembershipType").val($("#membership-"+selected+"-type").html());
         $("#cacheMembershipPrice").val($("#membership-"+selected+"-price").data('price'));
         $("#cacheMembershipCategory").val($("#membership-"+selected+"-category").val());
+        $("#changeApprovalBtn").prop("disabled", false);
 
         reselectMembershipCard(selected);
     }
 
     function reselectMembershipCard(selected){
         $("#membership-"+selected).addClass('block_active');
+        resetApprovalPrice();
 
         if(selectedMembership != null){
             $(selectedMembership).removeClass('block_active');
         }
+
         selectedMembership = "#membership-"+selected;
+    }
+
+    function resetApprovalPrice(){
+        $("#changeApprovalBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga');
+        $("#approvalPrice").val(null);
+        mShipApprovalPrice = null;
     }
 
     function checkRequiredData(type){
@@ -735,6 +861,15 @@
 
                     $("#confirmPayment").data("action", 'change-membership');
 
+                    if(mShipApprovalPrice != null){
+                        $("#total_payment").html(
+                            "<i style='text-decoration: line-through;'>" +
+                                asRupiah($("#cacheMembershipPrice").val()) +
+                            "</i><b>" + asRupiah(mShipApprovalPrice)+"</b>"
+                        );
+
+                        $("#total_price").html(asRupiah(mShipApprovalPrice));
+                    }
                 }
                 break;
         }

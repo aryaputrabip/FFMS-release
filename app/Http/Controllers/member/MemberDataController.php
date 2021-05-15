@@ -341,6 +341,8 @@ class MemberDataController extends Controller
     }
 
     public function getMemberLog(Request $request, $id){
+        date_default_timezone_set("Asia/Jakarta");
+
         if($request->ajax()){
             $data = MemberLogModel::from("logmember as PK")
                 ->join("log_category as logCat", "logCat.id", "=", "PK.category")
@@ -354,13 +356,13 @@ class MemberDataController extends Controller
                     'PK.status as status',
                     'PK.aksi'
                 )
-                ->orderBy('PK.date')
+                ->orderBy('PK.date', 'DESC')
                 ->where('PK.author', '=', $id)->get();
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('date', function ($data) {
-                    return '<span class="text-left">'.date('d/m/Y', strtotime($data->date)).'</span>';
+                    return '<span class="text-left">'.date('d M Y - H:i', strtotime($data->date)).'</span>';
                 })
                 ->addColumn('desc', function ($data) {
                     return '<div class="text-left">'.$data->desc.'</div>';
@@ -581,7 +583,7 @@ class MemberDataController extends Controller
                         <i class="fas fa-edit mr-1 fa-sm"></i> Ubah PT
                     </button>';
         }else{
-            return '<button type="button" class="btn btn-dark w-100">
+            return '<button type="button" class="btn btn-dark w-100" onclick="registerPT();">
                         <i class="fas fa-plus mr-1 fa-sm"></i> Daftar Paket PT
                     </button>';
         }
@@ -640,7 +642,9 @@ class MemberDataController extends Controller
                 'PK.author',
                 'PK.date as LOG_DATE',
                 'PK.reg_no as PO_ID',
-                'PK.additional')
+                'PK.additional',
+                'PK.notes'
+            )
             ->where("PK.author", $id)
             ->first();
 
@@ -759,7 +763,9 @@ class MemberDataController extends Controller
                 'PK.transaction',
                 'PK.additional',
                 'PK.t_membership',
-                'PK.t_sesi')
+                'PK.t_sesi',
+                'PK.notes'
+            )
             ->where("PK.author", $id)
             ->first();
 
@@ -938,7 +944,7 @@ class MemberDataController extends Controller
 
         $successMessage = "";
 
-        if($r->sTransaction == "extend-session"){
+        if($r->sTransaction == "extend-session") {
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
                 'session_reg' => ($r->sOld + $r->nSession),
                 'session' => ($r->lOld + $r->nSession),
@@ -946,15 +952,15 @@ class MemberDataController extends Controller
                 'updated_by' => Auth::user()->role_id
             ]);
 
-            if($r->nTitle == ""){
-                $fullSessionName = $r->nSession." Session";
-            }else{
-                $fullSessionName = $r->nTitle." - ".$r->nSession." Session";
+            if ($r->nTitle == "") {
+                $fullSessionName = $r->nSession . " Session";
+            } else {
+                $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
             $log = MemberLogModel::create([
                 'date' => $date_now,
-                'desc' => 'Pembelian Sesi PT - '.$fullSessionName,
+                'desc' => 'Pembelian Sesi PT - ' . $fullSessionName,
                 'category' => 5,
                 'transaction' => $r->nPrice,
                 'status' => 'Lunas',
@@ -962,36 +968,127 @@ class MemberDataController extends Controller
                 'additional' => $r->nPayment,
                 'reg_no' => ($r->nRegNo + 1),
                 'aksi' => 'sesi',
-                't_sesi' => $r->nPrice
+                't_sesi' => $r->nPrice,
+                'notes' => $r->nNotes
             ]);
 
             $successMessage = 'Pembelian Sesi Berhasil!';
 
-        }else if($r->sTransaction == "change-membership"){
-            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
-            $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
-
+        }else if($r->sTransaction == "register-session"){
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
-                'membership' => $r->mShipID,
-                'm_enddate' => $new_enddate,
+                'session_reg' => $r->nSession,
+                'session' => $r->nSession,
                 'updated_at' => $date_now,
                 'updated_by' => Auth::user()->role_id
             ]);
 
+            if($r->nPT == "nothing" || $r->nPT == ""){
+                $namaRegPT = null;
+            }else{
+                $namaRegPT = $r->nPT;
+            }
+
+            $data2 = MemberCacheModel::where('author', $r->sHiddenID)->update([
+                'id_pt' => $namaRegPT,
+                'session_price' => $r->nPrice
+            ]);
+
+            if ($r->nTitle == "") {
+                $fullSessionName = $r->nSession . " Session";
+            } else {
+                $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
+            }
+
             $log = MemberLogModel::create([
                 'date' => $date_now,
-                'desc' => 'Pembelian Paket Member - '.$r->mShipName,
+                'desc' => 'Pembelian Paket Personal Trainer - ' . $fullSessionName,
                 'category' => 5,
-                'transaction' => $r->mShipPrice,
+                'transaction' => $r->nPrice,
                 'status' => 'Lunas',
                 'author' => $r->sHiddenID,
                 'additional' => $r->nPayment,
                 'reg_no' => ($r->nRegNo + 1),
-                'aksi' => 'membership',
-                't_membership' => $r->mShipPrice
+                'aksi' => 'sesi',
+                't_sesi' => $r->nPrice,
+                'notes' => $r->nNotes
             ]);
 
-            $successMessage = 'Pembelian Paket Member Berhasil!';
+            $successMessage = "Pembelian Paket Personal Trainer Berhasil!";
+
+        }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
+            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
+            if($r->sTransaction == "change-membership"){
+                $log_desc = 'Pembelian Paket Member - '.$r->mShipName;
+                $successMessage = 'Pembelian Paket Member Berhasil!';
+
+                if($member['member']->status == 4){
+                    //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE CHANGE TO...
+                    $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                        'status' => 1,
+                        'membership' => $r->mShipID,
+                        'm_startdate' => $date_now,
+                        'm_enddate' => $new_enddate,
+                        'updated_at' => $date_now,
+                        'updated_by' => Auth::user()->role_id
+                    ]);
+                }else{
+                    $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+
+                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                        'membership' => $r->mShipID,
+                        'm_enddate' => $new_enddate,
+                        'updated_at' => $date_now,
+                        'updated_by' => Auth::user()->role_id
+                    ]);
+                }
+            }else if($r->sTransaction == "extend-membership"){
+                $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                $log_desc = 'Perpanjangan Paket Member - '.$r->mShipName;
+                $successMessage = 'Perpanjangan Paket Member Berhasil!';
+
+                $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                    'status' => 1,
+                    'membership' => $r->mShipID,
+                    'm_startdate' => $date_now,
+                    'm_enddate' => $new_enddate,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->role_id
+                ]);
+            }
+
+
+            if($r->mShipApproval == null || $r->mShipApproval == ""){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $log_desc,
+                    'category' => 5,
+                    'transaction' => $r->mShipPrice,
+                    'status' => 'Lunas',
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'membership',
+                    't_membership' => $r->mShipPrice,
+                    'notes' => $r->nNotes
+                ]);
+            }else{
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $log_desc,
+                    'category' => 5,
+                    'transaction' => $r->mShipApproval,
+                    'status' => 'Lunas',
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'membership',
+                    't_membership' => $r->mShipApproval,
+                    'notes' => $r->nNotes
+                ]);
+            }
         }
 
         if($this->checkAuth() == 1){
@@ -1015,12 +1112,14 @@ class MemberDataController extends Controller
                         ->first();
 
         if($data['data']->aksi == "sesi"){
-            $data['title'] = 'RETENTION SESSION INVOICE';
+            //$data['title'] = 'RETENTION SESSION INVOICE';
             $DOC_NAME = "INVOICE_RI_S_".$data['data']->member_id;
         }else if($data['data']->aksi == "membership"){
-            $data['title'] = 'RETENTION MEMBERSHIP INVOICE';
+            //$data['title'] = 'RETENTION MEMBERSHIP INVOICE';
             $DOC_NAME = "INVOICE_RI_M_".$data['data']->member_id;
         }
+
+        $data['title'] = 'PROFORMA INVOICE';
 
         $data['memberID'] = $data['data']->member_id;
         $data['memberName'] = $data['data']->name;

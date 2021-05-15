@@ -115,9 +115,24 @@ function asRupiah($value) {
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            )</h6>
+            )
+        </h6>
     </div>
 </div>
+@if(isset($data->notes))
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-12">
+            <div class="attachment-block">
+                <h6 class="mb-0 pl-1 pr-1"><b>Catatan :</b></h6>
+                <h6 class="pl-1 pr-1" style="font-weight: normal; text-align: justify">
+                    {{ $data->notes }}
+                </h6>
+            </div>
+        </div>
+    </div>
+@endisset
 
 
 <!-- INIT SCRIPTS -->

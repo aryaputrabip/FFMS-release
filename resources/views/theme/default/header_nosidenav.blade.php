@@ -42,7 +42,7 @@
                     <small><b>{{ $username }}</b><i class="fas fa-user ml-2"></i></small>
                 </a>
 
-                <div class="dropdown-menu dropdown-menu-sm">
+                <div class="dropdown-menu dropdown-menu-sm mr-3">
                     <a href="#" class="dropdown-item">
                         <i class="fas fa-user fa-sm mr-2"></i> Account
                     </a>
