@@ -205,9 +205,10 @@
 <script>
     @section('script')
     $(function(){
-        $("#checkinForm").on('keyup keypress', function(e) {
+        $("#checkinForm").on('keyup keypress keydown', function(e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode === 13) {
+                e.preventDefault();
                 if($("#dataIDMember").val() == ""){
                     messagingErrorCustom("ID Member Belum Diisi!");
                 }else{

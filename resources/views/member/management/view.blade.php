@@ -72,6 +72,9 @@
 
                                         <h6><b>Email</b></h6>
                                         <h6 class="mb-3">@if(isset($data->email)) {{ $data->email }} @else - @endisset</h6>
+
+                                        <h6><b>Catatan</b></h6>
+                                        <h6 class="mb-3">@if(isset($data->member_notes)) {{ $data->member_notes }} @else - @endisset</h6>
                                     </div>
                                     <div class="col-md-6 mt-4">
                                         <h6><b>ADDITIONAL INFO</b></h6>

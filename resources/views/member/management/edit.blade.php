@@ -90,6 +90,10 @@
 
                                         <h6><b>Email</b></h6>
                                         <input type="email" class="mb-3 w-100 form-control" id="dataEmail" name="dataEmail" value="@if(isset($data)) {{$data->email}} @endisset">
+
+                                        <h6><b>Catatan</b></h6>
+                                        <textarea class="form-control w-100" id="dataUserNote" name="dataUserNote" rows="6" placeholder="Catatan Member...">@if(isset($data->member_notes)){{ $data->member_notes }}@endisset</textarea>
+
                                     </div>
 
                                     <div class="col-md-6 mt-4">
@@ -114,8 +118,6 @@
                                              <?php
                                             }?>
                                         </select><br>
-
-
                                     </div>
 
                                     <input type="hidden" id="photoFile" name="photoFile" value="{{ $data->photo }}" readonly>

@@ -521,6 +521,7 @@ class MemberDataController extends Controller
             'photo' => $r->photoFile,
             'marketing' => $marketingName,
             'pt' => $ptName,
+            'member_notes' => $r->dataUserNote,
             'updated_at' => $date_now,
             'updated_by' => Auth::user()->role_id
         ]);

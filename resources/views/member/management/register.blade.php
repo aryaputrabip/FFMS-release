@@ -555,6 +555,13 @@
                 refreshApprovalBtn("#changeApprovalBtn");
             }
         });
+
+        $("#registrationForm").on('keyup keypress keydown', function(e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
+            }
+        });
     });
 
     $("#dataUserPTToggler").on('change', function(){
