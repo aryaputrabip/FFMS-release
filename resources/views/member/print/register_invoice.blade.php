@@ -139,19 +139,27 @@ function asRupiah($value) {
     <tr>
         <td colspan="2" style="border-bottom: 1px solid #FFFFFF; border-left: 1px solid #FFFFFF; border-bottom: 1px solid #FFFFFF; border-top: 1px solid #FFFFFF;"></td>
         <td colspan="2" class="pl-1 pr-1"><h6><b>GRAND TOTAL</b></h6></td>
-        <td class="text-right"><h6><b>
-            @if(isset($log->t_sesi))
-                <td class="text-right"><h6><b style="font-weight: normal;">
+        @if(isset($log->t_sesi))
+            <td class="text-right">
+                <h6><b style="font-weight: normal;">
                     <?php echo asRupiah(($log->t_membership + $log->t_sesi)); ?>
+                </b></h6>
+            </td>
+        @else
+            @if($data->session_reg != null)
+                <td class="text-right">
+                    <h6><b style="font-weight: normal;">
+                        <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?>
+                    </b></h6>
                 </td>
             @else
-                @if($data->session_reg != null)
-                    <?php echo asRupiah(($data->membershipPrice + $session->session_price)); ?>
-                @else
-                    <?php echo asRupiah(($data->membershipPrice)); ?>
-                @endif</b></h6>
-            @endisset
-        </td>
+                <td class="text-right">
+                    <h6><b style="font-weight: normal;">
+                        <?php echo asRupiah(($data->membershipPrice)); ?>
+                    </b></h6>
+                </td>
+            @endif
+        @endisset
     </tr>
     </tbody>
 </table>
