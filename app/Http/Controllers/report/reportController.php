@@ -31,6 +31,7 @@ class reportController extends Controller
             dd(explode(' ', $b));
         } */
         //dd($data);
+        $data['tahun'] = MemberLogModel::select(DB::raw('EXTRACT(year FROM date) AS year'))->where('aksi', 'register')->distinct()->orderBy('year', 'ASC')->get();
         return view('report.index2', $data);
     }
 
@@ -38,27 +39,32 @@ class reportController extends Controller
     {
         $tglMulai = $r->tglMulai;
         $tglAkhir = $r->tglAkhir;
+        $tahun = (isset($r->tahun)) ? $r->tahun : date('y');
         //dd($tglMulai);
         //$data['alldata'] = [];
         if ($tglMulai) {
             $data['alldata'] = DB::table('logmember')
                 ->where('date', '>', $tglMulai)
                 ->where('aksi', 'register')
+                ->whereRaw('extract(year from date) = ' . $tahun)
                 ->get();
         } else if ($tglAkhir) {
             $data['alldata'] = DB::table('logmember')
                 ->where('date', '<', $tglAkhir)
                 ->where('aksi', 'register')
+                ->whereRaw('extract(year from date) = ' . $tahun)
                 ->get();
         } else if ($tglMulai && $tglAkhir) {
             $data['alldata'] = DB::table('logmember')
                 ->where('date', '<', $tglAkhir)
                 ->where('date', '>', $tglMulai)
                 ->where('aksi', 'register')
+                ->whereRaw('extract(year from date) = ' . $tahun)
                 ->get();
         } else {
             $data['alldata'] = DB::table('logmember')
                 ->where('aksi', 'register')
+                ->whereRaw('extract(year from date) = ' . $tahun)
                 ->get();
         }
 
@@ -70,6 +76,7 @@ class reportController extends Controller
             $month[] = $dt;
             $dataMonth[] = MemberLogModel::where('aksi', 'register')
                 ->whereRaw("extract(month from date) = " . $i)
+                ->whereRaw('extract(year from date) = ' . $tahun)
                 ->count();
             $dpm = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
             //$dayPerMonth[] = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
@@ -77,14 +84,26 @@ class reportController extends Controller
                 $dataPerDay[$i][$j] = MemberLogModel::where('aksi', 'register')
                     ->whereRaw("extract(month from date) = " . $i)
                     ->whereRaw('extract(day from date) = ' . $j)
+                    ->whereRaw('extract(year from date) = ' . $tahun)
                     ->count();
             }
+        }
+
+        // Data Per Tahun
+        $tahun = MemberLogModel::select(DB::raw('EXTRACT(year FROM date) AS year'))->distinct()->orderBy('year', 'ASC')->get();
+        $year = [];
+        $dataPerYear = [];
+        foreach($tahun as $t) {
+            $year[] = $t->year;
+            $dataPerYear[] = MemberLogModel::where('aksi', 'register')->whereRaw('EXTRACT(year from date) = ' . $t->year)->count();
         }
 
         $data['month'] = $month;
         $data['dataMonth'] = $dataMonth;
         //$data['dayPerMonth'] = $dayPerMonth;
         $data['dataPerDay'] = $dataPerDay;
+        $data['year'] = $year;
+        $data['dataPerYear'] = $dataPerYear;
         //dd($data);
         return json_encode($data);
     }
