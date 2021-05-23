@@ -68,7 +68,7 @@
 
                                     <p>Menunggu Hasil Scan...</p>
                                     <input type="hidden" id="visitlog2" name="visitlog2" readonly>
-                                    <input type="text" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan">
+                                    <input type="hidden" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan">
                                 </form>
                             </div>
                         </div>
