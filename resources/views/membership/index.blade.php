@@ -63,8 +63,8 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="float-right">
-
+                        <div class="float-right m-2">
+                            @include('config.filter.filter_membership')
                         </div>
                     </div>
                 </div>
@@ -210,6 +210,7 @@
 <script>
     @section('script')
     $(function () {
+        var membership_table =
         $("#data_membership").DataTable({
             searching: true,
             lengthChange: true,
@@ -244,6 +245,18 @@
         $("#data_membership_filter").appendTo("#searchContainer");
         $("#data_membership_info").addClass("pt-2 pl-2");
         $("#data_membership_paginate").addClass("float-right");
+
+        $("#tableFilterMembershipJenis").on("change", function () {
+            membership_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterMembershipKategori").on("change", function () {
+            membership_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterMembershipStatus").on("change", function () {
+            membership_table.column($(this).data('column')).search($(this).val()).draw();
+        });
 
         $("#membershipDuration").on("keyup mouseup change click", function () {
             if($(this).prop('disabled')){

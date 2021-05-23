@@ -1,8 +1,11 @@
 @extends('layouts.app_admin')
 @section('style')
+
+@endsection
 @section('content')
 
 <div class="row m-3" style="background-color: white;">
+
     <div class="col-md-3">
         <div class="row">
             <form id="dataReg">
@@ -147,7 +150,7 @@
             drawReg(res, bln);
         });
     }
-    //sampe sini regis nya 
+    //sampe sini regis nya
 
     //buat tabs
     function openCity(evt, tabs, tabconts) {

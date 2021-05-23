@@ -46,6 +46,12 @@
                 </div>
                 <div class="float-right">
                     <div class='input-group'>
+{{--                        @if($role == 1 || $role == 2)--}}
+{{--                            <a href="#modal-export" data-toggle="modal" class="btn btn-sm btn-primary mt-2 mr-2" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">--}}
+{{--                                <i class="fas fa-download fa-sm mr-1"></i> Export Data--}}
+{{--                            </a>--}}
+{{--                        @endif--}}
+
                         <a @if($role == 1) href="{{ route('suadmin.member.registration.index') }}" @elseif($role == 2) href="#"
                            @elseif($role == 3) href="{{ route('cs.member.registration.index') }}" @endif class="btn btn-sm btn-primary mt-2 mr-3" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
                             <i class="fas fa-plus fa-xs mr-1"></i> Tambah Member
@@ -69,8 +75,8 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="float-right">
-
+                        <div class="float-right mt-2 mr-2 mb-2">
+                            @include('config.filter.filter_member')
                         </div>
                     </div>
                 </div>
@@ -111,6 +117,28 @@
             </div>
         </div>
     </div>
+
+    @if($role == 1 || $role == 2)
+        <div class="modal fade" id="modal-export">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title text-dark">
+                            <i class="fas fa-download fa-sm mr-1"></i> Export Data
+                        </h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <a href="{{ route('member.exportExcelData') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-print fa-sm mr-1"></i> Export to Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('import_script')
@@ -146,6 +174,7 @@
 <script>
     @section('script')
     $(function () {
+        var member_table =
         $("#data_member").DataTable({
             searching: true,
             lengthChange: true,
@@ -173,13 +202,21 @@
             columnDefs: [
                 {"className": "dt-center", "targets": "DT_RowIndex"}
             ],
-            language: { search: "", searchPlaceholder: "Cari...", lengthMenu: "_MENU_" },
+            language: { search: "", searchPlaceholder: "Cari...", lengthMenu: "_MENU_" }
         });
 
         $("#data_member_length").appendTo("#orderContainer");
         $("#data_member_filter").appendTo("#searchContainer");
         $("#data_member_info").addClass("pt-2 pl-2");
         $("#data_member_paginate").addClass("float-right");
+
+        $("#tableFilterStatus").on("change", function () {
+            member_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterMembershipType").on("change", function () {
+            member_table.column($(this).data('column')).search($(this).val()).draw();
+        });
    });
 
     const Toast = Swal.mixin({
@@ -265,6 +302,12 @@
             }
         });
     }
+    @if($role == 1 || $role == 2)
+    function exportData(type){
+
+    }
+    @endif
+
     @endsection
 </script>
 

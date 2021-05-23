@@ -63,8 +63,8 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="float-right">
-
+                        <div class="float-right mt-2 mr-2 mb-2">
+                            @include('config.filter.filter_member')
                         </div>
                     </div>
                 </div>
@@ -152,6 +152,7 @@
 <script>
     @section('script')
     $(function () {
+        var member_table =
         $("#data_member").DataTable({
             searching: true,
             lengthChange: true,
@@ -185,6 +186,14 @@
         $("#data_member_filter").appendTo("#searchContainer");
         $("#data_member_info").addClass("pt-2 pl-2");
         $("#data_member_paginate").addClass("float-right");
+
+        $("#tableFilterStatus").on("change", function () {
+            member_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterMembershipType").on("change", function () {
+            member_table.column($(this).data('column')).search($(this).val()).draw();
+        });
 
         $("#scanForm").on('keypress', function(e) {
             var keyCode = e.keyCode || e.which;

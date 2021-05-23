@@ -47,7 +47,7 @@
                     <div class="card-body">
                         <div class="tab-content" id="custom-content-below-tabContent">
                             <div class="tab-pane fade show active" id="member-manage-detail" role="tabpanel" aria-labelledby="member-manage-detail-tab">
-                                <h3 class="text-left mt-0 mb-2 col-12 mb-2">Informasi Member<br><small style="font-size: 18px;">ID Member : <span>{{ $data->member_id }}</span></small></h3>
+                                <h3 class="text-left mt-0 mb-2 col-12 mb-2 pl-0">Informasi Member<br><small style="font-size: 18px;">ID Member : <span>{{ $data->member_id }}</span></small></h3>
                                 <div class="row">
                                     <div class="col-md-6 mt-4 pr-3">
                                         <h6><b>IDENTITAS</b></h6>
@@ -140,7 +140,14 @@
                                     {{--                                        <h2>CHART_HERE</h2>--}}
                                     {{--                                    </div>--}}
                                     <div class="col-12">
-                                        <h3 class="text-left mt-0 mb-2 col-12 mb-2">Riwayat Member</h3>
+                                        <div class="row">
+                                            <h3 class="text-left col-8 mt-0 mb-2 mb-2">Riwayat Member</h3>
+                                            <div class="col-4">
+                                                <div class="float-right">
+                                                    @include('config.filter.filter_log')
+                                                </div>
+                                            </div>
+                                        </div>
                                         <hr>
                                         <table id="accountHistoryTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">
                                             <thead>
@@ -212,8 +219,9 @@
             ],
         });
 
+        var log_table =
         $('#accountHistoryTable').DataTable({
-            searching: false,
+            searching: true,
             lengthChange: false,
             paging: false,
             info: false,
@@ -234,6 +242,15 @@
                     searchable: false
                 },
             ],
+        });
+        $("#accountHistoryTable_filter").hide();
+
+        $("#tableFilterLogMemberStatus").on("change", function () {
+            log_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterLogMemberKategori").on("change", function () {
+            log_table.column($(this).data('column')).search($(this).val()).draw();
         });
 
         var nextMonth = new Date({{ date("Y-m-d",strtotime($data->membership_sdate."+".$membership->duration ." month")) }});

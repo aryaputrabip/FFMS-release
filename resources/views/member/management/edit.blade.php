@@ -183,7 +183,14 @@
                                     {{--                                        <h2>CHART_HERE</h2>--}}
                                     {{--                                    </div>--}}
                                     <div class="col-12">
-                                        <h3 class="text-left mt-0 mb-2 col-12 mb-2">Riwayat Member</h3>
+                                        <div class="row">
+                                            <h3 class="text-left col-8 mt-0 mb-2 mb-2">Riwayat Member</h3>
+                                            <div class="col-4">
+                                                <div class="float-right">
+                                                    @include('config.filter.filter_log')
+                                                </div>
+                                            </div>
+                                        </div>
                                         <hr>
                                         <table id="accountHistoryTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">
                                             <thead>
@@ -281,8 +288,9 @@
             ],
         });
 
+        var log_table =
         $('#accountHistoryTable').DataTable({
-            searching: false,
+            searching: true,
             lengthChange: false,
             paging: false,
             info: false,
@@ -304,6 +312,15 @@
                     searchable: false
                 },
             ],
+        });
+        $("#accountHistoryTable_filter").hide();
+
+        $("#tableFilterLogMemberStatus").on("change", function () {
+            log_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterLogMemberKategori").on("change", function () {
+            log_table.column($(this).data('column')).search($(this).val()).draw();
         });
 
         var nextMonth = new Date({{ date("Y-m-d",strtotime($data->membership_sdate."+".$membership->duration ." month")) }});

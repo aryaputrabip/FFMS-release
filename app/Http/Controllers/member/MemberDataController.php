@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\member;
 
+use App\Exports\MemberExport;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Session\Session;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
 class MemberDataController extends Controller
@@ -1187,5 +1189,11 @@ class MemberDataController extends Controller
         }else if($this->checkAuth() == 3){
             return redirect()->route('cs.member.edit', $r->ptEditHiddenID)->with(['success' => 'Nama Personal Trainer Berhasil Diubah!']);
         }
+    }
+
+    function exportExcelData(){
+        $namaFile = "members";
+
+        return Excel::download(new MemberExport(), $namaFile.'.xlsx');
     }
 }

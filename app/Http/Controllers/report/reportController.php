@@ -12,21 +12,44 @@ use Fx3costa\LaravelChartJs;
 
 class reportController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
     public function index()
     {
+        $role = $this->checkAuth();
+
         date_default_timezone_set("Asia/Jakarta");
         $datenow = Carbon::now();
+        if(isset($role)){
+            $data['title'] = "Report";
+            $data['board'] = "";
+            $data['username'] = Auth::user()->name;
+            $data['role'] = Auth::user()->role_id;
+            $data['app_layout'] = $this->defineLayout($role);
 
-        $data['title'] = "Report";
-        $data['board'] = "";
-        $data['username'] = Auth::user()->name;
-        $data['role'] = Auth::user()->role_id;
+            $data['revenueChart'] = $this->generateChart("revenue", "month", $datenow->year);
 
-        $data['revenueChart'] = $this->generateChart("revenue", "month", $datenow->year);
+            return view('report.index', $data);
+        }
+    }
 
-        return view('report.index', $data);
+    public function checkAuth(){
+        $role = Auth::user()->role_id;
+
+        return $role;
+    }
+
+    public function defineLayout($role){
+        if($role == 1){
+            return 'layouts.app_admin';
+        }else if($role == 2){
+            return "";
+        }else if($role == 3){
+            return 'layouts.app_cs';
+        }
     }
 
     //CHANGE CHART DATA (WHEN FILTER APPLIED)
@@ -89,21 +112,40 @@ class reportController extends Controller
             case "revenue":
                 if($subchart == "total"){
                     //IF QUERING TOTAL REVENUE CHART LAYER
-                    return MemberLogModel::whereMonth('date', '=', $index)
-                        ->whereYear('date', '=', $filterYear)
-                        ->sum('transaction');
+                    if($filterYear == "" || $filterYear == null){
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->sum('transaction');
+                    }else{
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->whereYear('date', '=', $filterYear)
+                            ->sum('transaction');
+                    }
+
                 }else if($subchart == "membership"){
                     //IF QUERING TOTAL REVENUE CHART (BY MEMBERSHIP TRANSACTION)
-                    return MemberLogModel::whereMonth('date', '=', $index)
-                        ->whereYear('date', '=', $filterYear)
-                        ->where('aksi', '=', "membership")
-                        ->sum('transaction');
+                    if($filterYear == "" || $filterYear == null){
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->where('aksi', '=', "membership")
+                            ->sum('transaction');
+                    }else{
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->whereYear('date', '=', $filterYear)
+                            ->where('aksi', '=', "membership")
+                            ->sum('transaction');
+                    }
+
                 }else if($subchart == "sesi"){
                     //IF QUERING TOTAL REVENUE CHART (BY SESI TRANSACTION)
-                    return MemberLogModel::whereMonth('date', '=', $index)
-                        ->whereYear('date', '=', $filterYear)
-                        ->where('aksi', '=', "sesi")
-                        ->sum('transaction');
+                    if($filterYear == "" || $filterYear == null){
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->where('aksi', '=', "sesi")
+                            ->sum('transaction');
+                    }else{
+                        return MemberLogModel::whereMonth('date', '=', $index)
+                            ->whereYear('date', '=', $filterYear)
+                            ->where('aksi', '=', "sesi")
+                            ->sum('transaction');
+                    }
                 }
                 break;
         }

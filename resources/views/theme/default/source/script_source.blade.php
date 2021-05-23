@@ -16,7 +16,8 @@
 <script src="{{ asset('/lib/chart.js/Chart.min.js') }}"></script>
 <!-- ChartJS Datalabels -->
 <script src="{{ asset('/lib/chartjs-datalabels/chartjs-plugin-datalabels.min.js') }}"></script>
-
+<!-- Datatables Filter -->
+<script src="{{ asset('/lib/datatables-filter/filterDropDown.js') }}"></script>
 
 <!-- RESOURCES -->
 <script src="{{ asset('/js/custom-script.js') }}"></script>
