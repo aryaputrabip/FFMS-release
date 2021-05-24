@@ -18,9 +18,24 @@
         <div class="row">
             <div class="col-photo">
                 <img @if(isset($data->photo)) src="{{ $data->photo }}" @endisset width="250" height="250" data-backdrop="static" style="background-color: gray;" id="photo">
-                <button type="button" class="btn btn-primary mb-3 mt-3" style="width: 250px;" id="checkinBtn" onclick="" disabled>
-                    <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
-                </button>
+                @if($data->status == 1)
+                    <button type="button" class="btn btn-primary mb-3 mt-3" style="width: 250px;" id="checkinBtn" onclick="checkinMember('{{ $data->member_id }}');">
+                        <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
+                    </button>
+                @elseif($data->status == 2)
+                    <button type="button" class="btn btn-success mb-3 mt-3" style="width: 250px;" id="checkinBtn" onclick="activateMember('{{ $data->member_id }}', {{ $membership->duration }});">
+                        <i class="fas fa-calendar-check fa-sm mr-1"></i> Aktivasi Member
+                    </button>
+                @elseif($data->status == 3)
+                    <button type="button" class="btn btn-primary mb-3 mt-3 disabled" style="width: 250px;" id="checkinBtn" onclick="checkinFailed('cuti')">
+                        <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
+                    </button>
+                @elseif($data->status == 4)
+                    <button type="button" class="btn btn-primary mb-3 mt-3 disabled" style="width: 250px;" id="checkinBtn" onclick="checkinFailed('expired')">
+                        <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
+                    </button>
+                @endif
+
                 <a @if($role == 1) href="{{ route('suadmin.member.edit', $data->member_id) }}" @elseif($role == 2) href="#"
                    @elseif($role == 3) href="{{ route('cs.member.edit', $data->member_id) }}" @endif type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="">
                     <i class="fas fa-edit fa-sm mr-1"></i> Edit Data
@@ -86,6 +101,13 @@
                                         <h6 class="mb-3">@if(isset($pt)) {{ $pt->name }} @else - @endisset</h6>
                                     </div>
                                 </div>
+
+                                <form id="checkinForm" action="{{ route('member.checkin') }}" method="POST">
+                                    {{ csrf_field() }}
+
+                                    <input type="hidden" class="form-control" id="dataIDMemberCheckin" name="dataIDMemberCheckin">
+                                    <input type="hidden" class="form-control" id="dataCheckinSource" name="dataCheckinSource" readonly>
+                                </form>
                             </div>
                             <div class="tab-pane fade" id="member-manage-membership" role="tabpanel" aria-labelledby="member-manage-membership-tab">
                                 <div class="row pb-0">
@@ -180,6 +202,32 @@
     @include('theme.default.import.modular.datatables.script')
 @endsection
 
+@section('message')
+    @if(Session::has('success'))
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'success',
+                button: false,
+                html: '{{Session::get("success")}}',
+                timer: 1500
+            })
+        </script>
+        <?php Session::forget('success') ?>
+    @endif
+
+    @if(Session::has('failed'))
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'warning',
+                button: false,
+                html: '{{Session::get("failed")}}',
+                timer: 1500
+            })
+        </script>
+        <?php Session::forget('failed') ?>
+    @endif
+@endsection
+
 <script>
     @section('script')
     $(function () {
@@ -229,6 +277,7 @@
             serverSide: true,
             ajax: "{{ route('member.getMemberLog', $data->member_id ) }}",
             iDisplayLength: 10,
+            "order": [[ 0, "desc" ]],
             columns: [
                 { data: 'date', name: 'date' },
                 { data: 'desc', name: 'desc' },
@@ -278,5 +327,66 @@
             html: message
         })
     }
+
+    function checkinFailed(status){
+        if(status == 'cuti'){
+            Swal.fire({
+                icon: 'warning',
+                button: false,
+                html: 'Member ini <b>sedang Cuti</b>!',
+                timer: 3000
+            });
+        }else if(status == 'expired'){
+            Swal.fire({
+                icon: 'warning',
+                button: false,
+                html: 'Membership Member ini <b>telah expired</b>!',
+                timer: 3000
+            });
+        }
+    }
+
+    @if($data->status == 1)
+    function checkinMember(member){
+        $("#dataIDMemberCheckin").val(member);
+
+        if($("#dataIDMemberCheckin").val() == ""){
+            messagingErrorCustom("Error when Checkin!");
+        }else{
+            $("#dataCheckinSource").val("view");
+            $("#checkinForm").submit();
+        }
+    }
+    @elseif($data->status == 2)
+    function activateMember(member, duration){
+        var token = '{{ csrf_token() }}';
+
+        const DestroySwal = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-success mr-2',
+                cancelButton: 'btn btn-outline-dark mr-2'
+            },
+            buttonsStyling: false
+        })
+
+        DestroySwal.fire({
+            icon: 'warning',
+            html: 'Apakah Anda yakin ingin melakukan Aktivasi untuk member ini ?</small>',
+            showCancelButton: true,
+            cancelButtonText: '<i class="fas fa-times fa-sm mr-1"></i> Batal',
+            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Aktivasi`,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel
+            ) {
+                return false;
+            }else{
+                $.post("{{ route('member.aktivasi') }}", { id:member, _token:token, duration:duration}, function(data){
+                    location.reload();
+                });
+            }
+        });
+    }
+    @endif
     @endsection
 </script>

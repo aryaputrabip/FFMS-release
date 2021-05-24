@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\member;
 
+use App\Model\member\MemberCheckinModel;
 use App\Model\member\MemberModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -63,9 +64,9 @@ class MemberCheckinController extends Controller
                     'PK.email',
                     'PK.status',
                     'PK.visitlog',
-                        'PK.checkin_status',
+                    'PK.checkin_status',
                     'mMarketingData.name as marketing',
-                    'mPTData.name as pt',
+                    'mPTData.name as pt'
                 )->where("member_id", $request->uid)->first();
 
             $data['url'] = "";
@@ -77,18 +78,66 @@ class MemberCheckinController extends Controller
     function checkin(Request $r){
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('Y-m-d H:i:s');
+        $redirectMessage = ['success' => 'Check-in Berhasil!'];
 
-        $data = MemberModel::where('member_id', $r->dataIDMember)->update([
-            'checkin_status' => true,
-            'visitlog' => $r->visitLog + 1
-        ]);
+        if($r->dataCheckinSource == 'checkin'){
+            $preview = MemberModel::select("visitlog", "checkin_status")->where("member_id", $r->dataIDMember)->first();
+        }elseif($r->dataCheckinSource  == 'member' || $r->dataCheckinSource  == 'view'){
+            $preview = MemberModel::select("visitlog", "checkin_status")->where("member_id", $r->dataIDMemberCheckin)->first();
+        }
+
+        if($preview->checkin_status){
+            $redirectMessage = ['failed' => 'Member ini belum Checkout!'];
+        }else{
+            if($r->dataCheckinSource == 'checkin'){
+                $data = MemberModel::where('member_id', $r->dataIDMember)->update([
+                    'checkin_status' => true,
+                    'visitlog' => ($preview->visitlog + 1)
+                ]);
+
+                $data2 = MemberCheckinModel::create([
+                    'date' => $date_now,
+                    'author' => $r->dataIDMember
+                ]);
+            }elseif($r->dataCheckinSource  == 'member' || $r->dataCheckinSource  == 'view'){
+                $data = MemberModel::where('member_id', $r->dataIDMemberCheckin)->update([
+                    'checkin_status' => true,
+                    'visitlog' => ($preview->visitlog + 1)
+                ]);
+
+                $data2 = MemberCheckinModel::create([
+                    'date' => $date_now,
+                    'author' => $r->dataIDMemberCheckin
+                ]);
+            }
+        }
+
+        $redirectTo = $this->checkinSourceRedirect($r->dataCheckinSource);
 
         if($this->checkAuth() == 1){
-            return redirect()->route('suadmin.member.checkin')->with(['success' => 'Check-in Berhasil!']);
+            if($r->dataCheckinSource == "view"){
+                return redirect()->route('suadmin.member'.$redirectTo, $r->dataIDMemberCheckin)->with($redirectMessage);
+            }else{
+                return redirect()->route('suadmin.member'.$redirectTo)->with($redirectMessage);
+            }
         }else if($this->checkAuth() == 2){
             //STILL EMPTY
         }else if($this->checkAuth() == 3){
-            return redirect()->route('cs.member.checkin')->with(['success' => 'Check-in Berhasil']);
+            if($r->dataCheckinSource == "view"){
+                return redirect()->route('cs.member'.$redirectTo, $r->dataIDMemberCheckin)->with($redirectMessage);
+            }else{
+                return redirect()->route('cs.member'.$redirectTo)->with($redirectMessage);
+            }
+        }
+    }
+
+    public function checkinSourceRedirect($source){
+        if($source == 'checkin'){
+            return ".checkin";
+        }else if($source == 'member'){
+            return '.index';
+        }else if($source  == 'view'){
+            return '.view';
         }
     }
 }

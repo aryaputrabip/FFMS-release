@@ -4,30 +4,36 @@ namespace App\Exports;
 
 use App\Model\member\MemberModel;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 
 class MemberExport implements FromView
 {
     public function view(): View
     {
-        return view('export.members', [
-            'invoices' => MemberModel::from("memberdata as PK")
-                ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
+        $memberQuery =
+            DB::table("public.memberdata as dt1")
+                ->join('secure.users as dt2', 'dt2.id', '=', 'dt1.created_by')
+                ->join("membership as mShipData", "mShipData.mship_id", "=", "membership")
                 ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
-                ->join("member_status as mStatus", "mStatus.mstatus_id", "=", "PK.status")
                 ->select(
-                    'PK.created_at as join_date',
-                    'PK.member_id',
-                    'PK.name',
-                    'PK.email',
+                    'dt1.created_at as join_date',
+                    'dt1.member_id',
+                    'dt1.name',
+                    'dt1.email',
                     'mShipData.name as membership',
-                    'PK.phone',
-                    'PK.marketing as marketing',
-                    'PK.pt as personal_trainer',
-                    'PK.member_notes as notes'
+                    'dt1.phone',
+                    'dt1.marketing as marketing',
+                    'dt1.pt as personal_trainer',
+                    'dt2.name as cs',
+                    'dt1.member_notes as notes'
                 )
-                ->orderBy('PK.name')
-                ->get()
+                ->get();
+
+        return view('export.members', [
+            'members' => $memberQuery
         ]);
     }
 }

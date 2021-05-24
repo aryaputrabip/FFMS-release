@@ -111,7 +111,7 @@
                         {{ csrf_field() }}
 
                         <p>Menunggu Hasil Scan...</p>
-                        <input type="hidden" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan" autofocus="false">
+                        <input type="text" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan" autofocus="false" style="width: 0; overflow: hidden; opacity: 0;">
                     </form>
                 </div>
             </div>

@@ -6,6 +6,7 @@ use App\Exports\MemberExport;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
+use App\Model\member\MemberCheckinModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipModel;
@@ -174,9 +175,9 @@ class MemberDataController extends Controller
                         $routeCuti = route("cs.cuti.index");
                     }
 
-                    return '<a href="'.$routeCheckin.'" class="btn btn-danger w-100 mb-2 font-weight-bold">
+                    return '<button type="button" class="btn btn-danger w-100 mb-2 font-weight-bold" onclick="checkinMember(`'.$r->id.'`)">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
-                            </a>
+                            </button>
                             <button class="btn btn-outline-secondary w-100 mb-2" disabled>
                                 <i class="fas fa-address-card fa-sm mr-1"></i> Perpanjang Paket Member
                             </button>
@@ -361,22 +362,45 @@ class MemberDataController extends Controller
                 ->orderBy('PK.date', 'DESC')
                 ->where('PK.author', '=', $id)->get();
 
-            return DataTables::of($data)
+            $data2 = MemberCheckinModel::where('author', '=', $id)->get();
+
+            $list = collect([]);
+
+            foreach($data as $d1) {
+                $list = $list->push($d1);
+            }
+            foreach($data2 as $d2) {
+                $list = $list->push($d2);
+            }
+
+            return DataTables::of($list)
                 ->addIndexColumn()
                 ->addColumn('date', function ($data) {
                     return '<span class="text-left">'.date('d M Y - H:i', strtotime($data->date)).'</span>';
                 })
                 ->addColumn('desc', function ($data) {
-                    return '<div class="text-left">'.$data->desc.'</div>';
+                    if($data->desc == null){
+                        return '<div class="text-left">Member Check-in</div>';
+                    }else{
+                        return '<div class="text-left">'.$data->desc.'</div>';
+                    }
                 })
                 ->addColumn('category', function ($data) {
-                    return '<div class="text-left">'.$data->category.'</div>';
+                    if($data->category == null){
+                        return '<div class="text-left">Aktivitas</div>';
+                    }else{
+                        return '<div class="text-left">'.$data->category.'</div>';
+                    }
                 })
                 ->addColumn('status', function ($data) {
                     return '<div class="text-left">'.$data->status.'</div>';
                 })
                 ->addColumn('transaction', function ($data) {
-                    return '<div class="text-left">'.$this->asRupiah($data->transaction).'</div>';
+                    if($data->transaction == null){
+                        return null;
+                    }else{
+                        return '<div class="text-left">'.$this->asRupiah($data->transaction).'</div>';
+                    }
                 })
                 ->addColumn('action', function ($data) {
                     if($data->aksi == "register"){

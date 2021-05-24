@@ -39,6 +39,7 @@
                                     {{ csrf_field() }}
 
                                     <input type="hidden" id="visitlog" name="visitlog" readonly>
+                                    <input type="hidden" id="dataCheckinSource" name="dataCheckinSource" value="checkin" readonly>
 
                                     <div class="form-group row">
                                         <label for="dataUserNama" class="col-sm-3 col-form-label">
@@ -67,8 +68,7 @@
                                     {{ csrf_field() }}
 
                                     <p>Menunggu Hasil Scan...</p>
-                                    <input type="hidden" id="visitlog2" name="visitlog2" readonly>
-                                    <input type="hidden" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan">
+                                    <input type="text" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan" style="width: 0; overflow: hidden; opacity: 0;">
                                 </form>
                             </div>
                         </div>
@@ -263,7 +263,8 @@
                 if($("#dataIDMemberScan").val() == ""){
                     messagingErrorCustom("ID Member Belum Diisi!");
                 }else{
-                    checkingData($("#dataIDMemberScan").val());
+                    $("#dataIDMember").val($("#dataIDMemberScan").val());
+                    checkingData($("#dataIDMember").val());
                 }
             }
         });

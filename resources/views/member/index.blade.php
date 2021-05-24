@@ -46,11 +46,11 @@
                 </div>
                 <div class="float-right">
                     <div class='input-group'>
-{{--                        @if($role == 1 || $role == 2)--}}
-{{--                            <a href="#modal-export" data-toggle="modal" class="btn btn-sm btn-primary mt-2 mr-2" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">--}}
-{{--                                <i class="fas fa-download fa-sm mr-1"></i> Export Data--}}
-{{--                            </a>--}}
-{{--                        @endif--}}
+                        @if($role == 1 || $role == 2)
+                            <a href="#modal-export" data-toggle="modal" class="btn btn-sm btn-primary mt-2 mr-2" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
+                                <i class="fas fa-download fa-sm mr-1"></i> Export Data
+                            </a>
+                        @endif
 
                         <a @if($role == 1) href="{{ route('suadmin.member.registration.index') }}" @elseif($role == 2) href="#"
                            @elseif($role == 3) href="{{ route('cs.member.registration.index') }}" @endif class="btn btn-sm btn-primary mt-2 mr-3" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
@@ -116,6 +116,13 @@
                 </div>
             </div>
         </div>
+
+        <form id="checkinForm" action="{{ route('member.checkin') }}" method="POST">
+            {{ csrf_field() }}
+
+            <input type="hidden" class="form-control" id="dataIDMemberCheckin" name="dataIDMemberCheckin">
+            <input type="hidden" class="form-control" id="dataCheckinSource" name="dataCheckinSource" readonly>
+        </form>
     </div>
 
     @if($role == 1 || $role == 2)
@@ -309,5 +316,16 @@
     @endif
 
     @endsection
+
+    function checkinMember(member){
+        $("#dataIDMemberCheckin").val(member);
+
+        if($("#dataIDMemberCheckin").val() == ""){
+            messagingErrorCustom("Error when Checkin!");
+        }else{
+            $("#dataCheckinSource").val("member");
+            $("#checkinForm").submit();
+        }
+    }
 </script>
 
