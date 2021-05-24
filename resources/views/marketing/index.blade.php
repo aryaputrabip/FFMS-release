@@ -67,8 +67,8 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="float-right">
-
+                        <div class="float-right m-2">
+                            @include('config.filter.filter_ptMarketing')
                         </div>
                     </div>
                 </div>
@@ -178,6 +178,7 @@
 <script>
     @section('script')
     $(function () {
+        var marketing_table =
         $("#data_marketing").DataTable({
             searching: true,
             lengthChange: true,
@@ -210,6 +211,14 @@
         $("#data_marketing_filter").appendTo("#searchContainer");
         $("#data_marketing_info").addClass("pt-2 pl-2");
         $("#data_marketing_paginate").addClass("float-right");
+
+        $("#tableFilterPTMarketingJK").on("change", function () {
+            marketing_table.column($(this).data('column')).search($(this).val()).draw();
+        });
+
+        $("#tableFilterPTMarketingStatus").on("change", function () {
+            marketing_table.column($(this).data('column')).search($(this).val()).draw();
+        });
     });
 
     const Toast = Swal.mixin({

@@ -63,8 +63,9 @@ class MemberCheckinController extends Controller
                     'PK.email',
                     'PK.status',
                     'PK.visitlog',
+                        'PK.checkin_status',
                     'mMarketingData.name as marketing',
-                    'mPTData.name as pt'
+                    'mPTData.name as pt',
                 )->where("member_id", $request->uid)->first();
 
             $data['url'] = "";
@@ -78,6 +79,7 @@ class MemberCheckinController extends Controller
         $date_now = date('Y-m-d H:i:s');
 
         $data = MemberModel::where('member_id', $r->dataIDMember)->update([
+            'checkin_status' => true,
             'visitlog' => $r->visitLog + 1
         ]);
 

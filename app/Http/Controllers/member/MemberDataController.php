@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\member;
 
+use App\Exports\MemberExport;
 use App\Model\marketing\MarketingModel;
+use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipModel;
+use App\Model\payment\BankModel;
+use App\Model\payment\PaymentModel;
 use App\Model\pt\PersonalTrainerModel;
+use App\Model\session\SessionModel;
 use App\Model\system\SysModel;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
@@ -15,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Session\Session;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
 class MemberDataController extends Controller
@@ -91,7 +97,7 @@ class MemberDataController extends Controller
                     return '<span class="text-left">'.$data->name.'</span>';
                 })
                 ->addColumn('status', function ($data) {
-                    if($data->status == "Non-Aktif"){
+                    if($data->status == "Non-Aktif" || $data->status == "Expired"){
                         return '<div class="text-center text-danger">'.$data->status.'</div>';
                     }else{
                         return '<div class="text-center text-success">'.$data->status.'</div>';
@@ -158,9 +164,19 @@ class MemberDataController extends Controller
 
             if(isset($data['data'])){
                 if($data['data']->status == 1){
-                    return '<button class="btn btn-danger w-100 mb-2 font-weight-bold" disabled>
+                    if($this->checkAuth() == 1){
+                        $routeCheckin = route("suadmin.member.checkin");
+                        $routeCuti = route("suadmin.cuti.index");
+                    }else if($this->checkAuth() == 2){
+
+                    }else if($this->checkAuth() == 3){
+                        $routeCheckin = route("cs.member.checkin");
+                        $routeCuti = route("cs.cuti.index");
+                    }
+
+                    return '<a href="'.$routeCheckin.'" class="btn btn-danger w-100 mb-2 font-weight-bold">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
-                            </button>
+                            </a>
                             <button class="btn btn-outline-secondary w-100 mb-2" disabled>
                                 <i class="fas fa-address-card fa-sm mr-1"></i> Perpanjang Paket Member
                             </button>
@@ -168,9 +184,9 @@ class MemberDataController extends Controller
                                 <i class="fas fa-dumbbell fa-sm mr-1"></i> Perpanjang Sesi Latihan Member
                             </button>
                             <hr>
-                            <button class="btn btn-secondary w-100" disabled>
+                            <a href="'.$routeCuti.'" class="btn btn-secondary w-100">
                                 <i class="fas fa-calendar-minus fa-sm mr-1"></i> Cutikan Member
-                            </button>
+                            </a>
                             <hr>
                             <a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
                                 <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
@@ -190,7 +206,23 @@ class MemberDataController extends Controller
                                 <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
                             </a>';
                 }else if($data['data']->status == 3){
-
+                    return '<a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
+                                <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
+                            </a>
+                            <a href="'.$editLink.'" class="btn btn-warning w-100">
+                                <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
+                            </a>';
+                }else if($data['data']->status == 4){
+                    return '<button href="#" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="extendMembership(`'.$r->id.'`, '.$r->duration.')">
+                                <i class="fas fa-calendar-plus fa-sm mr-1"></i> Perpanjang Paket Member
+                            </button>
+                            <hr>
+                            <a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
+                                <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
+                            </a>
+                            <a href="'.$editLink.'" class="btn btn-warning w-100">
+                                <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
+                            </a>';
                 }
             }
         }
@@ -257,7 +289,12 @@ class MemberDataController extends Controller
                 ->addColumn('visit', function ($data) {
                     return '<div class="text-left">'.$data->visit.'</div>';
                 })
-                ->rawColumns(['name', 'type', 'duration', 'start_date', 'expired_date', 'visit'])
+                ->addColumn('action', function ($data) {
+                    return '<button class="btn btn-default w-auto" title="Perpanjang Membership">
+                                <span class="fas fa-plus fa-xs mr-1"></span> Perpanjang
+                            </button>';
+                })
+                ->rawColumns(['name', 'type', 'duration', 'start_date', 'expired_date', 'visit', 'action'])
                 ->make(true);
         }
     }
@@ -265,7 +302,8 @@ class MemberDataController extends Controller
     public function getMemberPT(Request $request, $id){
         if($request->ajax() && $id != ""){
             $data = MemberModel::from("memberdata as PK")
-                ->join("ptdata as PTData", "PTData.name", "=", "PK.pt")
+                ->join("cache_read as cData", "cData.author", "=", "PK.member_id")
+                ->leftjoin("ptdata as PTData", "PTData.pt_id", "=", "cData.id_pt")
                 ->select(
                     'PK.member_id',
                     'PTData.name as name',
@@ -273,22 +311,31 @@ class MemberDataController extends Controller
                     'PK.session_reg as jsession',
                     'PK.session as session_left'
                 )
-                ->where('PK.member_id', '=', $id)
+                ->where('PK.member_id', $id)
+                ->where('PK.session_reg', "!=", null)
                 ->get();
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('name', function ($data) {
-                    return '<span class="text-left">'.$data->name.'</span>';
+                    if($data->name == ""){
+                        return '<span class="text-left"> - </span>';
+                    }else{
+                        return '<span class="text-left">'.$data->name.'</span>';
+                    }
                 })
                 ->addColumn('gender', function ($data) {
-                    return '<div class="text-left">'.$data->gender.'</div>';
+                    if($data->name == ""){
+                        return '<div class="text-left"> - </div>';
+                    }else{
+                        return '<div class="text-left">'.$data->gender.'</div>';
+                    }
                 })
                 ->addColumn('jsession', function ($data) {
-                    return '<div class="text-left">'.$data->jsession.'</div>';
+                    return '<div class="text-left">'.$data->jsession.' Sesi</div>';
                 })
                 ->addColumn('session_left', function ($data) {
-                    return '<div class="text-left">'.$data->session_left.'</div>';
+                    return '<div class="text-left">'.$data->session_left.' Sesi</div>';
                 })
                 ->rawColumns(['name', 'gender', 'jsession', 'session_left'])
                 ->make(true);
@@ -296,6 +343,8 @@ class MemberDataController extends Controller
     }
 
     public function getMemberLog(Request $request, $id){
+        date_default_timezone_set("Asia/Jakarta");
+
         if($request->ajax()){
             $data = MemberLogModel::from("logmember as PK")
                 ->join("log_category as logCat", "logCat.id", "=", "PK.category")
@@ -309,12 +358,13 @@ class MemberDataController extends Controller
                     'PK.status as status',
                     'PK.aksi'
                 )
+                ->orderBy('PK.date', 'DESC')
                 ->where('PK.author', '=', $id)->get();
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('date', function ($data) {
-                    return '<span class="text-left">'.date('d/m/Y', strtotime($data->date)).'</span>';
+                    return '<span class="text-left">'.date('d M Y - H:i', strtotime($data->date)).'</span>';
                 })
                 ->addColumn('desc', function ($data) {
                     return '<div class="text-left">'.$data->desc.'</div>';
@@ -335,8 +385,18 @@ class MemberDataController extends Controller
                                         <i class="fas fa-print text-info"></i>
                                     </a>
                                 </center>';
-                    }else{
-                        return "";
+                    }else if($data->aksi == "sesi"){
+                        return '<center>
+                                    <a href="'.route('member.printPembelianSesi', $data->log_id).'" class="btn btn-default btn-sm" title="Cetak Invoice Pembelian Sesi">
+                                        <i class="fas fa-print text-info"></i>
+                                    </a>
+                                </center>';
+                    }else if($data->aksi == "membership"){
+                        return '<center>
+                                    <a href="'.route('member.printPembelianSesi', $data->log_id).'" class="btn btn-default btn-sm" title="Cetak Invoice Pembelian Paket Member">
+                                        <i class="fas fa-print text-info"></i>
+                                    </a>
+                                </center>';
                     }
                 })
                 ->rawColumns(['date', 'desc', 'category', 'status', 'transaction', 'action'])
@@ -384,7 +444,12 @@ class MemberDataController extends Controller
 
             $data['data'] = MemberModel::where('member_id', $id)->first();
             $data['cache'] = MemberCacheModel::where('author', $id)->first();
-            $data['membership'] = MembershipModel::where('mship_id', $data['data']->membership)->first();
+
+            if($data['data']){
+                $data['membership'] = MembershipModel::where('mship_id', $data['data']->membership)->first();
+            }else{
+                abort(404);
+            }
 
             $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
             $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
@@ -397,10 +462,33 @@ class MemberDataController extends Controller
             $data['username'] = Auth::user()->name;
             $data['app_layout'] = $this->defineLayout($role);
 
+            $data['membership_action'] =
+                $this->isMembershipActive(
+                    $data['data']->status, $data['data']->m_enddate, $id, $data['membership']->duration
+                );
+
+            $data['pt_action'] = $this->isSessionAvailable($data['data']->session);
+            $data['session'] = SessionModel::get();
+            $data['payment'] = PaymentModel::latest()->orderBy('id')->get();
+            $data['membership_data'] = MembershipModel::from('membership as PK')
+                ->leftjoin('membership_type as mType', 'mType.mtype_id','=','PK.type')->select(
+                'PK.mship_id as mship_id',
+                'PK.name as name',
+                'PK.duration as duration',
+                'PK.price as price',
+                'PK.status as status',
+                'PK.category as category',
+                'mType.type as type'
+            )->where('status', 1)->get();
+
+            $data['debitType'] = BankModel::latest()->where('model', 2)->get();
+            $data['creditType'] = BankModel::latest()->where('model', 3)->get();
+            $data['reg_no'] = MemberLogModel::where('category', 5)->count();
+
             if($data['data'] != null){
                 return view('member.management.edit', $data);
             }else{
-                dd('data tidak ditemukan');
+                abort(404);
             }
         }
     }
@@ -435,6 +523,7 @@ class MemberDataController extends Controller
             'photo' => $r->photoFile,
             'marketing' => $marketingName,
             'pt' => $ptName,
+            'member_notes' => $r->dataUserNote,
             'updated_at' => $date_now,
             'updated_by' => Auth::user()->role_id
         ]);
@@ -452,6 +541,54 @@ class MemberDataController extends Controller
             //STILL EMPTY
         }else if($this->checkAuth() == 3){
             return redirect()->route('cs.member.index')->with(['success' => 'Data Member Berhasil Diubah']);
+        }
+    }
+
+    function isMembershipActive($status, $last_longer, $id, $duration){
+        date_default_timezone_set("Asia/Bangkok");
+        $date_now = Carbon::now();
+
+        //$date_now->diffInDays(Carbon::parse($last_longer)) <= 31
+        switch ($status){
+            case 1:
+                return
+                    '<button type="button" class="btn btn-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
+                        <i class="fas fa-plus mr-1 fa-sm"></i> Ganti Paket
+                    </button>';
+                break;
+            case 2:
+                return
+                    '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" onclick="activatePaket(`'.$id.'`,'.$duration.');">
+                        <i class="fas fa-check mr-1 fa-sm"></i>  Aktivasi Member
+                    </button>';
+                break;
+            case 3:
+                return null;
+                break;
+            case 4:
+                return
+                    '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="extendPaket();">
+                        <i class="fas fa-plus mr-1 fa-sm"></i>  Perpanjang
+                     </button>
+                     <button type="button" class="btn btn-outline-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
+                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti Paket
+                     </button>';
+                break;
+        }
+    }
+
+    function isSessionAvailable($session){
+        if($session > 0){
+            return '<button type="button" class="btn btn-dark mb-2 w-100" onclick="tambahSesi();">
+                        <i class="fas fa-plus mr-1 fa-sm"></i> Tambah Sesi
+                    </button>
+                    <button type="button" class="btn btn-outline-dark mt-0 w-100" onclick="ubahPT();">
+                        <i class="fas fa-edit mr-1 fa-sm"></i> Ubah PT
+                    </button>';
+        }else{
+            return '<button type="button" class="btn btn-dark w-100" onclick="registerPT();">
+                        <i class="fas fa-plus mr-1 fa-sm"></i> Daftar Paket PT
+                    </button>';
         }
     }
 
@@ -508,7 +645,9 @@ class MemberDataController extends Controller
                 'PK.author',
                 'PK.date as LOG_DATE',
                 'PK.reg_no as PO_ID',
-                'PK.additional')
+                'PK.additional',
+                'PK.notes'
+            )
             ->where("PK.author", $id)
             ->first();
 
@@ -625,7 +764,11 @@ class MemberDataController extends Controller
                 'PK.date as LOG_DATE',
                 'PK.reg_no as PO_ID',
                 'PK.transaction',
-                'PK.additional')
+                'PK.additional',
+                'PK.t_membership',
+                'PK.t_sesi',
+                'PK.notes'
+            )
             ->where("PK.author", $id)
             ->first();
 
@@ -747,5 +890,310 @@ class MemberDataController extends Controller
         }else{
             return $no;
         }
+    }
+
+    function dataChecking(){
+        date_default_timezone_set("Asia/Bangkok");
+        $date_now = Carbon::now()->toDateString();
+
+        $data['data'] = MemberModel::select('member_id','m_enddate','status')->where('status', '=', 1)->whereDate('m_enddate', '<', $date_now)->update(array('status' => 4));
+        $member = CutiMemberModel::from("cutidata as PK")
+                    ->join('memberdata as mData','mData.member_id','=','PK.member_id')
+                    ->join('membership as mShipData','mShipData.mship_id','=','mData.membership')
+                    ->select(
+                        'mData.member_id as mid',
+                        'mData.m_startdate as start',
+                        'mShipData.duration as duration',
+                        'PK.id as id',
+                        'PK.cuti_expired as cuti_expired'
+                    )->whereDate('cuti_expired', '<', $date_now)->get();
+
+        if(count($member) > 0){
+            $member_list = [];
+            $new_date_list = [];
+            foreach ($member as $m) {
+                $m->start = Carbon::parse($m->start)->addMonths($m->duration)->format('Y-m-d');
+                array_push($member_list, $m->mid);
+                array_push($new_date_list, $m->start);
+            }
+
+            foreach($new_date_list as $date){
+                $exec_date = MemberModel::select('member_id','m_enddate')
+                    ->whereIn('member_id', $member_list)
+                    ->update(array('m_enddate' => $date));
+            }
+
+            $exec_member = MemberModel::select('member_id','status')
+                ->whereIn('member_id', $member_list)
+                ->update(array('status' => 1));
+
+            $exec_cuti = CutiMemberModel::select('member_id')
+                ->whereIn('member_id', $member_list)
+                ->delete();
+        }
+
+        if(Auth::user()->role_id == 1){
+                return redirect()->route('suadmin.index');
+            }elseif(Auth::user()->role_id == 2){
+//              //
+        }elseif(Auth::user()->role_id == 3){
+                return redirect()->route('cs.index');
+            }
+    }
+
+    function addTransaction(Request $r){
+        date_default_timezone_set("Asia/Bangkok");
+        $date_now = Carbon::now();
+
+        $successMessage = "";
+
+        if($r->sTransaction == "extend-session") {
+            $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                'session_reg' => ($r->sOld + $r->nSession),
+                'session' => ($r->lOld + $r->nSession),
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->role_id
+            ]);
+
+            if ($r->nTitle == "") {
+                $fullSessionName = $r->nSession . " Session";
+            } else {
+                $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
+            }
+
+            $log = MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Pembelian Sesi PT - ' . $fullSessionName,
+                'category' => 5,
+                'transaction' => $r->nPrice,
+                'status' => 'Lunas',
+                'author' => $r->sHiddenID,
+                'additional' => $r->nPayment,
+                'reg_no' => ($r->nRegNo + 1),
+                'aksi' => 'sesi',
+                't_sesi' => $r->nPrice,
+                'notes' => $r->nNotes
+            ]);
+
+            $successMessage = 'Pembelian Sesi Berhasil!';
+
+        }else if($r->sTransaction == "register-session"){
+            $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                'session_reg' => $r->nSession,
+                'session' => $r->nSession,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->role_id
+            ]);
+
+            if($r->nPT == "nothing" || $r->nPT == ""){
+                $namaRegPT = null;
+            }else{
+                $namaRegPT = $r->nPT;
+            }
+
+            $data2 = MemberCacheModel::where('author', $r->sHiddenID)->update([
+                'id_pt' => $namaRegPT,
+                'session_price' => $r->nPrice
+            ]);
+
+            if ($r->nTitle == "") {
+                $fullSessionName = $r->nSession . " Session";
+            } else {
+                $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
+            }
+
+            $log = MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Pembelian Paket Personal Trainer - ' . $fullSessionName,
+                'category' => 5,
+                'transaction' => $r->nPrice,
+                'status' => 'Lunas',
+                'author' => $r->sHiddenID,
+                'additional' => $r->nPayment,
+                'reg_no' => ($r->nRegNo + 1),
+                'aksi' => 'sesi',
+                't_sesi' => $r->nPrice,
+                'notes' => $r->nNotes
+            ]);
+
+            $successMessage = "Pembelian Paket Personal Trainer Berhasil!";
+
+        }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
+            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
+            if($r->sTransaction == "change-membership"){
+                $log_desc = 'Pembelian Paket Member - '.$r->mShipName;
+                $successMessage = 'Pembelian Paket Member Berhasil!';
+
+                if($member['member']->status == 4){
+                    //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE CHANGE TO...
+                    $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                        'status' => 1,
+                        'membership' => $r->mShipID,
+                        'm_startdate' => $date_now,
+                        'm_enddate' => $new_enddate,
+                        'updated_at' => $date_now,
+                        'updated_by' => Auth::user()->role_id
+                    ]);
+                }else{
+                    $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+
+                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                        'membership' => $r->mShipID,
+                        'm_enddate' => $new_enddate,
+                        'updated_at' => $date_now,
+                        'updated_by' => Auth::user()->role_id
+                    ]);
+                }
+            }else if($r->sTransaction == "extend-membership"){
+                $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                $log_desc = 'Perpanjangan Paket Member - '.$r->mShipName;
+                $successMessage = 'Perpanjangan Paket Member Berhasil!';
+
+                $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                    'status' => 1,
+                    'membership' => $r->mShipID,
+                    'm_startdate' => $date_now,
+                    'm_enddate' => $new_enddate,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->role_id
+                ]);
+            }
+
+
+            if($r->mShipApproval == null || $r->mShipApproval == ""){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $log_desc,
+                    'category' => 5,
+                    'transaction' => $r->mShipPrice,
+                    'status' => 'Lunas',
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'membership',
+                    't_membership' => $r->mShipPrice,
+                    'notes' => $r->nNotes
+                ]);
+            }else{
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $log_desc,
+                    'category' => 5,
+                    'transaction' => $r->mShipApproval,
+                    'status' => 'Lunas',
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'membership',
+                    't_membership' => $r->mShipApproval,
+                    'notes' => $r->nNotes
+                ]);
+            }
+        }
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->sHiddenID)->with(['success' => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->sHiddenID)->with(['success' => $successMessage]);
+        }
+    }
+
+
+
+    function printPembelianSesi($log_id){
+        date_default_timezone_set("Asia/Bangkok");
+        $date_now = date('d M Y');
+
+        $data['data'] = MemberLogModel::from("logmember as PK")
+                        ->join("memberdata as mData", "mData.member_id", "=", "PK.author")
+                        ->where("PK.log_id", $log_id)
+                        ->first();
+
+        if($data['data']->aksi == "sesi"){
+            //$data['title'] = 'RETENTION SESSION INVOICE';
+            $DOC_NAME = "INVOICE_RI_S_".$data['data']->member_id;
+        }else if($data['data']->aksi == "membership"){
+            //$data['title'] = 'RETENTION MEMBERSHIP INVOICE';
+            $DOC_NAME = "INVOICE_RI_M_".$data['data']->member_id;
+        }
+
+        $data['title'] = 'PROFORMA INVOICE';
+
+        $data['memberID'] = $data['data']->member_id;
+        $data['memberName'] = $data['data']->name;
+
+        $data['desc'] = $data['data']->desc;
+
+        $idInvoice = $this->getNomorSurat($data['data']->reg_no);
+        $subject = "RI";
+
+        $data['price'] = $data['data']->transaction;
+        $data['disc'] = 0;
+
+        if($data['data']->additional == "Cash"){
+            $data['metodeBayar'] = "Cash";
+        }else if($data['data']->additional == "Master Card" || $data['data']->additional == "Visa"){
+            $data['metodeBayar'] = "Credit Card";
+        }else{
+            $data['metodeBayar'] = "Debit Card";
+        }
+
+
+        $data['namaBank'] = $data['data']->additional;
+        $activeMonth = $this->getRomawi((date("m",strtotime($data['data']->date))));
+        $data['time'] = date("d M Y",strtotime($data['data']->date));
+
+        $data['PINO'] = $idInvoice."/".$subject."/".$activeMonth."/".(date("Y",strtotime($date_now)));
+
+        //return $data;
+
+        $pdf = PDF::loadView('member.print.transaction_invoice', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'defaultFont' => 'serif',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+
+        return $pdf->download($DOC_NAME.".pdf");
+    }
+
+    function changePT(Request $r){
+        date_default_timezone_set("Asia/Bangkok");
+        $date_now = Carbon::now()->toDateString();
+
+        if($r->cachePT == "nothing"){
+            $activePT = null;
+        }else{
+            $activePT = $r->cachePT;
+        }
+
+        $PT = MemberCacheModel::where('author', $r->ptEditHiddenID)->update([
+            'id_pt' => $activePT,
+        ]);
+
+        $Member = MemberModel::where('member_id', $r->ptEditHiddenID)->update([
+            'updated_at' => $date_now,
+            'updated_by' => Auth::user()->role_id
+        ]);
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->ptEditHiddenID)->with(['success' => 'Nama Personal Trainer Berhasil Diubah!']);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->ptEditHiddenID)->with(['success' => 'Nama Personal Trainer Berhasil Diubah!']);
+        }
+    }
+
+    function exportExcelData(){
+        $namaFile = "members";
+
+        return Excel::download(new MemberExport(), $namaFile.'.xlsx');
     }
 }

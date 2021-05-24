@@ -31,6 +31,7 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
         Route::get('edit/{id}', 'MemberDataController@edit')->name('edit');
         Route::get('view/{id}', 'MemberDataController@view')->name('view');
         Route::get('checkin', 'MemberCheckinController@index')->name('checkin');
+        Route::get('checkout', 'MemberCheckoutController@index')->name('checkout');
 
         Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
             Route::get('/', 'MemberRegisterController@index')->name('index');
@@ -59,6 +60,7 @@ Route::prefix('cs')->name('cs.')->group(function (){
         Route::get('edit/{id}', 'MemberDataController@edit')->name('edit');
         Route::get('view/{id}', 'MemberDataController@view')->name('view');
         Route::get('checkin', 'MemberCheckinController@index')->name('checkin');
+        Route::get('checkout', 'MemberCheckoutController@index')->name('checkout');
 
         Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
             Route::get('/', 'MemberRegisterController@index')->name('index');
@@ -83,6 +85,18 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::post('aktivasi', 'MemberDataController@aktivasi')->name('aktivasi');
     Route::get('preview', 'MemberCheckinController@preview')->name('preview');
     Route::post('checkin', 'MemberCheckinController@checkin')->name('checkin');
+    Route::get('getCheckinMemberData', 'MemberCheckoutController@getCheckinMemberData')->name('getCheckinMemberData');
+    Route::get('getCheckoutMemberData', 'MemberCheckoutController@getCheckoutMemberData')->name('getCheckoutMemberData');
+    Route::post('checkoutMember', 'MemberCheckoutController@checkoutMember')->name('checkoutMember');
+
+    Route::post('addTransaction', 'MemberDataController@addTransaction')->name('addTransaction');
+
+    Route::get('dataChecking', 'MemberDataController@dataChecking')->name('dataChecking');
+    Route::get('printPembelianSesi/{id}', 'MemberDataController@printPembelianSesi')->name('printPembelianSesi');
+
+    Route::post('changePT', 'MemberDataController@changePT')->name('changePT');
+
+    Route::get('exportExcelData', 'MemberDataController@exportExcelData')->name('exportExcelData');
 
     Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
         Route::post('store', 'MemberRegisterController@store')->name('store');
@@ -117,6 +131,17 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
 Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
     Route::get('/','reportController@index')->name('index');
     Route::post('/dataReg','reportController@dataReg')->name('dataReg');
+    Route::get('/data','reportController@dataReg')->name('dataReg');
+    Route::get('/dataRevenue','reportController@dataRevenue')->name('dataRevenue');
+    Route::get('/updateChartData','reportController@updateChartData')->name('updateChartData');
 });
 
 //
+Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
+    Route::get('getCutiData', 'CutiController@getCutiData')->name('getCutiData');
+    Route::get('preview', 'CutiController@preview')->name('preview');
+    Route::get('checkCapability', 'CutiController@checkCapability')->name('checkCapability');
+    Route::get('abortCuti', 'CutiController@abortCuti')->name('abortCuti');
+    Route::post('approve', 'CutiController@approve')->name('approve');
+    Route::post('remove', 'CutiController@remove')->name('remove');
+});

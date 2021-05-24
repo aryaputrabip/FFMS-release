@@ -279,7 +279,7 @@
                                 <div class="col-sm-6">
                                     <select class="form-control select2 mb-4" style="width: 100%;" id="dataUserPTSession" name="dataUserPTSession" disabled="true"><?php
                                         foreach($session as $session_list){?>
-                                        <option value="{{ $session_list->duration }}" data-price="{{ $session_list->price }}" data-title="{{ $session_list->title }}">{{ $session_list->duration }} Sesi</option>
+                                        <option value="{{ $session_list->duration }}" data-price="{{ $session_list->price }}" data-title="{{ $session_list->title }}">@if($session_list->title != null){{ $session_list->title }} - @endif{{ $session_list->duration }} Sesi</option>
                                         <?php
                                         }
                                         ?>
@@ -404,6 +404,7 @@
                                         <div class="attachment-block clearfix" id="container_confirm_pt" style="padding: 5px 10px; display: block;">
                                             <h5 class="attachment-heading">Personal Trainer</h5>
                                             <div class="attachment-text"><b>(<span id="confirm_pt_name">Belum Ditentukan</span>)</b></div>
+                                            <div class="attachment-text"><b>Jenis Sesi:</b> <span id="confirm_pt_session_title"> - </span></div>
                                             <div class="attachment-text"><b>Total Sesi:</b> <span id="confirm_pt_session"> - </span></div>
                                         </div>
                                         <div class="attachment-block clearfix" id="container_confirm_marketing" style="padding: 5px 10px; display: block;">
@@ -428,7 +429,7 @@
                     </div>
                 </section>
 
-                <!-- FORM CARD -->
+            <!-- FORM CARD -->
             <section class="card" id="card-step-4" style="display: none;">
                 <div class="card-body pt-2 pb-2 pl-3 pr-3">
                     <h4 class="d-inline">Pembayaran</h4><hr>
@@ -498,12 +499,38 @@
                         </div>
                         <div class="col-md-4">
                             <button type="button" class="btn btn-primary w-100" onclick="continueToNextStep(5,this);">
-                                <i class="fas fa-check fa-sm pr-2"></i> Selesai
+                                <i class="fas fa-arrow-right fa-sm pr-2"></i> Catatan
                             </button>
                         </div>
                     </div>
                 </div>
             </section>
+
+                <!-- FORM CARD -->
+                <section class="card" id="card-step-5" style="display: none;">
+                    <div class="card-body pt-2 pb-2 pl-3 pr-3">
+                        <h4 class="d-inline">Catatan</h4><hr>
+
+                        <div class="row form-group">
+                            <div class="col-12 mb-3">
+                                <textarea class="form-control w-100" id="dataNote" name="dataNote" rows="6" placeholder="Tambah Catatan (optional)..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-8">
+                                <button type="button" class="btn btn-secondary w-100" id="prevBTN-4" onclick="continueToPreviousStep(4,this);">
+                                    <i class="fas fa-arrow-left fa-sm pr-2"></i> Kembali
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary w-100" onclick="continueToNextStep(6,this);">
+                                    <i class="fas fa-check fa-sm pr-2"></i> Selesai
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
             @include('member.modal.modal_registration')
         </form>
@@ -526,6 +553,13 @@
                 $("#changeApprovalBtn").prop('disabled',true);
                 $("#cacheMemberApproval").val("");
                 refreshApprovalBtn("#changeApprovalBtn");
+            }
+        });
+
+        $("#registrationForm").on('keyup keypress keydown', function(e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
             }
         });
     });
@@ -685,7 +719,13 @@
         $("#confirm_membership_duration").html($("#cacheMembershipDuration").val() + " Bulan");
 
         if($("#dataUserPTToggler").prop("checked")){
-            $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            if($("#dataUserPTSession").find(':selected').data('title') != ""){
+                $("#confirm_pt_session_title").html($("#dataUserPTSession").find(':selected').data('title'));
+                $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            }else{
+                $("#confirm_pt_session_title").html(" Regular ");
+                $("#confirm_pt_session").html($("#dataUserPTSession").val() + " Session");
+            }
 
             if($("#dataUserPT").val() == "nothing"){
                 $("#confirm_pt_name").html("Belum Ditentukan");
@@ -779,7 +819,7 @@
                     $("#confirm_email").html($("#dataUserEmail").val());
                     $("#confirm_job").html($("#dataUserJob").val());
                     $("#confirm_agency").html($("#dataUserCompany").val());
-                    
+
                     return true;
                 }
                 break;
@@ -794,18 +834,21 @@
                     return false;
                 }else{
                     if($("#cachePaymentModel").val() == "Cash"){
-                        confirmRegister();
-                        return "finish";
+                        return true;
                     }else{
                         if($("#cachePaymentType").val() == ""){
                             messagingErrorCustom("Bank Pembayaran Belum Dipilih!");
                             return false;
                         }else{
-                            confirmRegister();
-                            return "finish";
+                            return true;
                         }
                     }
                 }
+                break;
+
+            case 5:
+                confirmRegister();
+                return "finish";
                 break;
         }
     }
@@ -1041,406 +1084,3 @@
 
     @endsection
 </script>
-
-{{--<script>--}}
-{{--    @section('script')--}}
-{{--    $(function () {--}}
-{{--        $("#dataUserPTToggler").on('change', function () {--}}
-{{--            if($(this).prop('checked')){--}}
-{{--                $("#dataUserPT").prop('disabled', false);--}}
-{{--                $("#dataSessionContainer").show();--}}
-{{--            }else{--}}
-{{--                $("#dataUserPT").prop('disabled', true);--}}
-{{--                $("#dataSessionContainer").hide();--}}
-
-{{--                $("#dataUserPT").prop('selectedIndex',0);--}}
-{{--                $("#dataUserPTSession").prop('selectedIndex',0);--}}
-{{--            }--}}
-{{--        });--}}
-
-{{--        $("#dataUserMarketingToggler").on('change', function() {--}}
-{{--            if($(this).prop('checked')){--}}
-{{--                $("#dataUserMarketing").prop('disabled', false);--}}
-{{--            }else{--}}
-{{--                $("#dataUserMarketing").prop('disabled', true);--}}
-{{--                $("#dataUserMarketing").prop('selectedIndex', 0);--}}
-{{--            }--}}
-{{--        });--}}
-
-{{--        $("#dataMembershipPriceToggler").on('change', function() {--}}
-{{--            if($(this).prop('checked')){--}}
-{{--                $("#dataMembershipPriceApproval").prop('disabled', false);--}}
-{{--            }else{--}}
-{{--                $("#dataMembershipPriceApproval").prop('disabled', true);--}}
-{{--                $("#dataMembershipPriceApproval").val("");--}}
-{{--            }--}}
-{{--        });--}}
-
-{{--        $("#payment-child-2").append(--}}
-{{--            '<br><div id="bankDebitGroup" style="display: none;">' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-0" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank BRI`, 0)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-0-name"><i class="far fa-credit-card mr-2"></i>Bank BRI</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-1" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank BNI`, 1)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-1-name"><i class="far fa-credit-card mr-2"></i>Bank BNI</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-2" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank BTN`, 2)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-2-name"><i class="far fa-credit-card mr-2"></i>Bank BTN</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-3" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank BCA`, 3)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-3-name"><i class="far fa-credit-card mr-2"></i>Bank BCA</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-4" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank CIMB Niaga`, 4)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-4-name"><i class="far fa-credit-card mr-2"></i>Bank CIMB Niaga</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-5" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank OCBC NISP`, 5)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-5-name"><i class="far fa-credit-card mr-2"></i>Bank OCBC NISP</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-6" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Bank Danamon`, 6)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-6-name"><i class="far fa-credit-card mr-2"></i>Bank Danamon</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-7" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Lainnya`, 7)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-7-name"><i class="far fa-credit-card mr-2"></i>Lainnya...</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                </div>'--}}
-{{--        );--}}
-
-{{--        $("#payment-child-3").append(--}}
-{{--            '<br><div id="bankCreditGroup" style="display: none;">' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-8" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Visa`, 8)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-8-name"><i class="fa fa-cc-visa mr-2"></i>Visa</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                    <div class="attachment-block attachment-block-selector clearfix ml-2" id="bank-9" style="padding: 15px; cursor: pointer;" onclick="selectBank(this, `Master Card`, 9)">' +--}}
-{{--            '                                        <h6 class="attachment-heading" id="bank-9-name"><i class="fa fa-cc-mastercard mr-2"></i>Master Card</h6>' +--}}
-{{--            '                                    </div>' +--}}
-{{--            '                                </div>'--}}
-{{--        );--}}
-{{--    });--}}
-
-{{--    const Toast = Swal.mixin({--}}
-{{--        toast: true,--}}
-{{--        position: 'top-end',--}}
-{{--        showConfirmButton: false,--}}
-{{--        timer: 3000--}}
-{{--    });--}}
-
-{{--    function messagingError(){--}}
-{{--        Toast.fire({--}}
-{{--            icon: 'error',--}}
-{{--            html: 'Data belum lengkap!'--}}
-{{--        })--}}
-{{--    }--}}
-
-{{--    function messagingErrorCustom(message){--}}
-{{--        Toast.fire({--}}
-{{--            icon: 'error',--}}
-{{--            html: message--}}
-{{--        })--}}
-{{--    }--}}
-
-{{--    function checkRequired(step){--}}
-{{--        switch(step){--}}
-{{--            case 1:--}}
-{{--                if($("#dataUserNama").val() == "" || $("#dataUserGender").val() == "" || $("#dataUserEmail").val() == ""--}}
-{{--                    || $("#dataUserPhone").val() == ""){--}}
-{{--                    messagingError();--}}
-{{--                }else{--}}
-{{--                    if(isEmail($("#dataUserEmail").val())){--}}
-{{--                        $("#register-step-1").hide();--}}
-{{--                        $("#register-step-2").show();--}}
-{{--                    }else{--}}
-{{--                        messagingErrorCustom('Format Email Tidak Sesuai!');--}}
-{{--                    }--}}
-{{--                }--}}
-{{--                break--}}
-{{--            case 2:--}}
-{{--                if($("#dataUserMembership").val() == ""){--}}
-{{--                    messagingErrorCustom('Paket Member Belum Dipilih!');--}}
-{{--                }else{--}}
-{{--                    var completePT = false, completeMarketing = false, completeMembership = true;--}}
-
-{{--                    if($("#dataUserPTToggler").prop('checked')){--}}
-{{--                        if($("#dataUserPT").val() == "" || $("#dataUserPTSession").val() == ""){--}}
-{{--                            completePT = false;--}}
-{{--                        }else{--}}
-{{--                            completePT = true;--}}
-{{--                        }--}}
-{{--                    }else{--}}
-{{--                        completePT = true;--}}
-{{--                    }--}}
-
-{{--                    if($("#dataUserMarketingToggler").prop('checked')){--}}
-{{--                        if($("#dataUserMarketing").val() == ""){--}}
-{{--                            completeMarketing = false;--}}
-{{--                        }else{--}}
-{{--                            completeMarketing = true;--}}
-{{--                        }--}}
-{{--                    }else{--}}
-{{--                        completeMarketing = true;--}}
-{{--                    }--}}
-
-{{--                    if($("#dataMembershipPriceToggler").prop('checked')){--}}
-{{--                        if($("#dataMembershipPriceApproval").val() == ""){--}}
-{{--                            completeMembership = false;--}}
-{{--                        }else{--}}
-{{--                            completeMembership = true;--}}
-{{--                        }--}}
-{{--                    }else{--}}
-{{--                        completeMembership = true;--}}
-{{--                    }--}}
-
-{{--                    if(completePT == true && completeMarketing == true && completeMembership == true){--}}
-{{--                        $("#register-step-2").hide();--}}
-{{--                        $("#register-step-3").show();--}}
-
-{{--                        $("#confirm_name").html($("#dataUserNama").val());--}}
-{{--                        $("#confirm_gender").html($("#dataUserGender").val());--}}
-{{--                        $("#confirm_phone").html($("#dataUserPhone").val());--}}
-{{--                        $("#confirm_email").html($("#dataUserEmail").val());--}}
-{{--                        $("#confirm_job").html($("#dataUserJob").val());--}}
-{{--                        $("#confirm_agency").html($("#dataUserCompany").val());--}}
-{{--                        $("#confirm_membership_name").html($("#cacheMembershipName").val());--}}
-{{--                        $("#confirm_membership_duration").html($("#dataUserMembershipLength").val() + " Bulan");--}}
-{{--                        console.log();--}}
-{{--                        if($("#dataMembershipPriceApproval").val() != ""){--}}
-{{--                            $("#membership_price").val($("#dataMembershipPriceApproval").val());--}}
-{{--                        }else{--}}
-{{--                            $("#membership_price").val($('#membership-'+$("#dataUserMembership").val()+'-price').data('price'));--}}
-{{--                        }--}}
-
-{{--                        if($('#dataUserPT').is(':enabled')){--}}
-{{--                            $("#container_confirm_pt").show();--}}
-
-{{--                            if($("#dataUserPT").prop("value") == "nothing" || $("#dataUserPT").prop("value") == ""){--}}
-{{--                                $("#confirm_pt_name").html("");--}}
-{{--                            }else{--}}
-{{--                                $("#confirm_pt_name").html("(" + $("#dataUserPT option:selected").html()  + ")");--}}
-{{--                            }--}}
-
-{{--                            $("#confirm_pt_session").html($("#dataUserPTSession option:selected").html());--}}
-{{--                            $("#pt_price").val($("#dataUserPTSession option:selected").data('price'));--}}
-{{--                        }else{--}}
-{{--                            $("#container_confirm_pt").hide();--}}
-{{--                        }--}}
-
-{{--                        if($('#dataUserMarketing').is(':enabled')){--}}
-{{--                            $("#container_confirm_marketing").show();--}}
-{{--                            $("#confirm_marketing").html($("#dataUserMarketing option:selected").html());--}}
-
-{{--                            $("#dataUserMarketingToggler").on('change', function() {--}}
-{{--                                if($(this).prop('checked')){--}}
-{{--                                    $("#dataUserMarketing").prop('disabled', false);--}}
-{{--                                }else{--}}
-{{--                                    $("#dataUserMarketing").prop('disabled', true);--}}
-{{--                                    $("#dataUserMarketing").prop('selectedIndex', 0);--}}
-{{--                                }--}}
-{{--                            });--}}
-{{--                        }else{--}}
-{{--                            $("#container_confirm_marketing").hide();--}}
-{{--                        }--}}
-{{--                    }else{--}}
-{{--                        messagingError();--}}
-{{--                    }--}}
-{{--                }--}}
-{{--                break--}}
-{{--            case 3:--}}
-{{--                $("#register-step-3").hide();--}}
-{{--                $("#register-step-4").show();--}}
-
-{{--                var formatter = new Intl.NumberFormat(['ban', 'id']);--}}
-
-{{--                $("#total_membership").html(formatter.format(parseFloat($("#membership_price").val())));--}}
-
-{{--                if($('#dataUserPT').is(':enabled')){--}}
-{{--                    $("#total_pt").html(formatter.format(parseFloat($("#pt_price").val())));--}}
-{{--                    $("#total_price").html(formatter.format(parseFloat(parseFloat($("#membership_price").val()) + parseFloat($("#pt_price").val()))));--}}
-{{--                }else{--}}
-{{--                    $("#total_pt").html(0);--}}
-{{--                    $("#total_price").html(formatter.format(parseFloat(parseFloat($("#membership_price").val()))));--}}
-{{--                }--}}
-
-{{--                $("#total-session").html(formatter.format(parseFloat($("#dataUserPTSession option:selected").html())));--}}
-
-{{--                break--}}
-{{--            case 4:--}}
-{{--                if($("#dataUserPayment").val() == ""){--}}
-{{--                    messagingErrorCustom('Jenis Pembayaran Belum Dipilih!');--}}
-{{--                }else{--}}
-{{--                    // $("#register-step-4").hide();--}}
-{{--                    // $("#register-step-5").show();--}}
-
-{{--                    if($("#dataPaymentBank").val() == ""){--}}
-{{--                        messagingErrorCustom('Bank Pembayaran Belum Dipilih!');--}}
-{{--                    }else{--}}
-{{--                        confirmRegistration();--}}
-{{--                    }--}}
-{{--                }--}}
-{{--                break--}}
-{{--        }--}}
-{{--    }--}}
-
-{{--    function returnStep(step){--}}
-{{--        $("#register-step-" + (parseInt(step) + 1)).hide();--}}
-{{--        $("#register-step-" + step).show();--}}
-{{--    }--}}
-
-{{--    var setMembershipSelected;--}}
-{{--    function selectMembership(membership, id, duration, category){--}}
-{{--        $(membership).addClass('block_active');--}}
-
-{{--        if(setMembershipSelected != null){--}}
-{{--            if(id != setMembershipSelected){--}}
-{{--                $("#membership-" + setMembershipSelected).removeClass('block_active');--}}
-{{--            }--}}
-{{--        }--}}
-
-{{--        setMembershipSelected = id;--}}
-{{--        $('#dataUserMembership').val(id);--}}
-{{--        $('#dataUserMembershipLength').val(duration);--}}
-{{--        $('#dataUserMembershipCategory').val(category);--}}
-{{--        $('#cacheMembershipName').val($('#membership-'+id+'-name').html());--}}
-{{--        $('#cacheMembershipLength').val($('#membership-'+id+'-duration').html());--}}
-{{--        $('#cacheMembershipPrice').val($('#membership-'+id+'-price').html());--}}
-{{--        $('#cacheMembershipCategory').val($('#membership-'+id+'-category').val());--}}
-
-{{--        if(category > 1){--}}
-{{--            $("#toggleModalFamily").show();--}}
-{{--        }else{--}}
-{{--            $("#toggleModalFamily").hide();--}}
-{{--        }--}}
-{{--    }--}}
-
-{{--    var setPaymentSelected;--}}
-{{--    function selectPayment(payment, id){--}}
-{{--        $(payment).addClass('block_active');--}}
-{{--        $("#dataPaymentBank").val("");--}}
-
-{{--        if(setPaymentSelected != null){--}}
-{{--            if(id != setPaymentSelected){--}}
-{{--                $("#payment-" + setPaymentSelected).removeClass('block_active');--}}
-{{--            }--}}
-{{--        }--}}
-
-{{--        if(id == 2){--}}
-{{--            $("#bankDebitGroup").show();--}}
-{{--            $("#bankCreditGroup").hide();--}}
-{{--        }else if(id == 3){--}}
-{{--            $("#bankCreditGroup").show();--}}
-{{--            $("#bankDebitGroup").hide();--}}
-{{--        }else{--}}
-{{--            $("#bankDebitGroup").hide();--}}
-{{--            $("#bankCreditGroup").hide();--}}
-{{--            $("#dataPaymentBank").val("Cash");--}}
-{{--        }--}}
-
-{{--        setPaymentSelected = id;--}}
-{{--        $('#dataUserPayment').val(id);--}}
-{{--    }--}}
-
-{{--    var setBankSelected;--}}
-{{--    function selectBank(bank, id, id2){--}}
-{{--        $(bank).addClass('block_active');--}}
-
-{{--        if(setBankSelected != null){--}}
-{{--            if(id2 != setBankSelected){--}}
-{{--                $("#bank-" + setBankSelected).removeClass('block_active');--}}
-{{--            }--}}
-{{--        }--}}
-
-{{--        setBankSelected = id2;--}}
-{{--        $('#dataPaymentBank').val(id);--}}
-{{--    }--}}
-
-{{--    function confirmRegistration(){--}}
-{{--        var token = '{{ csrf_token() }}';--}}
-
-{{--        const ConfirmSwal = Swal.mixin({--}}
-{{--            customClass: {--}}
-{{--                confirmButton: 'btn btn-primary mr-2',--}}
-{{--                cancelButton: 'btn btn-danger mr-2'--}}
-{{--            },--}}
-{{--            buttonsStyling: false--}}
-{{--        });--}}
-
-{{--        ConfirmSwal.fire({--}}
-{{--            icon: 'warning',--}}
-{{--            html: 'Apakah Anda Yakin Ingin Menyelesaikan Registrasi ?',--}}
-{{--            showCancelButton: true,--}}
-{{--            cancelButtonText: `Tidak`,--}}
-{{--            confirmButtonText: `<i class="fas fa-check fa-sm"></i> Iya`,--}}
-{{--            reverseButtons: true--}}
-{{--        }).then((result) => {--}}
-{{--            if (result.dismiss === Swal.DismissReason.confirm){--}}
-{{--                $("#registrationForm").submit();--}}
-{{--            }else{--}}
-{{--                return false;--}}
-{{--            }--}}
-{{--        });--}}
-{{--    }--}}
-
-{{--    function openWebcam(){--}}
-{{--        var videocam = document.querySelector("#memberCapture");--}}
-
-{{--        if (navigator.mediaDevices.getUserMedia) {--}}
-{{--            navigator.mediaDevices.getUserMedia({ video: true })--}}
-{{--                .then(function (stream) {--}}
-{{--                    videocam.srcObject = stream;--}}
-{{--                })--}}
-{{--                .catch(function (err0r) {--}}
-{{--                    console.log("Something went wrong!");--}}
-{{--                });--}}
-{{--        }--}}
-{{--    }--}}
-
-{{--    function closeCam(){--}}
-{{--        var videocam = document.querySelector("#memberCapture");--}}
-{{--        var stream = videocam.srcObject;--}}
-{{--        var tracks = stream.getTracks();--}}
-
-{{--        for (var i = 0; i < tracks.length; i++) {--}}
-{{--            var track = tracks[i];--}}
-{{--            track.stop();--}}
-{{--        }--}}
-
-{{--        videocam.srcObject = null;--}}
-{{--    }--}}
-
-{{--    video = document.getElementById('memberCapture');--}}
-{{--    canvas = document.getElementById('canvas');--}}
-{{--    photo = document.getElementById('photo');--}}
-{{--    width = 400;--}}
-{{--    height = 400;--}}
-
-{{--    function takePicture() {--}}
-{{--        var context = canvas.getContext('2d');--}}
-{{--        if (width && height) {--}}
-{{--            canvas.width = width;--}}
-{{--            canvas.height = height;--}}
-{{--            context.drawImage(video, 0, 0, width, height);--}}
-
-{{--            var data = canvas.toDataURL('image/png');--}}
-{{--            photo.setAttribute('src', data);--}}
-{{--            closeCam();--}}
-{{--            $("#webcamModal").modal('hide');--}}
-{{--            $("#photoFile").val(data);--}}
-{{--        } else {--}}
-{{--            clearPhoto();--}}
-{{--            closeCam();--}}
-{{--            $("#webcamModal").modal('hide');--}}
-{{--        }--}}
-{{--    }--}}
-
-{{--    function clearPhoto() {--}}
-{{--        var context = canvas.getContext('2d');--}}
-{{--        context.fillStyle = "#AAA";--}}
-{{--        context.fillRect(0, 0, canvas.width, canvas.height);--}}
-
-{{--        var data = canvas.toDataURL('image/png');--}}
-{{--        photo.setAttribute('src', data);--}}
-{{--    }--}}
-
-{{--    function isEmail(email){--}}
-{{--        return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );--}}
-{{--    }--}}
-{{--    @endsection--}}
-{{--</script>--}}

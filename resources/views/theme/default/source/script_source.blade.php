@@ -12,6 +12,23 @@
 <script src="{{ asset('/lib/sweetalert2/sweetalert2.min.js') }}"></script>
 <!-- MomentJS -->
 <script src="{{ asset('/lib/moment.js/moment.min.js') }}"></script>
+<!-- ChartJS -->
+<script src="{{ asset('/lib/chart.js/Chart.min.js') }}"></script>
+<!-- ChartJS Datalabels -->
+<script src="{{ asset('/lib/chartjs-datalabels/chartjs-plugin-datalabels.min.js') }}"></script>
+<!-- Datatables Filter -->
+<script src="{{ asset('/lib/datatables-filter/filterDropDown.js') }}"></script>
 
 <!-- RESOURCES -->
 <script src="{{ asset('/js/custom-script.js') }}"></script>
+
+
+<script>
+    $(function () {
+        $.ajax({
+            type: 'GET',
+            dataType: 'html',
+            url: "{{ route('member.dataChecking') }}"
+        });
+    });
+</script>

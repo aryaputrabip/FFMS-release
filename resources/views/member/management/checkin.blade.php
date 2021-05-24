@@ -10,29 +10,68 @@
 </style>
 
 @section('content')
-    <div class="container-fluid w-50">
-        <div class="card">
-            <div class="card-body p-3">
-                <h4 class="d-inline"><span class="fas fa-calendar-check fa-sm mr-1"></span> Check-In</h4><hr>
-                <div class="row">
-                    <div class="col-12">
-                        <form id="checkinForm" action="{{ route('member.checkin') }}" method="POST">
-                            {{ csrf_field() }}
-
-                            <input type="hidden" id="visitlog" name="visitlog" readonly>
-
-                            <div class="form-group row">
-                                <label for="dataUserNama" class="col-sm-3 col-form-label">
-                                    ID Member<span class="text-danger">*</span>
-                                </label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="dataIDMember" name="dataIDMember" placeholder="Masukkan ID Member...">
-                                </div>
-                            </div>
-                        </form>
+    <div class="container-fluid w-100">
+        <div class="row">
+            <div class="col-3">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <button class="btn btn-primary w-100 mb-2" id="btnCheckinManual">
+                            Check-In (Manual)
+                        </button>
+                        <button class="btn btn-outline-primary mb-2 w-100" id="btnCheckingScan">
+                            Check-In (Scan)
+                        </button>
+                        <hr>
+                        <a @if($role == 1) href="{{ route('suadmin.member.checkout') }}" @elseif($role == 2) href="#"
+                           @elseif($role == 3) href="{{ route('cs.member.checkout') }}" @endif class="btn btn-danger w-100">
+                            <i class="fas fa-calendar-times fa-sm mr-1"></i> Checkout
+                        </a>
                     </div>
-                    <div class="col-12">
-                        <button class="btn btn-primary w-100 mt-3" id="checkinBtn"><span class="fas fa-search fa-sm mr-1"></span> Check</button>
+                </div>
+            </div>
+            <div class="col-9">
+                <div class="card" id="containerCheckinManual">
+                    <div class="card-body p-3">
+                        <h4 class="d-inline"><span class="fas fa-calendar-check fa-sm mr-1"></span> Check-In (Manual)</h4><hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <form id="checkinForm" action="{{ route('member.checkin') }}" method="POST">
+                                    {{ csrf_field() }}
+
+                                    <input type="hidden" id="visitlog" name="visitlog" readonly>
+
+                                    <div class="form-group row">
+                                        <label for="dataUserNama" class="col-sm-3 col-form-label">
+                                            ID Member<span class="text-danger">*</span>
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="dataIDMember" name="dataIDMember" placeholder="Masukkan ID Member..." autofocus="true">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 mt-3" id="checkinBtn"><span class="fas fa-search fa-sm mr-1"></span> Check</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card" id="containerCheckinScan" style="display: none;">
+                    <div class="card-body p-3">
+                        <h4 class="d-inline"><span class="fas fa-calendar-check fa-sm mr-1"></span> Check-In (Scan)</h4><hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <form id="checkinFormScan" action="{{ route('member.checkin') }}" method="POST">
+                                    {{ csrf_field() }}
+
+                                    <p>Menunggu Hasil Scan...</p>
+                                    <input type="hidden" id="visitlog2" name="visitlog2" readonly>
+                                    <input type="hidden" class="form-control" id="dataIDMemberScan" name="dataIDMemberScan">
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -205,15 +244,60 @@
 <script>
     @section('script')
     $(function(){
-        $("#checkinForm").on('keyup keypress', function(e) {
+        $("#checkinForm").on('keypress', function(e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode === 13) {
+                e.preventDefault();
                 if($("#dataIDMember").val() == ""){
                     messagingErrorCustom("ID Member Belum Diisi!");
                 }else{
                     checkingData($("#dataIDMember").val());
                 }
             }
+        });
+
+        $("#checkinFormScan").on('keypress', function(e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
+                if($("#dataIDMemberScan").val() == ""){
+                    messagingErrorCustom("ID Member Belum Diisi!");
+                }else{
+                    checkingData($("#dataIDMemberScan").val());
+                }
+            }
+        });
+
+        $("#btnCheckinManual").on('click', function() {
+            $("#btnCheckinManual").removeClass();
+            $("#btnCheckingScan").removeClass();
+
+            $("#btnCheckinManual").addClass('btn btn-primary w-100 mb-2');
+            $("#btnCheckingScan").addClass('btn btn-outline-primary w-100 mb-2');
+
+            $("#dataIDMember").val("");
+            $("#dataIDMemberScan").val("");
+
+            $("#containerCheckinManual").show();
+            $("#containerCheckinScan").hide();
+
+            $("#dataIDMember").focus();
+        });
+
+        $("#btnCheckingScan").on('click', function() {
+            $("#btnCheckinManual").removeClass();
+            $("#btnCheckingScan").removeClass();
+
+            $("#btnCheckingScan").addClass('btn btn-primary w-100 mb-2');
+            $("#btnCheckinManual").addClass('btn btn-outline-primary w-100 mb-2');
+
+            $("#dataIDMember").val("");
+            $("#dataIDMemberScan").val("");
+
+            $("#containerCheckinScan").show();
+            $("#containerCheckinManual").hide();
+
+            $("#dataIDMemberScan").focus();
         });
 
         $("#checkinBtn").on('click', function() {
@@ -226,6 +310,7 @@
 
         $('#modal-view').on('hide.bs.modal', function() {
             setCheckinStatusNormal("#checkinBtn");
+            $("#dataIDMemberScan").val("");
         });
 
         $("#checkinConfirm").on('click', function() {
@@ -283,6 +368,7 @@
 
     function getMemberContentData(data){
         var obj = JSON.parse(data);
+        console.log(obj.data);
 
         if(obj.data == null){
             Swal.fire({
@@ -292,12 +378,35 @@
             });
 
             setCheckinStatusNormal("#checkinBtn");
+            $("#dataIDMemberScan").val("");
         }else{
-            if(obj.data.status != 1){
+            if(obj.data.status != 1) {
+                if(obj.data.status == 2){
+                    Swal.fire({
+                        icon: 'warning',
+                        button: false,
+                        html: 'Member ini <b>belum diaktivasi!</b>'
+                    });
+                }else if(obj.data.status == 3){
+                    Swal.fire({
+                        icon: 'warning',
+                        button: false,
+                        html: 'Member ini sedang dalam <b>cuti!</b>'
+                    });
+                }else if(obj.data.status == 4){
+                    Swal.fire({
+                        icon: 'warning',
+                        button: false,
+                        html: 'Member ini telah <b>expired!</b>'
+                    });
+                }
+
+                setCheckinStatusNormal("#checkinBtn");
+            }else if(obj.data.checkin_status == true){
                 Swal.fire({
                     icon: 'warning',
                     button: false,
-                    html: 'ID Member ditemukan namun <b>belum diaktivasi</b>!'
+                    html: 'ID Member ditemukan dan belum di <b>checkout</b>!'
                 });
 
                 setCheckinStatusNormal("#checkinBtn");

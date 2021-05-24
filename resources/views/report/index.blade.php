@@ -1,95 +1,191 @@
-<!doctype html>
-<html lang="en">
+@extends($app_layout)
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ $title }}</title>
-
-    <!-- INIT STYLE -->
-    @include('theme.default.source.css_source')
-    @include('theme.default.import.modular.datatables.css')
-
-</head>
-
-<body class="sidebar-mini layout-navbar-fixed sidebar-collapse overflow-hidden">
-    <!-- layout-fixed  -->
-    <div class="wrapper">
-
-        @include('theme.default.header')
-
-        @include('theme.default.sidenav')
-
-        <div class="main-content bg-default-light">
-            @include('theme.default.title')
-        </div>
-
-        <section class="main-content container-fluid page-content mt-3 mb-3" style="background-color: aqua;">
-
-            <!-- <div class="card-header pl-2 pr-2 pt-1 pb-1">
-                <b>{{ $title }}</b>
-            </div> -->
-            <div class="row m-3" style="background-color: purple;">
-                <div class="col-xs-3">
-                    <div class="row">
-                        <form id="dataReg" class="form-control">
-                            @csrf
-                            <div class="col-12 my-2">Tanggal Mulai :</div>
-                            <div class="col-12 my-2"><input type="date" name="tglMulai" id="tglMulai"></div>
-
-                            <div class="col-12 my-2">Tanggal Akhir :</div>
-                            <div class="col-12 my-2"><input type="date" class="input-control" name="tglAkhir" id="tglAkhir"></div>
-                        </form>
-                        <div class="col-12 my-2"> <button class="btn btn-success" onclick="dataReg()"> search </button> </div>
-                    </div>
-                </div>
-                <div class="col-xs-9" style=" background-color: red;  width: 100%">
-                yo
-                    <!-- <div style="width:100%; background-color: yellow">
-                        <canvas id="reg"> </canvas>
-                    </div> -->
+@section('content')
+    <div class="container-fluid">
+        <!-- STATISTIC CARD -->
+        <div class="card mb-3">
+            <div class="card-header pl-2 pr-2 pt-1 pb-1">
+                <b>Filter Data</b>
+                <div class="card-tools mr-0">
+                    <button type="button" class="btn btn-tool mt-0" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
             </div>
-        </section>
+
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-4">
+                        <select class="form-control" id="SortTypeFilter" name="SortTypeFilter" disabled>
+                            <option value="year" disabled>Sort By (Daily)</option>
+                            <option value="month" selected>Sort By (Monthly)</option>
+                            <option value="year">Sort By (Yearly)</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control" id="SortMonthFilter" name="SortMonthFilter" disabled>
+                            <option value="1" selected>Bulan (Januari)</option>
+                            <option value="2">Bulan (Februari)</option>
+                            <option value="3">Bulan (Maret)</option>
+                            <option value="4">Bulan (April)</option>
+                            <option value="5">Bulan (Mei)</option>
+                            <option value="6">Bulan (Juni)</option>
+                            <option value="7">Bulan (Juli)</option>
+                            <option value="8">Bulan (Agustus)</option>
+                            <option value="9">Bulan (September)</option>
+                            <option value="10">Bulan(Oktober)</option>
+                            <option value="11">Bulan (November</option>
+                            <option value="12">Bulan (Desember)</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control" id="SortYearFilter" name="SortYearFilter">
+                            <option class="font-weight-bold" value="">Tahun (All)</option>
+                            <option value="2021" selected>Tahun (2021)</option>
+                            //<option value="2022">Tahun (2022)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA CARD -->
+        <div class="card p-2">
+            <div class="card-body p-0 pt-2 mb-2">
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="text-center">Performa Profit</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="revenueFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+@endsection
 
-    <!-- INIT SCRIPTS -->
-    @include('theme.default.source.script_source')
-    @include('theme.default.import.modular.datatables.script')
+<!-- page script -->
+<script>
+    @section('script')
+    $(function (){
+        $("#SortTypeFilter").on("change", function () {
+            // if($("#SortTypeFilter").val() == "year"){
+            //     $("#SortMonthFilter").hide();
+            // }else{
+            //     $("#SortMonthFilter").show();
+            // }
+        });
 
-    <!-- page script -->
-    <script>
-        var sel = document.getElementById('reg').getContext('2d');
+        $("#SortMonthFilter").on("change", function() {
+            //getChartData($("#SortTypeFilter").val(), $("#SortMonthFilter").val(), $("#SortYearFilter").val());
+        });
 
-        function dataReg() {
-            var form = $('#dataReg');
-            $.post("{{route('report.dataReg')}}", form.serialize(), function(response) {
-                var res = JSON.parse(response)
-            }).done(function(res) {
-                var res = JSON.parse(res)
-                console.log(res);
-                chart.destroy();
-                var chart = new Chart(sel, {
-                    type: 'bar',
-                    title: 'Data tahun ini',
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    },
-                    data: {
-                        labels: res.month,
-                        datasets: [{
-                            label: 'Peserta Terdaftar',
-                            data: res.dataMonth
-                        }]
-                    }
-                })
-                
-            })
+        $("#SortYearFilter").on("change", function () {
+            getChartData($("#SortTypeFilter").val(), null, $("#SortYearFilter").val());
+        });
+    });
+
+    function getChartData(typeFilter, monthFilter, yearFilter){
+        $.ajax({
+            type: 'GET',
+            dataType: 'html',
+            url: "{{ route('report.updateChartData') }}",
+            data: {
+                type: typeFilter,
+                month: monthFilter,
+                year: yearFilter
+            },
+            success: function(data){
+                var obj = JSON.parse(data);
+                console.log(obj.revenueData);
+
+                $("#revenueFrame").html('<canvas id="profitChart" width="400" height="100"></canvas>');
+
+                var ctxProfit = document.getElementById('profitChart').getContext('2d');
+                var chartProfit = new Chart(ctxProfit, {
+                    type: 'line',
+                    data: setData("revenue", [obj.revenueData, obj.revenueDataMembership, obj.revenueDataSesi]),
+                    options: setOptions('Profit Data', 'top', 0),
+                });
+
+                //i < jumlah chart
+
+                //console.log(myChart);
+                //myChart.update();
+            }
+        });
+    }
+
+    function setData(type, data){
+        switch(type){
+            case "revenue":
+                var dataGenerate = {
+                    labels: data[0].labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Total Revenue',
+                            data: data[0].dataset,
+                            borderColor: 'rgb(7,138,238)',
+                            backgroundColor: 'rgba(6,95,173,0.1)',
+                            borderWidth: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Total Revenue',
+                            data: data[1].dataset,
+                            borderColor: 'rgb(219,98,6)',
+                            backgroundColor: 'rgba(173,64,6,0.1)',
+                            borderWidth: 2,
+                            hidden: true
+                        },
+                        {
+                            type: 'line',
+                            label: 'Total Revenue',
+                            data: data[2].dataset,
+                            borderColor: 'rgb(219,6,6)',
+                            backgroundColor: 'rgba(173,6,20,0.1)',
+                            borderWidth: 2,
+                            hidden: true
+                        }
+                    ]
+                }
+
+                return dataGenerate;
+                break;
         }
-    </script>
+    }
 
-</body>
+    function setOptions(title, position, tension){
+        var options = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: position,
+                },
+                title: {
+                    display: true,
+                    text: title
+                }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+            elements: {
+                line: {
+                    tension: tension
+                }
+            }
+        }
 
-</html>
+        return options;
+    }
+    @endsection
+</script>
