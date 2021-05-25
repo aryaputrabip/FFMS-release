@@ -84,6 +84,8 @@ class MemberCheckinController extends Controller
             $preview = MemberModel::select("visitlog", "checkin_status")->where("member_id", $r->dataIDMember)->first();
         }elseif($r->dataCheckinSource  == 'member' || $r->dataCheckinSource  == 'view'){
             $preview = MemberModel::select("visitlog", "checkin_status")->where("member_id", $r->dataIDMemberCheckin)->first();
+        }else{
+            $preview = MemberModel::select("visitlog", "checkin_status")->where("member_id", $r->dataIDMember)->first();
         }
 
         if($preview->checkin_status){
