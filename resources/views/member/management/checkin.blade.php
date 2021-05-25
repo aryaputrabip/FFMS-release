@@ -332,6 +332,7 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.dismiss === Swal.DismissReason.confirm){
+                    $("#dataCheckinSource").val("checkin");
                     $("#checkinForm").submit();
                 }else{
                     return false;
