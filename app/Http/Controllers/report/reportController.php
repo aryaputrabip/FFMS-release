@@ -4,7 +4,9 @@ namespace App\Http\Controllers\report;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Model\member\MemberCacheModel;
 use App\Model\member\MemberLogModel;
+use App\Model\memberData;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -71,6 +73,19 @@ class reportController extends Controller
         $month = [];
         $dataMonth = [];
         $dataProfitMonth = [];
+        $dataProfitMemberPerMonth = [];
+        $dataProfitSesiPerMonth = [];
+        $dataCheckInPerMonth = [];
+        $dataCheckOutPerMonth = [];
+        $dataPembelianPerMonth = [];
+        $dataMemberPerMonth = [];
+        $dataLakiPerMonth = [];
+        $dataPerempuanPerMonth = [];
+        $dataPerformaMarketingPerMonth = [];
+        $dataPerformaMarketingPerMonth_profit = [];
+        $dataPerformaPTPerMonth = [];
+        $dataPerformaPTPerMonth_profit = [];
+        
 
         for ($i = 1; $i <= 12; $i++) {
             $dt =  date("F", mktime(0, 0, 0, $i, 10));
@@ -84,6 +99,24 @@ class reportController extends Controller
             $dataProfitMonth[] = MemberLogModel::whereRaw("extract(month from date) = " . $i)
                 ->whereRaw('EXTRACT(year from date) = ' . $tahun)->sum('transaction');
 
+            $dataProfitMemberPerMonth[] = MemberLogModel::where('aksi', 'membership')->whereRaw("extract(month from date) = " . $i)
+                ->whereRaw('EXTRACT(year from date) = ' . $tahun)->sum('transaction');
+
+            $dataProfitSesiPerMonth[] = MemberLogModel::where('aksi', 'sesi')->whereRaw("extract(month from date) = " . $i)
+                ->whereRaw('EXTRACT(year from date) = ' . $tahun)->sum('transaction');
+
+            $dataPembelianPerMonth[] =  MemberLogModel::whereRaw("extract(month from date) = " . $i)
+            ->whereRaw('EXTRACT(year from date) = ' . $tahun)->count();
+
+            $dataMemberPerMonth[] = DB::table('memberdata')->whereRaw("extract(month from m_startdate) = " . $i)
+            ->whereRaw('EXTRACT(year from m_startdate) = ' . $tahun)->count();
+
+            $dataLakiPerMonth[] = DB::table('memberdata')->where('gender', 'Laki-laki')->whereRaw("extract(month from m_startdate) = " . $i)
+            ->whereRaw('EXTRACT(year from m_startdate) = ' . $tahun)->count();
+
+            $dataPerempuanPerMonth[] = DB::table('memberdata')->where('gender', 'Perempuan')->whereRaw("extract(month from m_startdate) = " . $i)
+            ->whereRaw('EXTRACT(year from m_startdate) = ' . $tahun)->count();
+
             $dpm = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
             //$dayPerMonth[] = cal_days_in_month(CAL_GREGORIAN, $i, Carbon::now()->year);
             for ($j = 1; $j <= $dpm; $j++) {
@@ -95,6 +128,26 @@ class reportController extends Controller
                 $dataPerDay[$i][$j] = 0;
             }
         }
+
+        $TopMarketing = DB::select('select marketingdata.mark_id, marketingdata.name, SUM(cache_read.session_price) AS total_profit
+                                                        FROM cache_read
+                                                        JOIN marketingdata ON (marketingdata.mark_id = cache_read.id_marketing)
+                                                        GROUP BY marketingdata.mark_id, marketingdata.name
+                                                        ORDER BY total_profit DESC
+                                                        LIMIT 10
+                                                ');
+
+        $TopPT = DB::select('select ptdata.pt_id, ptdata.name, SUM(cache_read.session_price) AS total_profit
+                                                        FROM cache_read
+                                                        JOIN ptdata ON (ptdata.pt_id = cache_read.id_marketing)
+                                                        GROUP BY ptdata.pt_id, ptdata.name
+                                                        ORDER BY total_profit DESC
+                                                        LIMIT 10
+                                                ');
+
+        $dataTopMarketing = [];
+        $dataTopPT = [];
+        
 
         // Data Per Tahun
         $tahun = MemberLogModel::select(DB::raw('EXTRACT(year FROM date) AS year'))->distinct()->orderBy('year', 'ASC')->get();
@@ -112,8 +165,24 @@ class reportController extends Controller
         // Data Perbulan
         $data['month'] = $month;
         $data['dataMonth'] = $dataMonth;
+
+        // Data Profit Perbulan
         $data['profitPerMonth'] = $dataProfitMonth;
-        
+        $data['profitMemberPerMonth'] = $dataProfitMemberPerMonth;
+        $data['profitSesiPerMonth'] = $dataProfitSesiPerMonth;
+
+        // Data Aktivitas Member Perbulan
+        $data['pembelianPerMonth'] = $dataPembelianPerMonth;
+
+        // Data Performa Member Perbulan
+        $data['memberPerMonth'] = $dataMemberPerMonth;
+        $data['memberLakiPerMonth'] = $dataLakiPerMonth;
+        $data['memberPerempuanPerMonth'] = $dataPerempuanPerMonth;
+
+        // Data Top 10
+        $data['topMarketing'] = $TopMarketing;
+        $data['topPT'] = $TopPT;
+
         //Data Pertahun
         
         $data['year'] = $year;

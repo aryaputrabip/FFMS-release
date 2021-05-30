@@ -84,6 +84,15 @@
                 <canvas id="profyear"> </canvas>
             </div>
             
+            <!-- Aktivitas Member -->
+            <div id="bulanAktiv" class="bulan reg" style="width: 100%; min-height: 300px ;display:none">
+                <canvas id="aktiv"> </canvas>
+            </div>
+
+            <!-- Performa Member -->
+            <div id="bulanPerforma" class="bulan reg" style="width: 100%; min-height: 300px ;display:none">
+                <canvas id="performa"> </canvas>
+            </div>
 
             <div id="filterRegs" class="reg" style="width: 100%; min-height: 300px; display:none;">
 
@@ -96,11 +105,14 @@
     var prof = document.getElementById('prof').getContext('2d');
     var profday = document.getElementById('profday').getContext('2d');
     var profyear = document.getElementById('profyear').getContext('2d');
-    
     //Regis doang
     var sel = document.getElementById('reg').getContext('2d');
     var selday = document.getElementById('regday').getContext('2d');
     var selyear = document.getElementById('regyear').getContext('2d');
+    // Chart Aktivitas
+    var aktiv = document.getElementById('aktiv').getContext('2d');
+    // Chart Performa Meber
+    var performa = document.getElementById('performa').getContext('2d');
 
     var form = $('#dataReg');
     var bulan = new Date().getMonth() + 1;
@@ -165,13 +177,15 @@
             },
             data: {
                 labels: res.year,
-                datasets: [{
-                    label: 'Total Revenue',
-                    data: res.profitPerYear,
-                    borderColor: 'rgb(7,138,238)',
-                    backgroundColor: 'rgba(6,95,173,0.1)',
-                    borderWidth: 2
-                }]
+                datasets: [
+                    {
+                        label: 'Total Revenue',
+                        data: res.profitPerYear,
+                        borderColor: 'rgb(7,138,238)',
+                        backgroundColor: 'rgba(6,95,173,0.1)',
+                        borderWidth: 2
+                    }
+                ]
             }
         })
     }
@@ -226,13 +240,122 @@
             },
             data: {
                 labels: res.month,
-                datasets: [{
-                    label: 'Total Revenue',
-                    data: res.profitPerMonth,
-                    borderColor: 'rgb(7,138,238)',
-                    backgroundColor: 'rgba(6,95,173,0.1)',
-                    borderWidth: 2
-                }]
+                datasets: [
+                    {
+                        label: 'Total Revenue',
+                        data: res.profitPerMonth,
+                        borderColor: 'rgb(7,138,238)',
+                        backgroundColor: 'rgba(6,95,173,0.1)',
+                        borderWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Revenue (Membership)',
+                        data: res.profitMemberPerMonth,
+                        borderColor: 'rgb(219,98,6)',
+                        backgroundColor: 'rgba(173,64,6,0.1)',
+                        borderWidth: 2,
+                        hidden: true
+                    },
+                    {
+                        type: 'line',
+                        label: 'Revenue (Sesi)',
+                        data: res.profitSesiPerMonth,
+                        borderColor: 'rgb(219,6,6)',
+                        backgroundColor: 'rgba(173,6,20,0.1)',
+                        borderWidth: 2,
+                        hidden: true
+                    }
+                ]
+            }
+        })
+
+        // Chart Aktivitas Per Bulan
+        chartAktivMonth = new Chart(aktiv, {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Performa Aktivitas Member Tahun ' + tahun,
+                        padding: {
+                            top: 30,
+                            bottom: 10
+                        }
+                    }
+                }
+            },
+            data: {
+                labels: res.month,
+                datasets: [
+                    {
+                        label: 'Pembelian',
+                        data: res.pembelianPerMonth,
+                        borderColor: 'rgb(9,187,89)',
+                        backgroundColor: 'rgba(6,95,173,0.1)',
+                        borderWidth: 2
+                    }
+                ]
+            }
+        })
+
+        // Chart Performa Member Perbulan
+        chartPeformaMonth = new Chart(performa, {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Performa Member Tahun ' + tahun,
+                        padding: {
+                            top: 30,
+                            bottom: 10
+                        }
+                    }
+                }
+            },
+            data: {
+                labels: res.month,
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Total Member',
+                        data: res.memberPerMonth,
+                        borderColor: 'rgb(6,173,41)',
+                        backgroundColor: 'rgba(252,87,94,0.0)',
+                        borderWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Total Member (Laki-laki)',
+                        data: res.memberLakiPerMonth,
+                        borderColor: 'rgb(6,115,173)',
+                        backgroundColor: 'rgba(23,152,222,0)',
+                        borderWidth: 2,
+                        hidden: true
+                    },
+                    {
+                        type: 'line',
+                        label: 'Total Member (Perempuan)',
+                        data: res.memberPerempuanPerMonth,
+                        borderColor: 'rgb(224,7,68)',
+                        backgroundColor: 'rgba(224,13,97,0)',
+                        borderWidth: 2,
+                        hidden: true
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Member Baru',
+                        data: res.dataMonth,
+                        borderColor: 'rgb(37,147,220)',
+                        backgroundColor: 'rgba(37,147,220,0.2)',
+                        borderWidth: 2
+                    }
+                ]
             }
         })
 
