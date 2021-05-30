@@ -61,6 +61,76 @@
                             {!! $revenueChart->render() !!}
                         </div>
                     </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Performa Aktivitas Member</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="activityFrame">
+                            {!! $activityChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Performa Member</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberFrame">
+                            {!! $memberChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Performa Marketing</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="marketingFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Top 10 Marketing</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="topMarketingFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Performa Personal Trainer</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="ptFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Top 10 Personal Trainer</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="topPTFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <hr>
+                        <h2 class="text-center">Performa Cuti Member</h2>
+                    </div>
+                    <div class="col-12">
+                        <div style="max-width: 100%; overflow-x: auto;" id="cutiFrame">
+                            {!! $revenueChart->render() !!}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,14 +167,33 @@
             },
             success: function(data){
                 var obj = JSON.parse(data);
-                console.log(obj.revenueData);
+
+                console.log(obj);
+
                 $("#revenueFrame").html('<canvas id="profitChart" width="400" height="100"></canvas>');
+                $("#activityFrame").html('<canvas id="activityChart" width="400" height="100"></canvas>')
+
                 var ctxProfit = document.getElementById('profitChart').getContext('2d');
                 var chartProfit = new Chart(ctxProfit, {
                     type: 'line',
                     data: setData("revenue", [obj.revenueData, obj.revenueDataMembership, obj.revenueDataSesi]),
                     options: setOptions('Profit Data', 'top', 0),
                 });
+
+                var ctxActivity = document.getElementById('activityChart').getContext('2d');
+                var chartActivity = new Chart(ctxActivity, {
+                    type: 'line',
+                    data: setData("activity", [obj.activityCheckin, obj.activityPembelian]),
+                    options: setOptions('Activity Data', 'top', 0),
+                });
+
+                var ctxMember = document.getElementById('memberChart').getContext('2d');
+                var chartMember = new Chart(ctxMember, {
+                    type: 'line',
+                    data: setData("member", [obj.memberData, obj.memberLK, obj.memberPR, obj.memberBaru]),
+                    options: setOptions('Member Data', 'top', 0),
+                });
+
                 //i < jumlah chart
                 //console.log(myChart);
                 //myChart.update();
@@ -142,6 +231,70 @@
                             backgroundColor: 'rgba(173,6,20,0.1)',
                             borderWidth: 2,
                             hidden: true
+                        }
+                    ]
+                }
+                return dataGenerate;
+                break;
+            case "activity":
+                var dataGenerate = {
+                    labels: data[0].labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Check-In',
+                            data: data[0].dataset,
+                            borderColor: 'rgb(37,147,220)',
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            borderWidth: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Pembelian',
+                            data: data[1].dataset,
+                            borderColor: 'rgb(9,187,89)',
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            borderWidth: 2
+                        }
+                    ]
+                }
+                return dataGenerate;
+                break;
+            case "member":
+                var dataGenerate = {
+                    labels: data[0].labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Total Member',
+                            data: data[0].dataset,
+                            borderColor: 'rgb(6,173,41)',
+                            backgroundColor: 'rgba(252,87,94,0.0)',
+                            borderWidth: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Total Member (Laki-laki)',
+                            data: data[1].dataset,
+                            borderColor: 'rgb(6,115,173)',
+                            backgroundColor: 'rgba(23,152,222,0)',
+                            borderWidth: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Total Member (Perempuan)',
+                            data: data[2].dataset,
+                            borderColor: 'rgb(224,7,68)',
+                            backgroundColor: 'rgba(224,13,97,0)',
+                            borderWidth: 2
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Member Baru',
+                            data: data[3].dataset,
+                            borderColor: 'rgb(37,147,220)',
+                            backgroundColor: 'rgba(37,147,220,0.2)',
+                            borderWidth: 2
                         }
                     ]
                 }

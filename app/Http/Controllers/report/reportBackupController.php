@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\report;
 
-use App\Model\member\MemberCheckinModel;
-use App\Model\member\MemberModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\member\MemberLogModel;
@@ -12,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Fx3costa\LaravelChartJs;
 
-class reportController extends Controller
+class reportBackupController extends Controller
 {
     public function __construct()
     {
@@ -33,8 +31,6 @@ class reportController extends Controller
             $data['app_layout'] = $this->defineLayout($role);
 
             $data['revenueChart'] = $this->generateChart("revenue", "month", $datenow->year);
-            $data['activityChart'] = $this->generateChart("activity", "month", $datenow->year);
-            $data['memberChart'] = $this->generateChart("member", "month", $datenow->year);
 
             return view('report.index', $data);
         }
@@ -61,18 +57,10 @@ class reportController extends Controller
         date_default_timezone_set("Asia/Jakarta");
         $datenow = Carbon::now();
 
-        //$data['revenueInit'] = $this->initChartData("revenue", "month", $r->year);
+        $data['revenueInit'] = $this->initChartData("revenue", "month", $r->year);
         $data['revenueData'] = $this->chartData("revenue", "total", "month", $r->year);
         $data['revenueDataMembership'] = $this->chartData("revenue", "membership", "month", $r->year);
         $data['revenueDataSesi'] = $this->chartData("revenue", "sesi", "month", $r->year);
-
-        $data['activityCheckin'] = $this->chartData("activity", "total", "month", $r->year);
-        $data['activityPembelian'] = $this->chartData("activity", "pembelian", "month", $r->year);
-
-        $data['memberData'] = $this->chartData("member", "total", "month", $r->year);
-        $data['memberLK'] = $this->chartData("member", "lk", "month", $r->year);
-        $data['memberPR'] = $this->chartData("member", "pr", "month", $r->year);
-        $data['memberBaru'] = $this->chartData("member", "baru", "month", $r->year);
 
         return $data;
     }
@@ -160,101 +148,6 @@ class reportController extends Controller
                     }
                 }
                 break;
-            case "activity":
-                if($subchart == "total"){
-                    //IF QUERING TOTAL CHECKIN CHART LAYER
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberCheckinModel::whereMonth('date', '=', $index)
-                            ->count();
-                    }else{
-                        return MemberCheckinModel::whereMonth('date', '=', $index)
-                            ->whereYear('date', '=', $filterYear)
-                            ->count();
-                    }
-
-                }else if($subchart == "pembelian"){
-                    //IF QUERING TOTAL PEMBELIAN CHART (BY MEMBERSHIP TRANSACTION)
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberLogModel::whereMonth('date', '=', $index)
-                            ->where('aksi', '!=', "registrasi")
-                            ->count();
-                    }else{
-                        return MemberLogModel::whereMonth('date', '=', $index)
-                            ->whereYear('date', '=', $filterYear)
-                            ->where('aksi', '!=', "registrasi")
-                            ->count();
-                    }
-
-                }
-                break;
-            case "member":
-                if($subchart == "total"){
-                    //IF QUERING TOTAL MEMBER CHART LAYER
-                    $enddate = Carbon::create($filterYear, $index);
-
-                    if($filterYear == ""){
-                        $cdata1 = MemberModel::select('created_at')->orderBy('created_at','ASC')->first();
-                        $cdata2 = MemberModel::select('created_at')->orderBy('created_at','DESC')->first();
-
-                        $filterYearFrom = Carbon::parse($cdata1->created_at)->year;
-                        $filterYearTo = Carbon::parse($cdata2->created_at)->year;
-                    }else{
-                        $filterYearFrom = $filterYear;
-                        $filterYearTo = $filterYear;
-                    }
-
-                    $from = date('Y-m-d', strtotime($filterYearFrom.'-01'.'01'));
-
-                    if($index < 10){
-                        $to = date('Y-m-d', strtotime($filterYearTo.'-0'.$index."-".(string) $enddate->daysInMonth));
-                    }else{
-                        $to = date('Y-m-d', strtotime($filterYearTo.'-'.$index."-".(string) $enddate->daysInMonth));
-                    }
-
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereBetween('created_at', [$from, $to])
-                            ->count();
-                    }else{
-                        return MemberModel::whereBetween('created_at', [$from, $to])
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->count();
-                    }
-
-                }else if($subchart == "lk"){
-                    //IF QUERING TOTAL MEMBER LAKI-LAKI CHART
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->where('gender', '=', "Laki-laki")
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->where('gender', '=', "Laki-laki")
-                            ->count();
-                    }
-                }else if($subchart == "pr"){
-                    //IF QUERING TOTAL MEMBER PREMPUAN CHART
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->where('gender', '=', "Perempuan")
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->where('gender', '=', "Perempuan")
-                            ->count();
-                    }
-                }else if($subchart == "baru"){
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->count();
-                    }
-                }
-                break;
         }
     }
 
@@ -298,42 +191,10 @@ class reportController extends Controller
 
                 break;
             case "activity":
-                $getData = $this->chartData($chart, "total", $filterType, $filterYear); //TOTAL = CHECK-IN
-                $getData2 = $this->chartData($chart, "pembelian", $filterType, $filterYear);
 
-                $init['type'] = 'line'; //CHART TYPE
-                $init['name'] = 'activityChart'; //CHART ID IN HTML
-                $init['size'] = ['width' => 400, 'height' => 100]; //CHART SIZE (PASANG SEGINI)
-                $init['labels'] = $getData['labels']; //CHART LABEL
-                $init['dataset'] = [
-                    $this->setTableData("line", 'Check-In', $getData['dataset'], 'rgba(0,0,0,0)', 'rgb(37,147,220)', 2, false),
-                    $this->setTableData("line", 'Pembelian', $getData2['dataset'], 'rgba(0,0,0,0)', 'rgb(9,187,89)', 2, true),
-                ]; //CHART DATASET
-
-                $init['options'] = [
-                    $this->setTableOptions("top", "Check-In")
-                ]; //CHART OPTIONS
                 break;
             case "member":
-                $getData = $this->chartData($chart, "total", $filterType, $filterYear); //TOTAL
-                $getData2 = $this->chartData($chart, "lk", $filterType, $filterYear);
-                $getData3 = $this->chartData($chart, "pr", $filterType, $filterYear);
-                $getData4 = $this->chartData($chart, "baru", $filterType, $filterYear);
 
-                $init['type'] = 'line'; //CHART TYPE
-                $init['name'] = 'memberChart'; //CHART ID IN HTML
-                $init['size'] = ['width' => 400, 'height' => 100]; //CHART SIZE (PASANG SEGINI)
-                $init['labels'] = $getData['labels']; //CHART LABEL
-                $init['dataset'] = [
-                    $this->setTableData("line", 'Total Member', $getData['dataset'], 'rgba(252,87,94,0.0)', 'rgb(6,173,41)', 2, false),
-                    $this->setTableData("line", 'Total Member (Laki-laki)', $getData2['dataset'], 'rgba(23,152,222,0)', 'rgb(6,115,173)', 2, true),
-                    $this->setTableData("line", 'Total Member (Perempuan)', $getData3['dataset'], 'rgba(224,13,97,0)', 'rgb(224,7,68)', 2, true),
-                    $this->setTableData("bar", 'Member Baru', $getData4['dataset'], 'rgba(37,147,220,0.2)', 'rgb(37,147,220)', 2, true),
-                ]; //CHART DATASET
-
-                $init['options'] = [
-                    $this->setTableOptions("top", "Check-In")
-                ]; //CHART OPTIONS
                 break;
             case "member_top":
 
