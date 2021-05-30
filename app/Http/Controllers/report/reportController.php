@@ -129,24 +129,43 @@ class reportController extends Controller
             }
         }
 
-        $TopMarketing = DB::select('select marketingdata.mark_id, marketingdata.name, SUM(cache_read.session_price) AS total_profit
+        // Data Top 10
+        $TopMarketing = DB::select('select marketingdata.mark_id, marketingdata.name, COUNT(cache_read.session_price) AS total, SUM(cache_read.session_price) AS total_profit
                                                         FROM cache_read
                                                         JOIN marketingdata ON (marketingdata.mark_id = cache_read.id_marketing)
+                                                        --WHERE EXTRACT(YEAR from marketingdata.join_from) = '.$tahun.'
                                                         GROUP BY marketingdata.mark_id, marketingdata.name
-                                                        ORDER BY total_profit DESC
+                                                        ORDER BY total DESC
                                                         LIMIT 10
                                                 ');
 
-        $TopPT = DB::select('select ptdata.pt_id, ptdata.name, SUM(cache_read.session_price) AS total_profit
+        $TopPT = DB::select('select ptdata.pt_id, ptdata.name, COUNT(cache_read.session_price) AS total, SUM(cache_read.session_price) AS total_profit
                                                         FROM cache_read
                                                         JOIN ptdata ON (ptdata.pt_id = cache_read.id_marketing)
+                                                        --WHERE EXTRACT(YEAR from ptdata.join_from) = '.$tahun.'
                                                         GROUP BY ptdata.pt_id, ptdata.name
-                                                        ORDER BY total_profit DESC
+                                                        ORDER BY total DESC
                                                         LIMIT 10
                                                 ');
 
+        
         $dataTopMarketing = [];
+        $dataTopMarketingCount = [];
+        $dataTopMarketingProfit = [];
+        foreach($TopMarketing as $t) {
+            $dataTopMarketing[] = $t->name;
+            $dataTopMarketingCount[] = $t->total;
+            $dataTopMarketingProfit[] = $t->total_profit;
+        }
+
         $dataTopPT = [];
+        $dataTopPTCount = [];
+        $dataTopPTProfit = [];
+        foreach($TopPT as $t) {
+            $dataTopPT[] = $t->name;
+            $dataTopPTCount[] = $t->total;
+            $dataTopPTProfit[] = $t->total_profit;
+        }
         
 
         // Data Per Tahun
@@ -180,11 +199,15 @@ class reportController extends Controller
         $data['memberPerempuanPerMonth'] = $dataPerempuanPerMonth;
 
         // Data Top 10
-        $data['topMarketing'] = $TopMarketing;
-        $data['topPT'] = $TopPT;
+        $data['topMarketing'] = $dataTopMarketing;
+        $data['topMarketingCount'] = $dataTopMarketingCount;
+        $data['topMarketingProfit'] = $dataTopMarketingProfit;
+        $data['topPT'] = $dataTopPT;
+        $data['topPTCount'] = $dataTopPTCount;
+        $data['topPTProfit'] = $dataTopPTProfit;
+
 
         //Data Pertahun
-        
         $data['year'] = $year;
         $data['dataPerYear'] = $dataPerYear;
         $data['profitPerYear'] = $profitPerYear;

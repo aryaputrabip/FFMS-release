@@ -94,6 +94,15 @@
                 <canvas id="performa"> </canvas>
             </div>
 
+            <!-- Top 10 -->
+            <div id="" class="bulan reg" style="width: 100%; min-height: 300px ;display:none">
+                <canvas id="topMarketing"> </canvas>
+            </div>
+
+            <div id="" class="bulan reg" style="width: 100%; min-height: 300px ;display:none">
+                <canvas id="topPT"> </canvas>
+            </div>
+
             <div id="filterRegs" class="reg" style="width: 100%; min-height: 300px; display:none;">
 
             </div>
@@ -113,6 +122,9 @@
     var aktiv = document.getElementById('aktiv').getContext('2d');
     // Chart Performa Meber
     var performa = document.getElementById('performa').getContext('2d');
+    // Chart Top 10
+    var topMarketing = document.getElementById('topMarketing').getContext('2d');
+    var topPT = document.getElementById('topPT').getContext('2d');
 
     var form = $('#dataReg');
     var bulan = new Date().getMonth() + 1;
@@ -354,6 +366,88 @@
                         borderColor: 'rgb(37,147,220)',
                         backgroundColor: 'rgba(37,147,220,0.2)',
                         borderWidth: 2
+                    }
+                ]
+            }
+        })
+
+        // Chart Top 10 Marketing
+        chartTopMarketing = new Chart(topMarketing, {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 10 Marketing ' + tahun,
+                        padding: {
+                            top: 30,
+                            bottom: 10
+                        }
+                    }
+                }
+            },
+            data: {
+                labels: res.topMarketing,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Total Member',
+                        data: res.topMarketingCount,
+                        borderColor: 'rgb(6,173,41)',
+                        backgroundColor: 'rgba(252,87,94,0.0)',
+                        borderWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Profit Diperoleh',
+                        data: res.topMarketingProfit,
+                        borderColor: 'rgb(208,12,12)',
+                        backgroundColor: 'rgba(37,147,220,0.0)',
+                        borderWidth: 2,
+                        hidden: true
+                    }
+                ]
+            }
+        })
+
+        // Chart Top 10 PT
+        chartTopPT = new Chart(topPT, {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 10 PT ' + tahun,
+                        padding: {
+                            top: 30,
+                            bottom: 10
+                        }
+                    }
+                }
+            },
+            data: {
+                labels: res.topPT,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Total Member',
+                        data: res.topPTCount,
+                        borderColor: 'rgb(6,173,41)',
+                        backgroundColor: 'rgba(252,87,94,0.0)',
+                        borderWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Profit Diperoleh',
+                        data: res.topPTProfit,
+                        borderColor: 'rgb(208,12,12)',
+                        backgroundColor: 'rgba(37,147,220,0.0)',
+                        borderWidth: 2,
+                        hidden: true
                     }
                 ]
             }
