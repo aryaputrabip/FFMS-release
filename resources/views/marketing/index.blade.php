@@ -1,7 +1,7 @@
 @extends($app_layout)
 
 @section('content')
-    <div class="container-fluid">
+        <div class="container-fluid">
         <!-- STATISTIC CARD -->
         <div class="card mb-3">
             <div class="card-header pl-2 pr-2 pt-1 pb-1">
@@ -178,7 +178,7 @@
 <script>
     @section('script')
     $(function () {
-        var marketing_table =
+        const marketing_table =
         $("#data_marketing").DataTable({
             searching: true,
             lengthChange: true,
@@ -213,11 +213,15 @@
         $("#data_marketing_paginate").addClass("float-right");
 
         $("#tableFilterPTMarketingJK").on("change", function () {
-            marketing_table.column($(this).data('column')).search($(this).val()).draw();
+            if (marketing_table.column(2).search() !== $(this).val()) {
+                marketing_table.column(2).search($(this).val()).draw();
+            }
         });
 
         $("#tableFilterPTMarketingStatus").on("change", function () {
-            marketing_table.column($(this).data('column')).search($(this).val()).draw();
+            if (marketing_table.column(4).search() !== $(this).val()) {
+                marketing_table.column(4).search($(this).val()).draw();
+            }
         });
     });
 

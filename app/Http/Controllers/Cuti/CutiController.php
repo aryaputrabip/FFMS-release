@@ -22,7 +22,7 @@ class CutiController extends Controller
     {
         $role = $this->checkAuth();
         if(isset($role)){
-            $title = 'Data Member';
+            $title = 'Data Cuti Member';
             $jMember = MemberModel::from('memberdata')->count();
             $jMemberCuti = CutiMemberModel::count();
             $jMemberCutiLK = CutiMemberModel::from("cutidata as PK")
@@ -137,10 +137,10 @@ class CutiController extends Controller
         $date_now = Carbon::now();
 
         if($request->ajax()){
-            $data['check'] = CutiMemberModel::where('member_id', $request->uid)->count();
+            $data['check'] = CutiMemberModel::where('member_id', $request->userID)->count();
 
             if($data['check'] == 0){
-                $data['data'] = MemberModel::where('member_id', $request->uid)->first();
+                $data['data'] = MemberModel::where('member_id', $request->userID)->first();
 
                 //DURASI CUTI MAKSIMAL ADALAH SISA BULAN - 1
                 //(sisakan 1 bulan terakhir agar tidak bisa mengajukan cuti)
@@ -157,7 +157,7 @@ class CutiController extends Controller
 
                 return $data;
             }else{
-                $data['pass'] = -1;
+                $data['pass'] = null;
 
                 return $data;
             }
@@ -203,7 +203,7 @@ class CutiController extends Controller
         if($request->ajax()){
             $data['today'] = $date_now->format('d M Y');
             $data['data'] = CutiMemberModel::where('member_id', $request->uid)->first();
-            $data['member'] = MemberModel::select('member_id', 'm_enddate', 'membership')
+            $data['member'] = MemberModel::select('member_id', 'm_startdate', 'm_enddate', 'membership')
                                 ->where('member_id', $request->uid)->first();
 
             $data['membership'] = MembershipModel::where('mship_id', $data['member']->membership)->first();

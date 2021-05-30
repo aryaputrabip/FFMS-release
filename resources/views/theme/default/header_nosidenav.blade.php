@@ -43,7 +43,7 @@
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-sm mr-3">
-                    <a href="#" class="dropdown-item">
+                    <a href="{{ route('cs.management.account') }}" class="dropdown-item">
                         <i class="fas fa-user fa-sm mr-2"></i> Account
                     </a>
                     <div class="dropdown-divider"></div>

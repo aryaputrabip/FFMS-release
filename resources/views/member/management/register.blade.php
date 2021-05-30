@@ -241,6 +241,7 @@
                                     <div class="attachment-block attachment-block-selector clearfix" id="membership-{{ $mship->mship_id }}" style="padding: 15px; cursor: pointer;" onclick="selectMembership({{$mship->mship_id}})">
                                         <h5 class="attachment-heading" id="membership-{{ $mship->mship_id }}-name">{{ $mship->name }}</h5>
                                         <div class="attachment-text"><b>Durasi: </b> <span id="membership-{{ $mship->mship_id }}-duration">{{ $mship->duration }}</span> Bulan</div>
+                                        <div class="attachment-text"><b>Tipe: </b> <span id="membership-{{ $mship->type }}-type">{{ $mship->type }}</span></div>
                                         <div class="attachment-text"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
                                         <input type="hidden" id="membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
                                     </div><?php

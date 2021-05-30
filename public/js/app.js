@@ -50019,17 +50019,29 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/sass/theme/default/fonts.scss":
+/*!*************************************************!*\
+  !*** ./resources/sass/theme/default/fonts.scss ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+
 /***/ 0:
-/*!************************************************************************************************************************************************************************!*\
-  !*** multi ./resources/js/app.js ./resources/sass/theme/default/app.scss ./resources/sass/theme/default/bootstrap.scss ./resources/sass/theme/default/datatables.scss ***!
-  \************************************************************************************************************************************************************************/
+/*!******************************************************************************************************************************************************************************************************************!*\
+  !*** multi ./resources/js/app.js ./resources/sass/theme/default/app.scss ./resources/sass/theme/default/bootstrap.scss ./resources/sass/theme/default/datatables.scss ./resources/sass/theme/default/fonts.scss ***!
+  \******************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\js\app.js */"./resources/js/app.js");
 __webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\sass\theme\default\app.scss */"./resources/sass/theme/default/app.scss");
 __webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\sass\theme\default\bootstrap.scss */"./resources/sass/theme/default/bootstrap.scss");
-module.exports = __webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\sass\theme\default\datatables.scss */"./resources/sass/theme/default/datatables.scss");
+__webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\sass\theme\default\datatables.scss */"./resources/sass/theme/default/datatables.scss");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\beta-app\FFMS\resources\sass\theme\default\fonts.scss */"./resources/sass/theme/default/fonts.scss");
 
 
 /***/ })

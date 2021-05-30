@@ -9,11 +9,10 @@
     <div class="input-group-prepend">
         <select data-column="2" class="form-control form-control-sm" id="tableFilterLogMemberKategori">
             <option value="" class="font-weight-bold">Kategori (All)</option>
-            <option value="Registrasi">Registrasi</option>
-            <option value="Check-In">Check-In</option>
-            <option value="Perpanjangan">Perpanjangan</option>
-            <option value="Cuti">Cuti</option>
-            <option value="Pembelian">Pembelian</option>
+            <?php
+                foreach($logCategory as $logCat){?>
+                <option value="{{ $logCat->category }}">{{ $logCat->category }}</option><?php
+            }?>
         </select>
     </div>
 </div>

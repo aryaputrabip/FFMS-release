@@ -1,18 +1,29 @@
 <div class="input-group">
     <div class="input-group-prepend mr-2">
+        <select data-column="3" class="form-control form-control-sm" id="tableFilterMembershipName">
+            <option value="" class="font-weight-bold">Membership (All)</option>
+            <?php
+            foreach($membership as $mship){?>
+            <option value="{{ $mship->name }}">{{ $mship->name }}</option><?php
+            }?>
+        </select>
+    </div>
+    <div class="input-group-prepend mr-2">
         <select data-column="4" class="form-control form-control-sm" id="tableFilterMembershipType">
             <option value="" class="font-weight-bold">Jenis Membership (All)</option>
-            <option value="GYM Only">GYM Only</option>
-            <option value="All Access">All Access</option>
+            <?php
+            foreach($membershipType as $mshipType){?>
+                <option value="{{ $mshipType->type }}">{{ $mshipType->type }}</option><?php
+            }?>
         </select>
     </div>
     <div class="input-group-prepend">
         <select data-column="2" class="form-control form-control-sm" id="tableFilterStatus">
             <option value="" class="font-weight-bold">Status (All)</option>
-            <option value="Aktif">Aktif</option>
-            <option value="Non-Aktif">Non-Aktif</option>
-            <option value="Cuti">Cuti</option>
-            <option value="Expired">Expired</option>
+            <?php
+            foreach($memberStatus as $mStatus){?>
+                <option value="{{ $mStatus->status }}">{{ $mStatus->status }}</option><?php
+            }?>
         </select>
     </div>
 </div>

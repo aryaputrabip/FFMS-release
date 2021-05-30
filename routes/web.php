@@ -26,6 +26,18 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::prefix('suadmin')->name('suadmin.')->group(function (){
     Route::get('/', 'AdminDashboardController@index')->name('index');
 
+    Route::namespace('management')->prefix('management')->name('management.')->group(function () {
+        Route::get('users/', 'UserManagementController@index')->name('index');
+        Route::get('userManagementData', 'UserManagementController@userManagementData')->name('userManagementData');
+        Route::get('getUserData', 'UserManagementController@getUserData')->name('getUserData');
+        Route::get('checkIsUserAvailable', 'UserManagementController@checkIsUserAvailable')->name('checkIsUserAvailable');
+        Route::post('addUser', 'UserManagementController@addUser')->name('addUser');
+        Route::post('editUser', 'UserManagementController@editUser')->name('editUser');
+        Route::post('deleteUser', 'UserManagementController@deleteUser')->name('deleteUser');
+
+        Route::get('account/', 'UserDataController@account')->name('account');
+    });
+
     Route::namespace('member')->prefix('member')->name('member.')->group(function () {
         Route::get('/', 'MemberDataController@index')->name('index');
         Route::get('edit/{id}', 'MemberDataController@edit')->name('edit');
@@ -55,6 +67,11 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
 Route::prefix('cs')->name('cs.')->group(function (){
     Route::get('/', 'CSDashboardController@index')->name('index');
 
+    Route::namespace('management')->prefix('management')->name('management.')->group(function () {
+
+        Route::get('account/', 'UserDataController@account')->name('account');
+    });
+
     Route::namespace('member')->prefix('member')->name('member.')->group(function () {
         Route::get('/', 'MemberDataController@index')->name('index');
         Route::get('edit/{id}', 'MemberDataController@edit')->name('edit');
@@ -77,6 +94,7 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::get('getMemberData', 'MemberDataController@getMemberData')->name('getMemberData');
     Route::get('requestModalAction', 'MemberDataController@requestModalAction')->name('requestModalAction');
     Route::post('update', 'MemberDataController@update')->name('update');
+    Route::post('deleteMember', 'MemberDataController@deleteMember')->name('deleteMember');
     Route::get('edit/{id}/getMemberMembership', 'MemberDataController@getMemberMembership')->name('getMemberMembership');
     Route::get('edit/{id}/getMemberPT', 'MemberDataController@getMemberPT')->name('getMemberPT');
     Route::get('edit/{id}/getMemberLog', 'MemberDataController@getMemberLog')->name('getMemberLog');
@@ -144,4 +162,9 @@ Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
     Route::get('abortCuti', 'CutiController@abortCuti')->name('abortCuti');
     Route::post('approve', 'CutiController@approve')->name('approve');
     Route::post('remove', 'CutiController@remove')->name('remove');
+});
+
+Route::namespace('management')->prefix('management')->name('management.')->group(function () {
+    Route::get('getAccountData', 'UserDataController@getAccountData')->name('getAccountData');
+    Route::post('editAccountData', 'UserDataController@editAccountData')->name('editAccountData');
 });

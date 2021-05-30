@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\member;
 
 use App\Model\member\MemberModel;
+use App\Model\member\MemberStatusModel;
+use App\Model\membership\MembershipModel;
+use App\Model\membership\MembershipTypeModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +26,13 @@ class MemberCheckoutController extends Controller
             $username = Auth::user()->name;
             $app_layout = $this->defineLayout($role);
             $memberCheckin = MemberModel::from('memberdata')->where('checkin_status', true)->count();
+            $membership = MembershipModel::select('name')->get();
+            $memberStatus = MemberStatusModel::select('status')->get();
+            $membershipType = MembershipTypeModel::select("type")->get();
             $memberLK = MemberModel::from('memberdata')->where('checkin_status', true)->where('gender', '=', 'Laki-laki')->count();
             $memberPR = MemberModel::from('memberdata')->where('checkin_status', true)->where('gender', '=', 'Perempuan')->count();
 
-            return view('member.management.logout', compact('title','username','role','app_layout', 'memberCheckin', 'memberLK', 'memberPR'));
+            return view('member.management.logout', compact('title','username','role','app_layout', 'memberCheckin','membership','memberStatus', 'membershipType', 'memberLK', 'memberPR'));
         }
     }
 

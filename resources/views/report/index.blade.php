@@ -78,16 +78,13 @@
             //     $("#SortMonthFilter").show();
             // }
         });
-
         $("#SortMonthFilter").on("change", function() {
             //getChartData($("#SortTypeFilter").val(), $("#SortMonthFilter").val(), $("#SortYearFilter").val());
         });
-
         $("#SortYearFilter").on("change", function () {
             getChartData($("#SortTypeFilter").val(), null, $("#SortYearFilter").val());
         });
     });
-
     function getChartData(typeFilter, monthFilter, yearFilter){
         $.ajax({
             type: 'GET',
@@ -101,24 +98,19 @@
             success: function(data){
                 var obj = JSON.parse(data);
                 console.log(obj.revenueData);
-
                 $("#revenueFrame").html('<canvas id="profitChart" width="400" height="100"></canvas>');
-
                 var ctxProfit = document.getElementById('profitChart').getContext('2d');
                 var chartProfit = new Chart(ctxProfit, {
                     type: 'line',
                     data: setData("revenue", [obj.revenueData, obj.revenueDataMembership, obj.revenueDataSesi]),
                     options: setOptions('Profit Data', 'top', 0),
                 });
-
                 //i < jumlah chart
-
                 //console.log(myChart);
                 //myChart.update();
             }
         });
     }
-
     function setData(type, data){
         switch(type){
             case "revenue":
@@ -153,12 +145,10 @@
                         }
                     ]
                 }
-
                 return dataGenerate;
                 break;
         }
     }
-
     function setOptions(title, position, tension){
         var options = {
             responsive: true,
@@ -184,7 +174,6 @@
                 }
             }
         }
-
         return options;
     }
     @endsection

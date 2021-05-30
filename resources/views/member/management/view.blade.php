@@ -267,7 +267,7 @@
             ],
         });
 
-        var log_table =
+        const log_table =
         $('#accountHistoryTable').DataTable({
             searching: true,
             lengthChange: false,
@@ -295,11 +295,15 @@
         $("#accountHistoryTable_filter").hide();
 
         $("#tableFilterLogMemberStatus").on("change", function () {
-            log_table.column($(this).data('column')).search($(this).val()).draw();
+            if (log_table.column(3).search() !== $(this).val()) {
+                log_table.column(3).search($(this).val()).draw();
+            }
         });
 
         $("#tableFilterLogMemberKategori").on("change", function () {
-            log_table.column($(this).data('column')).search($(this).val()).draw();
+            if (log_table.column(2).search() !== $(this).val()) {
+                log_table.column(2).search($(this).val()).draw();
+            }
         });
 
         var nextMonth = new Date({{ date("Y-m-d",strtotime($data->membership_sdate."+".$membership->duration ." month")) }});

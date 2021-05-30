@@ -29,9 +29,10 @@ class PTDataController extends Controller
             $url = "pt.store";
             $status = GlobalStatusModel::get();
             $app_layout = $this->defineLayout($role);
+            $filterStatus = GlobalStatusModel::select("status")->get();
 
             return view('pt.index',
-                compact('title','username','role','app_layout','url','status','jPT','PTActive','PTLK','PTPR'));
+                compact('title','username','role','app_layout','url','status','jPT','PTActive','PTLK','PTPR','filterStatus'));
         }
     }
 

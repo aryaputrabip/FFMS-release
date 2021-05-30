@@ -6,7 +6,10 @@ use App\Model\gstatus\GlobalStatusModel;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\MemberCategoryModel;
 use App\Model\member\MemberModel;
+use App\Model\membership\MembershipCategoryModel;
 use App\Model\membership\MembershipModel;
+use App\Model\membership\MembershipStatusModel;
+use App\Model\membership\MembershipTypeModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -33,8 +36,12 @@ class MembershipDataController extends Controller
             $url = "membership.store";
             $app_layout = $this->defineLayout($role);
 
+            $membershipType = MembershipTypeModel::select('type')->get();
+            $membershipCategory = MembershipCategoryModel::select('category')->get();
+            $membershipStatus = MembershipStatusModel::select('status')->get();
+
             return view('membership.index',
-                compact('title','username','role','url','app_layout','type','status','jMembership','membershipActive','category'));
+                compact('title','username','role','url','app_layout','type','status','jMembership','membershipActive','category','membershipType', 'membershipStatus', 'membershipCategory'));
         }
     }
 

@@ -33,15 +33,17 @@ class MemberRegisterController extends Controller
             $title = 'Registrasi Member';
             $membership = MembershipModel::from("membership as PK")
                 ->join("membership_category as mShipCategory", "mShipCategory.id", "=", "PK.category")
+                ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "PK.type")
                 ->select(
                     'PK.mship_id',
                     'PK.name',
                     'PK.duration',
                     'PK.price',
                     'PK.status',
-                    'PK.type',
+                    'mShipType.type as type',
                     'mShipCategory.member as tMember'
                 )->where('status', 1)->orderBy('mship_id')->get();
+
             $pt = PersonalTrainerModel::latest()->where('status', 1)->orderBy('name')->get();
             $session = SessionModel::latest()->orderBy('duration')->get();
             $marketing = MarketingModel::latest()->where('status', 1)->orderBy('name')->get();

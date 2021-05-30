@@ -7,9 +7,13 @@ use App\Model\marketing\MarketingModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
 use App\Model\member\MemberCheckinModel;
+use App\Model\member\MemberLogCategoryModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
+use App\Model\member\MemberStatusModel;
+use App\Model\membership\MembershipCategoryModel;
 use App\Model\membership\MembershipModel;
+use App\Model\membership\MembershipTypeModel;
 use App\Model\payment\BankModel;
 use App\Model\payment\PaymentModel;
 use App\Model\pt\PersonalTrainerModel;
@@ -40,10 +44,13 @@ class MemberDataController extends Controller
             $memberActive = MemberModel::from('memberdata')->where('status', 1)->count();
             $memberLK = MemberModel::from('memberdata')->where('gender', '=', 'Laki-laki')->count();
             $memberPR = MemberModel::from('memberdata')->where('gender', '=', 'Perempuan')->count();
+            $membership = MembershipModel::select('name')->get();
+            $membershipType = MembershipTypeModel::select('type')->get();
+            $memberStatus = MemberStatusModel::select('status')->get();
             $username = Auth::user()->name;
             $app_layout = $this->defineLayout($role);
 
-            return view('member.index', compact('title','username','role','jMember','memberActive','memberLK','memberPR','app_layout'));
+            return view('member.index', compact('title','username','role','jMember','memberActive','memberLK','memberPR','membership','membershipType','memberStatus','app_layout'));
         }
     }
 
@@ -449,6 +456,8 @@ class MemberDataController extends Controller
             $data['role'] = $this->checkAuth();
             $data['username'] = Auth::user()->name;
             $data['app_layout'] = $this->defineLayout($role);
+            
+            $data['logCategory'] = MemberLogCategoryModel::select('category')->get();
 
             if($data['data'] != null){
                 return view('member.management.view', $data);
@@ -468,6 +477,7 @@ class MemberDataController extends Controller
 
             $data['data'] = MemberModel::where('member_id', $id)->first();
             $data['cache'] = MemberCacheModel::where('author', $id)->first();
+            $data['logCategory'] = MemberLogCategoryModel::select('category')->get();
 
             if($data['data']){
                 $data['membership'] = MembershipModel::where('mship_id', $data['data']->membership)->first();
@@ -1219,5 +1229,23 @@ class MemberDataController extends Controller
         $namaFile = "members";
 
         return Excel::download(new MemberExport(), $namaFile.'.xlsx');
+    }
+
+    function deleteMember(Request $r){
+        $exec = MemberModel::where('member_id', $r->hiddenID)->delete();
+
+        if($this->checkAuth() == 1){
+            $enroute = 'suadmin.member.index';
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            $enroute = 'cs.member.index';
+        }
+
+        if($exec){
+            return redirect()->route($enroute)->with(['success' => 'Member Berhasil Dihapus']);
+        }else{
+            return redirect()->route($enroute)->with(['error' => 'Member Gagal Dihapus']);
+        }
     }
 }

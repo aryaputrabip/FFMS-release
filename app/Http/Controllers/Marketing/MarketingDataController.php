@@ -29,9 +29,10 @@ class MarketingDataController extends Controller
             $url = "marketing.store";
             $status = GlobalStatusModel::from('global_status')->get();
             $app_layout = $this->defineLayout($role);
+            $filterStatus = GlobalStatusModel::select("status")->get();
 
             return view('marketing.index',
-                compact('title','username','role','app_layout','url','status','jMarketing','marketingActive','marketingLK','marketingPR'));
+                compact('title','username','role','app_layout','url','status','jMarketing','marketingActive','marketingLK','marketingPR','filterStatus'));
         }
     }
 

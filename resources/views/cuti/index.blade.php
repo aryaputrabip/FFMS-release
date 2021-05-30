@@ -616,14 +616,17 @@
                 dataType: 'html',
                 url: "{{ route('cuti.checkCapability') }}",
                 data: {
-                    uid: $("#activeMemberID").val(),
+                    userID: $("#activeMemberID").val().toString(),
                     duration: $("#dataCutiDuration").val()
                 },
                 success: function(data){
                     var obj = JSON.parse(data);
 
-                    if(obj.pass == -1){
+                    if(obj.pass == null) {
                         notifyErrorCustom("Member ini telah dicutikan! Tidak dapat memproses pengajuan cuti!");
+                        setConfirmNormal();
+                    }else if(obj.pass <= 0){
+                        notifyErrorCustom("Sisa Bulan Member kurang dari 1 Bulan setelah dikurangai waktu bulan cuti. Tidak dapat memproses pengajuan cuti!");
                         setConfirmNormal();
                     }else{
                         if(obj.pass < $("#dataCutiDuration").val()){

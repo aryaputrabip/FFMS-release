@@ -88,10 +88,10 @@
                     @if($role == 1)
                         <li class="text-dark-default nav-header">Aplikasi</li>
                         <li class="nav-item">
-                            <button href="#" class="btn btn-link nav-link text-dark-default" disabled>
+                            <a href="{{ route('suadmin.management.index') }}" class="nav-link text-dark-default">
                                 <i class="nav-icon fas fa-user-shield"></i>
                                 <p>User Aplikasi</p>
-                            </button>>
+                            </a>
                         </li>
                     @endif
                 </ul>

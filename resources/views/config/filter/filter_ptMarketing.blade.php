@@ -9,8 +9,10 @@
     <div class="input-group-prepend">
         <select data-column="4" class="form-control form-control-sm" id="tableFilterPTMarketingStatus">
             <option value="" class="font-weight-bold">Status (All)</option>
-            <option value="Tersedia">Tersedia</option>
-            <option value="Tidak Tersedia">Tidak Tersedia</option>
+            <?php
+            foreach($filterStatus as $fStatus){?>
+                <option value="{{ $fStatus->status }}">{{ $fStatus->status }}</option><?php
+            }?>
         </select>
     </div>
 </div>

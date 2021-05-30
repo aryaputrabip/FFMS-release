@@ -181,7 +181,7 @@
 <script>
     @section('script')
     $(function () {
-        var member_table =
+        const member_table =
         $("#data_member").DataTable({
             searching: true,
             lengthChange: true,
@@ -218,11 +218,21 @@
         $("#data_member_paginate").addClass("float-right");
 
         $("#tableFilterStatus").on("change", function () {
-            member_table.column($(this).data('column')).search($(this).val()).draw();
+            if (member_table.column(2).search() !== $(this).val()) {
+                member_table.column(2).search($(this).val()).draw();
+            }
         });
 
         $("#tableFilterMembershipType").on("change", function () {
-            member_table.column($(this).data('column')).search($(this).val()).draw();
+            if (member_table.column(4).search() !== $(this).val()) {
+                member_table.column(4).search($(this).val()).draw();
+            }
+        });
+
+        $("#tableFilterMembershipName").on("change", function () {
+            if (member_table.column(3).search() !== $(this).val()) {
+                member_table.column(3).search($(this).val()).draw();
+            }
         });
    });
 

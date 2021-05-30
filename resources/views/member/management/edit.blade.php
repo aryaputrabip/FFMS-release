@@ -120,6 +120,26 @@
                                         </select><br>
                                     </div>
 
+                                    <div class="col-12 mt-5">
+                                        <div class="card collapsed-card">
+                                            <div class="row p-3">
+                                                <label class="col-sm-9 col-form-label">
+                                                    Danger Area<span class="color-danger">*</span>
+                                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                        <i class="fas fa-caret-down"></i>
+                                                    </button>
+                                                </label>
+                                            </div>
+                                            <div class="card-body pt-0" style="overflow-y: auto; overflow-x: hidden;">
+                                                <hr style="margin: 0 0 20px 0;">
+                                                <h6 class="mt-2 text-red"><b>Hapus Member</b></h6>
+                                                <button type="button" class="btn btn-danger w-100" onclick="deleteMember();">
+                                                    <i class="fas fa-trash fa-sm mr-1"></i> Hapus Member ini
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <input type="hidden" id="photoFile" name="photoFile" value="{{ $data->photo }}" readonly>
                                     <input type="hidden" id="cacheMarketing" name="cacheMarketing" readonly>
                                 </form>
@@ -288,7 +308,7 @@
             ],
         });
 
-        var log_table =
+        const log_table =
         $('#accountHistoryTable').DataTable({
             searching: true,
             lengthChange: false,
@@ -316,11 +336,15 @@
         $("#accountHistoryTable_filter").hide();
 
         $("#tableFilterLogMemberStatus").on("change", function () {
-            log_table.column($(this).data('column')).search($(this).val()).draw();
+            if (log_table.column(3).search() !== $(this).val()) {
+                log_table.column(3).search($(this).val()).draw();
+            }
         });
 
         $("#tableFilterLogMemberKategori").on("change", function () {
-            log_table.column($(this).data('column')).search($(this).val()).draw();
+            if (log_table.column(2).search() !== $(this).val()) {
+                log_table.column(2).search($(this).val()).draw();
+            }
         });
 
         var nextMonth = new Date({{ date("Y-m-d",strtotime($data->membership_sdate."+".$membership->duration ." month")) }});
@@ -466,6 +490,76 @@
             }else{
                 messagingErrorCustom('Format Email Tidak Sesuai!');
             }
+        }
+    }
+
+    function deleteMember(){
+        const DestroySwal = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-outline-secondary mr-2'
+            },
+            buttonsStyling: false
+        });
+
+        DestroySwal.fire({
+            icon: 'warning',
+            html: 'Apakah Anda yakin ingin menghapus member ini ? <br><br> <i>(Perhatian! Data tidak dapat dikembalikan)</i>',
+            showCancelButton: true,
+            cancelButtonText: `<i class="fas fa-arrow-left fa-sm mr-1"></i> Kembali`,
+            confirmButtonText: `<i class="fas fa-trash fa-sm mr-1"></i> Hapus`,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.confirm){
+                deleteMemberConfirmation('{{ $data->member_id }}');
+            }else{
+                return false;
+            }
+        });
+    }
+
+    function deleteMemberConfirmation(id){
+        const DestroySwal = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-outline-secondary mr-2'
+            },
+            buttonsStyling: false
+        });
+
+        var title =
+            '<p class="text-danger" id="deleteValidationLabel" style="display: none;">' +
+            'Oops! Member ID salah.</p> ' +
+            'Mohon isikan Member ID untuk mengkonfirmasi aksi! ' +
+            '<b>'+ {{ $data->member_id }} + '</b> ' +
+            '<br> ' +
+            '<input type="text" class="form-control mt-2" id="deleteValidationInput">';
+
+        //CONFIRMATION DELETE STEP-2
+        DestroySwal.fire({
+            icon: 'warning',
+            html: title,
+            showCancelButton: true,
+            cancelButtonText: `<i class="fas fa-arrow-left fa-sm mr-1"></i> Batal`,
+            confirmButtonText: `<i class="fas fa-trash fa-sm mr-1"></i> OK`,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.confirm){
+                validateDelete(id);
+            }else{
+                return false;
+            }
+        });
+    }
+
+    function validateDelete(id){
+        if($("#deleteValidationInput").val() == id){
+            $("#editMemberForm").attr("action", "{{ route('member.deleteMember') }}");
+            $("#editMemberForm").submit();
+        }else{
+            deleteMemberConfirmation(id);
+            $("#deleteValidationLabel").show();
+            $("#deleteValidationInput").addClass("is-invalid");
         }
     }
 
