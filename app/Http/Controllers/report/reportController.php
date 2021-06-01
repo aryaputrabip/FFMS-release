@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\report;
 
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Sesi\SesiUseController;
 use App\Model\member\MemberCheckinModel;
 use App\Model\member\MemberModel;
 use Illuminate\Http\Request;
@@ -34,9 +36,20 @@ class reportController extends Controller
 
             $data['revenueChart'] = $this->generateChart("revenue", "month", $datenow->year);
             $data['activityChart'] = $this->generateChart("activity", "month", $datenow->year);
-            $data['memberChart'] = $this->generateChart("member", "month", $datenow->year);
+            $data['memberChart'] = $this->getChart("member_total");
 
             return view('report.index', $data);
+        }
+    }
+
+    public function getChart($chart){
+        date_default_timezone_set("Asia/Jakarta");
+        $datenow = Carbon::now();
+
+        switch($chart){
+            case "member_total":
+                return $this->generateChart("member", "month", $datenow->year, $datenow->month);
+                break;
         }
     }
 
@@ -56,70 +69,116 @@ class reportController extends Controller
         }
     }
 
+    public function updateMemberChartData(Request $r){
+        date_default_timezone_set("Asia/Jakarta");
+        $datenow = Carbon::now();
+
+        $data['memberData'] = $this->chartData("member", "total", $r->type, $r->year, $r->month);
+        $data['memberLK'] = $this->chartData("member", "lk", $r->type, $r->year, $r->month);
+        $data['memberPR'] = $this->chartData("member", "pr", $r->type, $r->year, $r->month);
+        $data['memberBaru'] = $this->chartData("member", "baru", $r->type, $r->year, $r->month);
+
+        return $data;
+    }
+
     //CHANGE CHART DATA (WHEN FILTER APPLIED)
     public function updateChartData(Request $r){
         date_default_timezone_set("Asia/Jakarta");
         $datenow = Carbon::now();
 
         //$data['revenueInit'] = $this->initChartData("revenue", "month", $r->year);
-        $data['revenueData'] = $this->chartData("revenue", "total", "month", $r->year);
-        $data['revenueDataMembership'] = $this->chartData("revenue", "membership", "month", $r->year);
-        $data['revenueDataSesi'] = $this->chartData("revenue", "sesi", "month", $r->year);
+        $data['revenueData'] = $this->chartData("revenue", "total", $r->type, $r->year, $r->month);
+        $data['revenueDataMembership'] = $this->chartData("revenue", "membership", $r->type, $r->year, $r->month);
+        $data['revenueDataSesi'] = $this->chartData("revenue", "sesi", $r->type, $r->year, $r->month);
 
-        $data['activityCheckin'] = $this->chartData("activity", "total", "month", $r->year);
-        $data['activityPembelian'] = $this->chartData("activity", "pembelian", "month", $r->year);
+        $data['activityCheckin'] = $this->chartData("activity", "total", $r->type, $r->year, $r->month);
+        $data['activityPembelian'] = $this->chartData("activity", "pembelian", $r->type, $r->year, $r->month);
 
-        $data['memberData'] = $this->chartData("member", "total", "month", $r->year);
-        $data['memberLK'] = $this->chartData("member", "lk", "month", $r->year);
-        $data['memberPR'] = $this->chartData("member", "pr", "month", $r->year);
-        $data['memberBaru'] = $this->chartData("member", "baru", "month", $r->year);
+        $data['memberData'] = $this->chartData("member", "total", $r->type, $r->year, $r->month);
+        $data['memberLK'] = $this->chartData("member", "lk", $r->type, $r->year, $r->month);
+        $data['memberPR'] = $this->chartData("member", "pr", $r->type, $r->year, $r->month);
+        $data['memberBaru'] = $this->chartData("member", "baru", $r->type, $r->year, $r->month);
 
         return $data;
     }
 
     //GETTING CHART DATASET & LABELS
-    public function chartData($chart, $subchart, $filterBy, $filterYear){
+    public function chartData($chart, $subchart, $filterBy, $filterYear, $filterMonth){
         date_default_timezone_set("Asia/Jakarta");
         $datenow = Carbon::now();
+
+        $adminController = new AdminDashboardController();
 
         $data['dataset'] = array();
         $data['labels'] = array();
 
         if($filterBy == "month"){
-            //IF FILTERED BY MONTH
-            //& CURRENT FILTERED YEAR == CURRENT YEAR
             if($filterYear == $datenow->year){
-                //TOTAL MONTH = CURRENT MONTH (NOT 12 MONTHS)
                 for($i=1; $i<=$datenow->month; $i++){
                     array_push($data['labels'], $this->getMonth($i));
-                    array_push(
-                        $data['dataset'],
-                        $this->queryFilteredData($chart, $subchart, $i, $filterBy, $filterYear)
-                    );
-
                 }
             }else{
-                //& CURRENT FILTERED YEAR != CURRENT YEAR
-                //TOTAL MONTH = 12 MONTHS
                 for($i=1; $i<=12; $i++){
                     array_push($data['labels'], $this->getMonth($i));
-                    array_push(
-                        $data['dataset'],
-                        $this->queryFilteredData($chart, $subchart, $i, $filterBy, $filterYear)
-                    );
                 }
             }
-            //==========================
-        }else if($filterBy == "year"){
-            //IF FILTERED BY YEAR
+        }else if($filterBy == "day"){
+            if($filterYear == $datenow->year){
+                if($filterMonth == $datenow->month){
+                    for($i=1; $i<=$datenow->day; $i++){
+                        array_push($data['labels'], $i);
+                    }
+                }else{
+                    for($i=1; $i<=$datenow->daysInMonth; $i++){
+                        array_push($data['labels'], $i);
+                    }
+                }
+            }else{
+                if($filterMonth == $datenow->month){
+                    for($i=1; $i<=$datenow->day; $i++){
+                        array_push($data['labels'], $i);
+                    }
+                }else{
+                    for($i=1; $i<=$datenow->daysInMonth; $i++){
+                        array_push($data['labels'], $i);
+                    }
+                }
+            }
+        }else{
+            $year = $adminController->getYearList();
+            $indexer = 0;
 
+            for($i=$year[0]; $i<=end($year); $i++){
+                array_push($data['labels'], $year[$indexer]);
+                $indexer++;
+            }
         }
+
+        array_push($data['dataset'], $this->queryFilteredData($chart, $subchart, 0, $filterBy, $filterYear, $filterMonth));
+        $data['dataset'] = $data['dataset'][0];
 
         return $data;
     }
 
     //QUERY CHART DATA BY FILTER
-    public function queryFilteredData($chart, $subchart, $index, $filterType, $filterYear){
+    public function queryFilteredData($chart, $subchart, $index, $filterType, $filterYear, $filterMonth){
+        date_default_timezone_set("Asia/Jakarta");
+        $datenow = Carbon::now();
+
+        $adminController = new AdminDashboardController();
+        $generateLength = $adminController->defineGenerateLength($filterType, $filterYear, $filterMonth, $datenow);
+
+        $adminController = new AdminDashboardController();
+        $year = $adminController->getYearList();
+
+        if($filterType != "year"){
+            $indexer = 1;
+        }else{
+            $indexer = $year[0];
+        }
+
+        $data = array();
+
         switch ($chart){
             case "revenue":
                 if($subchart == "total"){
@@ -188,79 +247,103 @@ class reportController extends Controller
                 }
                 break;
             case "member":
-                if($subchart == "total"){
-                    //IF QUERING TOTAL MEMBER CHART LAYER
-                    $enddate = Carbon::create($filterYear, $index);
-
-                    if($filterYear == ""){
-                        $cdata1 = MemberModel::select('created_at')->orderBy('created_at','ASC')->first();
-                        $cdata2 = MemberModel::select('created_at')->orderBy('created_at','DESC')->first();
-
-                        $filterYearFrom = Carbon::parse($cdata1->created_at)->year;
-                        $filterYearTo = Carbon::parse($cdata2->created_at)->year;
+                    if($subchart == "total"){
+                        for($i=$indexer; $i<=$generateLength; $i++){
+                            $queryResult = $adminController->queryData("member_new", $filterType, $filterMonth, $filterYear, $i);
+                            array_push($data, $queryResult);
+                        }
+                    }else if($subchart == "lk"){
+                        for($i=$indexer; $i<=$generateLength; $i++){
+                            $queryResult = $adminController->queryData("member_lk", $filterType, $filterMonth, $filterYear, $i);
+                            array_push($data, $queryResult);
+                        }
+                    }else if($subchart == "pr"){
+                        for($i=$indexer; $i<=$generateLength; $i++){
+                            $queryResult = $adminController->queryData("member_pr", $filterType, $filterMonth, $filterYear, $i);
+                            array_push($data, $queryResult);
+                        }
                     }else{
-                        $filterYearFrom = $filterYear;
-                        $filterYearTo = $filterYear;
+                        for($i=1; $i<=$filterMonth; $i++){
+                            $queryResult = $adminController->queryData("member_total", $filterType, $i, $filterYear, $i);
+                            array_push($data, $queryResult);
+                        }
                     }
 
-                    $from = date('Y-m-d', strtotime($filterYearFrom.'-01'.'01'));
+                    return $data;
 
-                    if($index < 10){
-                        $to = date('Y-m-d', strtotime($filterYearTo.'-0'.$index."-".(string) $enddate->daysInMonth));
-                    }else{
-                        $to = date('Y-m-d', strtotime($filterYearTo.'-'.$index."-".(string) $enddate->daysInMonth));
-                    }
-
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereBetween('created_at', [$from, $to])
-                            ->count();
-                    }else{
-                        return MemberModel::whereBetween('created_at', [$from, $to])
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->count();
-                    }
-
-                }else if($subchart == "lk"){
-                    //IF QUERING TOTAL MEMBER LAKI-LAKI CHART
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->where('gender', '=', "Laki-laki")
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->where('gender', '=', "Laki-laki")
-                            ->count();
-                    }
-                }else if($subchart == "pr"){
-                    //IF QUERING TOTAL MEMBER PREMPUAN CHART
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->where('gender', '=', "Perempuan")
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->where('gender', '=', "Perempuan")
-                            ->count();
-                    }
-                }else if($subchart == "baru"){
-                    if($filterYear == "" || $filterYear == null){
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->count();
-                    }else{
-                        return MemberModel::whereMonth('created_at', '=', $index)
-                            ->whereYear('created_at', '=', $filterYear)
-                            ->count();
-                    }
-                }
+//                if($subchart == "total"){
+//                    //IF QUERING TOTAL MEMBER CHART LAYER
+//                    $enddate = Carbon::create($filterYear, $index);
+//
+//                    if($filterYear == ""){
+//                        $cdata1 = MemberModel::select('created_at')->orderBy('created_at','ASC')->first();
+//                        $cdata2 = MemberModel::select('created_at')->orderBy('created_at','DESC')->first();
+//
+//                        $filterYearFrom = Carbon::parse($cdata1->created_at)->year;
+//                        $filterYearTo = Carbon::parse($cdata2->created_at)->year;
+//                    }else{
+//                        $filterYearFrom = $filterYear;
+//                        $filterYearTo = $filterYear;
+//                    }
+//
+//                    $from = date('Y-m-d', strtotime($filterYearFrom.'-01'.'01'));
+//
+//                    if($index < 10){
+//                        $to = date('Y-m-d', strtotime($filterYearTo.'-0'.$index."-".(string) $enddate->daysInMonth));
+//                    }else{
+//                        $to = date('Y-m-d', strtotime($filterYearTo.'-'.$index."-".(string) $enddate->daysInMonth));
+//                    }
+//
+//                    if($filterYear == "" || $filterYear == null){
+//                        return MemberModel::whereBetween('created_at', [$from, $to])
+//                            ->count();
+//                    }else{
+//                        return MemberModel::whereBetween('created_at', [$from, $to])
+//                            ->whereYear('created_at', '=', $filterYear)
+//                            ->count();
+//                    }
+//
+//                }else if($subchart == "lk"){
+//                    //IF QUERING TOTAL MEMBER LAKI-LAKI CHART
+//                    if($filterYear == "" || $filterYear == null){
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->where('gender', '=', "Laki-laki")
+//                            ->count();
+//                    }else{
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->whereYear('created_at', '=', $filterYear)
+//                            ->where('gender', '=', "Laki-laki")
+//                            ->count();
+//                    }
+//                }else if($subchart == "pr"){
+//                    //IF QUERING TOTAL MEMBER PREMPUAN CHART
+//                    if($filterYear == "" || $filterYear == null){
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->where('gender', '=', "Perempuan")
+//                            ->count();
+//                    }else{
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->whereYear('created_at', '=', $filterYear)
+//                            ->where('gender', '=', "Perempuan")
+//                            ->count();
+//                    }
+//                }else if($subchart == "baru"){
+//                    if($filterYear == "" || $filterYear == null){
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->count();
+//                    }else{
+//                        return MemberModel::whereMonth('created_at', '=', $index)
+//                            ->whereYear('created_at', '=', $filterYear)
+//                            ->count();
+//                    }
+//                }
                 break;
         }
     }
 
     //KONFIGURASI GENERATE CHART UNTUK DI RENDER
-    public function generateChart($chartName, $filterType, $filterYear){
-        $initData = $this->initChartData($chartName, $filterType, $filterYear);
+    public function generateChart($chartName, $filterType, $filterYear, $filterMonth){
+        $initData = $this->initChartData($chartName, $filterType, $filterYear, $filterMonth);
 
         $chart = app()->chartjs
             ->name($initData['name'])
@@ -274,13 +357,13 @@ class reportController extends Controller
     }
 
     //KONFIGURASI ISI CHART
-    public function initChartData($chart, $filterType, $filterYear){
+    public function initChartData($chart, $filterType, $filterYear, $filterMonth){
         switch ($chart){
             case "revenue":
                 //GUNAKAN METODE revenueData UNTUK MENDAPATKAN DATASET & LABEL DARI CHART REVENUE
-                $getData = $this->chartData($chart, "total", $filterType, $filterYear);
-                $getData2 = $this->chartData($chart, "membership", $filterType, $filterYear);
-                $getData3 = $this->chartData($chart, "sesi", $filterType, $filterYear);
+                $getData = $this->chartData($chart, "total", $filterType, $filterYear, $filterMonth);
+                $getData2 = $this->chartData($chart, "membership", $filterType, $filterYear, $filterMonth);
+                $getData3 = $this->chartData($chart, "sesi", $filterType, $filterYear, $filterMonth);
 
                 $init['type'] = 'line'; //CHART TYPE
                 $init['name'] = 'profitChart'; //CHART ID IN HTML
@@ -298,8 +381,8 @@ class reportController extends Controller
 
                 break;
             case "activity":
-                $getData = $this->chartData($chart, "total", $filterType, $filterYear); //TOTAL = CHECK-IN
-                $getData2 = $this->chartData($chart, "pembelian", $filterType, $filterYear);
+                $getData = $this->chartData($chart, "total", $filterType, $filterYear, $filterMonth); //TOTAL = CHECK-IN
+                $getData2 = $this->chartData($chart, "pembelian", $filterType, $filterYear, $filterMonth);
 
                 $init['type'] = 'line'; //CHART TYPE
                 $init['name'] = 'activityChart'; //CHART ID IN HTML
@@ -315,20 +398,20 @@ class reportController extends Controller
                 ]; //CHART OPTIONS
                 break;
             case "member":
-                $getData = $this->chartData($chart, "total", $filterType, $filterYear); //TOTAL
-                $getData2 = $this->chartData($chart, "lk", $filterType, $filterYear);
-                $getData3 = $this->chartData($chart, "pr", $filterType, $filterYear);
-                $getData4 = $this->chartData($chart, "baru", $filterType, $filterYear);
+                $getData = $this->chartData($chart, "total", $filterType, $filterYear, $filterMonth); //TOTAL
+                $getData2 = $this->chartData($chart, "lk", $filterType, $filterYear, $filterMonth);
+                $getData3 = $this->chartData($chart, "pr", $filterType, $filterYear, $filterMonth);
+                $getData4 = $this->chartData($chart, "baru", $filterType, $filterYear, $filterMonth);
 
                 $init['type'] = 'line'; //CHART TYPE
                 $init['name'] = 'memberChart'; //CHART ID IN HTML
                 $init['size'] = ['width' => 400, 'height' => 100]; //CHART SIZE (PASANG SEGINI)
                 $init['labels'] = $getData['labels']; //CHART LABEL
                 $init['dataset'] = [
-                    $this->setTableData("line", 'Total Member', $getData['dataset'], 'rgba(252,87,94,0.0)', 'rgb(6,173,41)', 2, false),
-                    $this->setTableData("line", 'Total Member (Laki-laki)', $getData2['dataset'], 'rgba(23,152,222,0)', 'rgb(6,115,173)', 2, true),
-                    $this->setTableData("line", 'Total Member (Perempuan)', $getData3['dataset'], 'rgba(224,13,97,0)', 'rgb(224,7,68)', 2, true),
-                    $this->setTableData("bar", 'Member Baru', $getData4['dataset'], 'rgba(37,147,220,0.2)', 'rgb(37,147,220)', 2, true),
+                    $this->setTableData("bar", 'Total Member', $getData['dataset'], 'rgba(252,87,94,0.0)', 'rgb(6,173,41)', 2, false),
+                    $this->setTableData("bar", 'Total Member (Laki-laki)', $getData2['dataset'], 'rgba(23,152,222,0)', 'rgb(6,115,173)', 2, true),
+                    $this->setTableData("bar", 'Total Member (Perempuan)', $getData3['dataset'], 'rgba(224,13,97,0)', 'rgb(224,7,68)', 2, true),
+                    $this->setTableData("line", 'Member Baru', $getData4['dataset'], 'rgba(37,147,220,0.2)', 'rgb(37,147,220)', 2, true),
                 ]; //CHART DATASET
 
                 $init['options'] = [

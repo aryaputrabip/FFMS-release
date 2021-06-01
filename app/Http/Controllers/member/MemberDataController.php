@@ -456,7 +456,7 @@ class MemberDataController extends Controller
             $data['role'] = $this->checkAuth();
             $data['username'] = Auth::user()->name;
             $data['app_layout'] = $this->defineLayout($role);
-            
+
             $data['logCategory'] = MemberLogCategoryModel::select('category')->get();
 
             if($data['data'] != null){

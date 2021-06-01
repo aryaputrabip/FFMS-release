@@ -25,6 +25,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::prefix('suadmin')->name('suadmin.')->group(function (){
     Route::get('/', 'AdminDashboardController@index')->name('index');
+    Route::get('getMemberData', 'AdminDashboardController@getMemberData')->name('getMemberData');
 
     Route::namespace('management')->prefix('management')->name('management.')->group(function () {
         Route::get('users/', 'UserManagementController@index')->name('index');
@@ -62,6 +63,9 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
     Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
         Route::get('/', 'CutiController@index')->name('index');
     });
+    Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
+        Route::get('/', 'SesiUseController@index')->name('index');
+    });
 });
 
 Route::prefix('cs')->name('cs.')->group(function (){
@@ -87,6 +91,9 @@ Route::prefix('cs')->name('cs.')->group(function (){
 
     Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
         Route::get('/', 'CutiController@index')->name('index');
+    });
+    Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
+        Route::get('/', 'SesiUseController@index')->name('index');
     });
 });
 
@@ -152,6 +159,7 @@ Route::namespace('report')->prefix('report/')->name('report.')->group(function()
     Route::get('/data','reportController@dataReg')->name('dataReg');
     Route::get('/dataRevenue','reportController@dataRevenue')->name('dataRevenue');
     Route::get('/updateChartData','reportController@updateChartData')->name('updateChartData');
+    Route::get('/updateMemberChartData','reportController@updateMemberChartData')->name('updateMemberChartData');
 });
 
 //
@@ -162,6 +170,11 @@ Route::namespace('cuti')->prefix('cuti')->name('cuti.')->group(function () {
     Route::get('abortCuti', 'CutiController@abortCuti')->name('abortCuti');
     Route::post('approve', 'CutiController@approve')->name('approve');
     Route::post('remove', 'CutiController@remove')->name('remove');
+});
+
+Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
+    Route::get('getMemberData', 'SesiUseController@getMemberData')->name('getMemberData');
+    Route::post('useSesi', 'SesiUseController@useSesi')->name('useSesi');
 });
 
 Route::namespace('management')->prefix('management')->name('management.')->group(function () {

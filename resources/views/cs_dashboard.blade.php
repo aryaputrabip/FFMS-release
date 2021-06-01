@@ -57,8 +57,8 @@
             </a>
         </div>
         <div class="col-md-4">
-            <a href="{{ route('cs.cuti.index') }}" class="btn btn-danger w-100 mb-2">
-                <span class="fas fa-calendar-minus mr-1"></span> Cutikan Member
+            <a href="{{ route('cs.sesi.index') }}" class="btn btn-danger w-100 mb-2">
+                <span class="fas fa-user mr-1"></span> Gunakan Sesi
             </a>
         </div>
     </div>

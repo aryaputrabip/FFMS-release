@@ -155,6 +155,7 @@
             getChartData($("#SortTypeFilter").val(), null, $("#SortYearFilter").val());
         });
     });
+
     function getChartData(typeFilter, monthFilter, yearFilter){
         $.ajax({
             type: 'GET',
@@ -167,8 +168,6 @@
             },
             success: function(data){
                 var obj = JSON.parse(data);
-
-                console.log(obj);
 
                 $("#revenueFrame").html('<canvas id="profitChart" width="400" height="100"></canvas>');
                 $("#activityFrame").html('<canvas id="activityChart" width="400" height="100"></canvas>')

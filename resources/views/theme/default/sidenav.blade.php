@@ -32,6 +32,13 @@
                             <p>Tambah Member</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a @if($role == 1) href="{{ route('suadmin.sesi.index') }}" @elseif($role == 3)
+                        href="{{ route('cs.sesi.index') }}" @endif class="nav-link text-dark-default">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>Gunakan Sesi</p>
+                        </a>
+                    </li>
 
                     <li class="text-dark-default nav-header">Management</li>
                     <li class="nav-item">
@@ -68,8 +75,7 @@
 
                     <li class="text-dark-default nav-header">Member</li>
                     <li class="nav-item">
-                        <a @if($role == 1) href="{{ route('suadmin.cuti.index') }}" @elseif($role == 2) href="#"
-                           @elseif($role == 3) href="{{ route('cs.cuti.index') }}" @endif class="nav-link text-dark-default">
+                        <a href="{{ route('suadmin.cuti.index') }}" class="nav-link text-dark-default">
                             <i class="nav-icon fas fa-calendar-minus"></i>
                             <p>Data Cuti Member</p>
                         </a>

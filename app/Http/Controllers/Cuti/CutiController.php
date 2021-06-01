@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Cuti;
 
+use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipModel;
+use App\Model\pt\PersonalTrainerModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -20,22 +22,25 @@ class CutiController extends Controller
 
     public function index()
     {
-        $role = $this->checkAuth();
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthADM();
+
+        $title = 'Data Cuti Member';
+        $username = Auth::user()->name;
+        $app_layout = $validateRole->defineLayout($role);
+
         if(isset($role)){
-            $title = 'Data Cuti Member';
             $jMember = MemberModel::from('memberdata')->count();
             $jMemberCuti = CutiMemberModel::count();
             $jMemberCutiLK = CutiMemberModel::from("cutidata as PK")
-                                ->join("memberdata as mData", "mData.member_id", "PK.member_id")
-                                ->where('mData.gender', '=', 'Laki-laki')->count();
+                ->join("memberdata as mData", "mData.member_id", "PK.member_id")
+                ->where('mData.gender', '=', 'Laki-laki')->count();
             $jMemberCutiPR = CutiMemberModel::from("cutidata as PK")
-                                ->join("memberdata as mData", "mData.member_id", "PK.member_id")
-                                ->where('mData.gender', '=', 'Perempuan')->count();
-            $username = Auth::user()->name;
-            $app_layout = $this->defineLayout($role);
+                ->join("memberdata as mData", "mData.member_id", "PK.member_id")
+                ->where('mData.gender', '=', 'Perempuan')->count();
 
             return view('cuti.index',
-                compact('title','username','role','app_layout',
+                compact('title','username','app_layout','role',
                         'jMemberCuti','jMemberCutiLK','jMemberCutiPR'));
         }
     }
@@ -44,16 +49,6 @@ class CutiController extends Controller
         $role = Auth::user()->role_id;
 
         return $role;
-    }
-
-    public function defineLayout($role){
-        if($role == 1){
-            return 'layouts.app_admin';
-        }else if($role == 2){
-            return "";
-        }else if($role == 3){
-            return 'layouts.app_cs';
-        }
     }
 
     public function getCutiData(Request $request){

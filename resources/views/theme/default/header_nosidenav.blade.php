@@ -89,6 +89,9 @@
                         <a href="{{ route('cs.member.registration.index') }}" class="dropdown-item mt-2 mb-2 font-weight-bold">
                             <i class="fas fa-user-plus fa-sm mr-2"></i> Tambah Member
                         </a>
+                        <a href="{{ route('cs.sesi.index') }}" class="dropdown-item mt-2 mb-2">
+                            <i class="fas fa-user fa-sm mr-2"></i> Gunakan Sesi Member
+                        </a>
                         <div class="dropdown-divider"></div>
                         <a href="{{ route('cs.member.index') }}" class="dropdown-item mt-2 mb-2">
                             <i class="fas fa-users fa-sm mr-2"></i> Data Member
@@ -96,21 +99,7 @@
                     </div>
                 </li>
                 <li class="nav-item menu-border"></li>
-                <li class="nav-item menu-item">
-                    <a class="nav-link text-dark" data-toggle="dropdown">
-                        <span class="fas fa-calendar-minus fa-sm mr-1"></span> Cuti Member
-                    </a>
 
-                    <div class="dropdown-menu dropdown-menu-lg">
-                        <a href="{{ route('cs.cuti.index') }}" class="dropdown-item mt-2 mb-2 font-weight-bold">
-                            <i class="fas fa-user-plus fa-sm mr-2"></i> Pengajuan Cuti Member
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('cs.cuti.index') }}" class="dropdown-item mt-2 mb-2">
-                            <i class="fas fa-calendar-minus fa-sm mr-2"></i> Data Cuti Member
-                        </a>
-                    </div>
-                </li>
             </ul>
         </div>
     </div>
