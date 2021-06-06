@@ -114,9 +114,9 @@
                                     <div class="col-8">
                                         <h3 class="text-left mt-0 mb-2 col-12 mb-2">Paket Member</h3>
                                     </div>
-                                    <div class="col-4 text-right">
-                                        <button type="button" class="btn btn-secondary mt-0 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Perpanjang</button>
-                                    </div>
+{{--                                    <div class="col-4 text-right">--}}
+{{--                                        <button type="button" class="btn btn-secondary mt-0 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Perpanjang</button>--}}
+{{--                                    </div>--}}
                                     <div class="col-12">
                                         <hr>
                                         <table id="membershipTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">
@@ -136,9 +136,9 @@
                                     <div class="col-8">
                                         <h3 class="text-left mt-3 mb-2 col-12 mb-2">Personal Trainer & Sesi Latihan</h3>
                                     </div>
-                                    <div class="col-4 text-right">
-                                        <button type="button" class="btn btn-secondary mt-3 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Tambah Sesi</button>
-                                    </div>
+{{--                                    <div class="col-4 text-right">--}}
+{{--                                        <button type="button" class="btn btn-secondary mt-3 mb-2" disabled><i class="fas fa-plus mr-1 fa-xs"></i> Tambah Sesi</button>--}}
+{{--                                    </div>--}}
                                     <div class="col-12">
                                         <hr>
                                         <table id="ptTable" class="table table-bordered table-striped w-100" style="font-size: 14px;">

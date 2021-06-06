@@ -140,9 +140,9 @@ class PTDataController extends Controller
         $exec = PersonalTrainerModel::destroy($r->pt_id);
 
         if($exec){
-            redirect()->route('suadmin.pt.index')->with(['success' => 'Data Pif(autersonal Trainer Berhasil Dihapus']);
+            return redirect()->route('suadmin.pt.index')->with(['success' => 'Data Personal Trainer Berhasil Dihapus']);
         }else{
-            redirect()->route('suadmin.pt.index')->with(['error' => 'Data Personal Trainer Gagal Dihapus']);
+            return redirect()->route('suadmin.pt.index')->with(['error' => 'Data Personal Trainer Gagal Dihapus']);
         }
     }
 }

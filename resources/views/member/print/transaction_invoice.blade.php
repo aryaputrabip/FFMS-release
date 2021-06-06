@@ -8,7 +8,14 @@
     <title>{{ $title }}</title>
 
     <!-- INIT STYLE -->
-    @include('theme.default.source.css_source')
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="{{ asset('/lib/adminlte/css/adminlte.css') }}">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <!-- RESOURCES -->
+    <link rel="stylesheet" href="{{ asset('/css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/bootstrap.css') }}">
 
 </head>
 <body>

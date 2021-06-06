@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title text-dark">
-                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga By Approval
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga Paket Member By Approval
                 </h6>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -16,6 +16,37 @@
                     </div>
                     <div class="col">
                         <input type="number" id="approvalPrice" name="approvalPrice" class="form-control" autocomplete="off" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer pt-1 pb-1" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-dark pt-1 pb-1" data-dismiss="modal">
+                    <i class="fas fa-check fa-sm mr-1"></i> Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="approvalSesiModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga Paket PT By Approval
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-1">
+                        <h6 class="pt-1">Rp. </h6>
+                    </div>
+                    <div class="col">
+                        <input type="number" id="approvalSesiPrice" name="approvalSesiPrice" class="form-control" autocomplete="off" min="0">
                     </div>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\member\Registration;
 
 use App\Model\marketing\MarketingModel;
+use App\Model\member\CicilanDataModel;
 use App\Model\member\MemberCacheModel;
 use App\Model\member\MemberFamilyModel;
 use App\Model\member\MemberLogModel;
@@ -45,7 +46,7 @@ class MemberRegisterController extends Controller
                 )->where('status', 1)->orderBy('mship_id')->get();
 
             $pt = PersonalTrainerModel::latest()->where('status', 1)->orderBy('name')->get();
-            $session = SessionModel::latest()->orderBy('duration')->get();
+            $session = SessionModel::latest()->orderBy('duration')->where('status', 1)->get();
             $marketing = MarketingModel::latest()->where('status', 1)->orderBy('name')->get();
             $payment = PaymentModel::latest()->orderBy('id')->get();
             $debitType = BankModel::latest()->where('model', 2)->get();
@@ -107,7 +108,11 @@ class MemberRegisterController extends Controller
         }
 
         if(isset($r->cacheMemberSessionPrice)){
-            $sessionPrice = $r->cacheMemberSessionPrice;
+            if(isset($r->cachePTApproval)){
+                $sessionPrice = $r->approvalSesiPrice;
+            }else{
+                $sessionPrice = $r->cacheMemberSessionPrice;
+            }
         }else{ $sessionPrice = null; }
 
         if(isset($r->cacheMemberMarketing)){
@@ -226,20 +231,44 @@ class MemberRegisterController extends Controller
             }
         }
 
-        $chargePrice = $membershipPrice + $sessionPrice;
+        if($r->paymentMethodGroup == "cicilan"){
+            $statusBayar = "Dalam Cicilan";
+            $chargePrice = $membershipPrice + $sessionPrice;
+            $restData = $chargePrice - ($chargePrice / $r->paymentCicilanDuration);
+            $restDataTransaction = $chargePrice / $r->paymentCicilanDuration;
+
+            if($sessionPrice != null || $sessionPrice > 0){
+                $restDataMembership = ($chargePrice / $r->paymentCicilanDuration)/2;
+                $restDataSesi = (int) ($chargePrice / $r->paymentCicilanDuration)/2;
+            }else{
+                $restDataMembership = $chargePrice / $r->paymentCicilanDuration;
+                $restDataSesi = null;
+            }
+        }else{
+            $statusBayar = "Lunas";
+            $chargePrice = $membershipPrice + $sessionPrice;
+            $restData = $chargePrice;
+            $restDataTransaction = $chargePrice;
+            $restDataMembership = $membershipPrice;
+            if($sessionPrice != null || $sessionPrice > 0){
+                $restDataSesi = (int) $sessionPrice;
+            }else{
+                $restDataSesi = null;
+            }
+        }
 
         if(isset($r->cachepaymentType)){
             $startLog = MemberLogModel::create([
                 'date' => $date_now,
                 'desc' => $logDesc,
                 'category' => 1,
-                'status' => 'Lunas',
-                'transaction' => $chargePrice,
+                'status' => $statusBayar,
+                'transaction' => (int) $restDataTransaction,
                 'author' => $data->member_id,
                 'additional' => $r->cachepaymentType,
                 'reg_no' => $nSystemNum,
-                't_membership' => $membershipPrice,
-                't_sesi' => $sessionPrice,
+                't_membership' => (int) $restDataMembership,
+                't_sesi' => $restDataSesi,
                 'aksi' => 'register',
                 'notes' => $r->dataNote
             ]);
@@ -248,15 +277,26 @@ class MemberRegisterController extends Controller
                 'date' => $date_now,
                 'desc' => $logDesc,
                 'category' => 1,
-                'status' => 'Lunas',
-                'transaction' => $chargePrice,
+                'status' => $statusBayar,
+                'transaction' => (int) $restDataTransaction,
                 'author' => $data->member_id,
                 'additional' => $r->cachePaymentModel,
                 'reg_no' => $nSystemNum,
-                't_membership' => $membershipPrice,
-                't_sesi' => $sessionPrice,
+                't_membership' => (int) $restDataMembership,
+                't_sesi' => $restDataSesi,
                 'aksi' => 'register',
                 'notes' => $r->dataNote
+            ]);
+        }
+
+        if($r->paymentMethodGroup == "cicilan"){
+            $cicilan = CicilanDataModel::create([
+               'author' => $data->member_id,
+               'rest_duration' => ($r->paymentCicilanDuration - 1),
+               'rest_price' => $chargePrice,
+               'rest_data' => (int) $restData,
+               'rest_membership' => $logDesc,
+               'created_at' => $date_now
             ]);
         }
 
@@ -337,7 +377,10 @@ class MemberRegisterController extends Controller
                 'PK.reg_no as PO_ID',
                 'PK.transaction',
                 'PK.additional',
-                'PK.notes'
+                'PK.notes',
+                'PK.status as status',
+                'PK.t_membership as t_membership',
+                'PK.t_sesi as t_sesi'
             )
             ->where("PK.author", $id)
             ->first();
@@ -380,11 +423,23 @@ class MemberRegisterController extends Controller
         $data['metodeBayar'] = "Cash";
         $data['namaBank'] = "";
 
-        if($data['session']->session_price != null){
-            $data['data']->membershipPrice = $data['log']->transaction - $data['session']->session_price;
-        }else{
+        if($data['log']->status == "Dalam Cicilan"){
             $data['data']->membershipPrice = $data['log']->transaction;
+            $data['log']->t_membership = $data['log']->transaction;
+            if($data['session'] != null){
+                $data['data']->membershipPrice = $data['log']->t_membership;
+                $data['log']->t_membership = $data['log']->t_membership;
+                $data['session']->sessionPrice = $data['log']->t_sesi;
+            }
+        }else{
+            if($data['session']->session_price != null){
+                $data['data']->membershipPrice = $data['log']->transaction - $data['session']->session_price;
+            }else{
+                $data['data']->membershipPrice = $data['log']->transaction;
+            }
         }
+
+
 
         if($data['log']->additional == "Cash"){
             $data['metodeBayar'] = "Cash";

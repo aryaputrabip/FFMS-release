@@ -81,9 +81,9 @@
     <div class="modal fade" id="modal-chart-member">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header bg-danger">
+                <div class="modal-header bg-info">
                     <h6 class="modal-title font-weight-bold">
-                            <i class="fas fa-users fa-sm mr-1"></i> Total Member
+                        <i class="fas fa-users fa-sm mr-1"></i> Total Member
                     </h6>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -149,14 +149,120 @@
                                     <th>Total Member</th>
                                 </thead>
                             </table>
+                        </div>
+                        <!-- END OF TABLE SECTION -->
                     </div>
-                    <!-- END OF TABLE SECTION -->
                 </div>
             </div>
         </div>
     </div>
-    <!-- END OF MODAL SECTION -->
+
+    <div class="modal fade" id="modal-chart-cuti">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h6 class="modal-title font-weight-bold">
+                        <i class="fas fa-calendar-minus fa-sm mr-1"></i> Total Member Cuti
+                    </h6>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- CHART FILTER SECTION -->
+                    <div class="row">
+                        <div class="col-12">
+                            <span class="float-left">
+                                <select class="form-control" id="filterTypeCuti" name="filterTypeCuti">
+                                    <option value="day">Filter By (Daily)</option>
+                                    <option value="month" selected>Filter By (Monthly)</option>
+                                    <option value="year">Filter By (Yearly)</option>
+                                </select>
+                            </span>
+                            <span class="float-right">
+                                <select class="form-control" id="filterYearCuti" name="filterYearCuti">
+                                    <option value=""><b>Tahun (ALL)</b></option>
+                                    @foreach($yearlist as $year)
+                                        <option value="{{ $year }}" @if($year == $current_year) selected @endif>Tahun ({{ $year }})</option>
+                                    @endforeach
+                                </select>
+                            </span>
+                            <span class="float-right mr-2">
+                                <select class="form-control" id="filterMonthCuti" name="filterMonthCuti" style="display: none;">
+                                    @foreach($monthList as $month)
+                                        <option value="{{ $month[1] }}" @if($month[1] == $current_month) selected @endif>Bulan ({{ $month[0] }})</option>
+                                    @endforeach
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- END OF CHART FILTER SECTION -->
+
+                    <!-- CHART SECTION -->
+                    <div class="row">
+                        <div style="max-width: 100%; overflow-x: auto;" id="cutiFrame">
+                            {!! $cutiChart->render() !!}
+                        </div>
+                    </div>
+                    <!-- END OF CHART SECTION -->
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="modal fade" id="modal-chart-revenue">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h6 class="modal-title font-weight-bold">
+                        <i class="fas fa-chart-line fa-sm mr-1"></i> Total Sales
+                    </h6>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- CHART FILTER SECTION -->
+                    <div class="row">
+                        <div class="col-12">
+                            <span class="float-left">
+                                <select class="form-control" id="filterTypeRevenue" name="filterTypeRevenue">
+                                    <option value="day">Filter By (Daily)</option>
+                                    <option value="month" selected>Filter By (Monthly)</option>
+                                    <option value="year">Filter By (Yearly)</option>
+                                </select>
+                            </span>
+                            <span class="float-right">
+                                <select class="form-control" id="filterYearRevenue" name="filterYearRevenue">
+                                    <option value=""><b>Tahun (ALL)</b></option>
+                                    @foreach($yearlist as $year)
+                                        <option value="{{ $year }}" @if($year == $current_year) selected @endif>Tahun ({{ $year }})</option>
+                                    @endforeach
+                                </select>
+                            </span>
+                            <span class="float-right mr-2">
+                                <select class="form-control" id="filterMonthRevenue" name="filterMonthRevenue" style="display: none;">
+                                    @foreach($monthList as $month)
+                                        <option value="{{ $month[1] }}" @if($month[1] == $current_month) selected @endif>Bulan ({{ $month[0] }})</option>
+                                    @endforeach
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- END OF CHART FILTER SECTION -->
+
+                    <!-- CHART SECTION -->
+                    <div class="row">
+                        <div style="max-width: 100%; overflow-x: auto;" id="revenueFrame">
+
+                        </div>
+                    </div>
+                    <!-- END OF CHART SECTION -->
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- END OF MODAL SECTION -->
 @endsection
 
 
@@ -261,7 +367,6 @@
                 },
                 success: function(data){
                     const dataset = JSON.parse(data);
-                    console.log(dataset);
                     updateDatatable("data_member", dataset);
                 }
             });
@@ -269,13 +374,9 @@
     }
 
     function updateDatatable(table, data){
-        switch(table){
-            case "data_member":
-                var table = $('#data_member').DataTable();
-                table.clear();
-                table.rows.add(data).draw();
-                break;
-        }
+        var table = $('#' + table).DataTable();
+        table.clear();
+        table.rows.add(data).draw();
     }
 
     function dataToggle(data){
@@ -290,10 +391,10 @@
 
             break;
             case "member_cuti":
-
+                $("#modal-chart-cuti").modal("toggle");
             break;
             case "revenue":
-
+                $("#modal-chart-revenue").modal("toggle");
             break;
         }
     }

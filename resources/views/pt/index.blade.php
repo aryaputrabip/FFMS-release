@@ -356,7 +356,6 @@
             }
         });
     }
-    @endsection
 
     function deleteConfirmation(uid, token){
         const DestroySwal = Swal.mixin({
@@ -385,4 +384,5 @@
             }
         });
     }
+    @endsection
 </script>

@@ -58,6 +58,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a @if($role == 1) href="{{ route('suadmin.sesi.manager') }}" @endif
+                            class="nav-link text-dark-default">
+                                <i class="nav-icon fas fa-address-book"></i>
+                                <p>Data Paket PT</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a @if($role == 1) href="{{ route('suadmin.pt.index') }}" @endif class="nav-link text-dark-default">
                                 <i class="nav-icon fas fa-dumbbell"></i>
                                 <p>Data Personal Trainer</p>
@@ -78,6 +85,12 @@
                         <a href="{{ route('suadmin.cuti.index') }}" class="nav-link text-dark-default">
                             <i class="nav-icon fas fa-calendar-minus"></i>
                             <p>Data Cuti Member</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('suadmin.member.cicilan.index') }}" class="nav-link text-dark-default">
+                            <i class="nav-icon fas fa-money-bill-alt fa-sm"></i>
+                            <p>Data Cicilan Member</p>
                         </a>
                     </li>
 

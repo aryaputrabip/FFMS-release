@@ -182,17 +182,18 @@ class MemberDataController extends Controller
                         $routeCuti = route("cs.cuti.index");
                     }
 
-                    return '<button type="button" class="btn btn-danger w-100 mb-2 font-weight-bold" onclick="checkinMember(`'.$r->id.'`)">
+                    //<button class="btn btn-outline-secondary w-100 mb-2" disabled>
+                    //                                <i class="fas fa-address-card fa-sm mr-1"></i> Perpanjang Paket Member
+                    //                            </button>
+                    //                            <button class="btn btn-outline-secondary w-100" disabled>
+                    //                                <i class="fas fa-dumbbell fa-sm mr-1"></i> Perpanjang Sesi Latihan Member
+                    //                            </button>
+                    //                            <hr>
+
+                    return '<button type="button" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="checkinMember(`'.$r->id.'`)">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
                             </button>
-                            <button class="btn btn-outline-secondary w-100 mb-2" disabled>
-                                <i class="fas fa-address-card fa-sm mr-1"></i> Perpanjang Paket Member
-                            </button>
-                            <button class="btn btn-outline-secondary w-100" disabled>
-                                <i class="fas fa-dumbbell fa-sm mr-1"></i> Perpanjang Sesi Latihan Member
-                            </button>
-                            <hr>
-                            <a href="'.$routeCuti.'" class="btn btn-secondary w-100">
+                            <a href="'.$routeCuti.'" class="btn btn-outline-dark w-100">
                                 <i class="fas fa-calendar-minus fa-sm mr-1"></i> Cutikan Member
                             </a>
                             <hr>
@@ -502,7 +503,7 @@ class MemberDataController extends Controller
                 );
 
             $data['pt_action'] = $this->isSessionAvailable($data['data']->session);
-            $data['session'] = SessionModel::get();
+            $data['session'] = SessionModel::where('status', 1)->get();
             $data['payment'] = PaymentModel::latest()->orderBy('id')->get();
             $data['membership_data'] = MembershipModel::from('membership as PK')
                 ->leftjoin('membership_type as mType', 'mType.mtype_id','=','PK.type')->select(

@@ -50,6 +50,10 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
             Route::get('/', 'MemberRegisterController@index')->name('index');
             Route::get('complete', 'MemberRegisterController@complete')->name('complete');
         });
+
+        Route::namespace('cicilan')->prefix('cicilan')->name('cicilan.')->group(function () {
+            Route::get('/', 'CicilanManagerController@index')->name('index');
+        });
     });
     Route::namespace('membership')->prefix('membership')->name('membership.')->group(function () {
         Route::get('/', 'MembershipDataController@index')->name('index');
@@ -65,6 +69,7 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
     });
     Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
         Route::get('/', 'SesiUseController@index')->name('index');
+        Route::get('manager/', 'SesiManagerController@manager')->name('manager');
     });
 });
 
@@ -127,6 +132,12 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
         Route::post('store', 'MemberRegisterController@store')->name('store');
         Route::get('print/{id}', 'MemberRegisterController@print')->name('print');
     });
+
+    Route::namespace('cicilan')->prefix('cicilan')->name('cicilan.')->group(function () {
+        Route::get('cicilanMemberData', 'CicilanManagerController@cicilanMemberData')->name('cicilanMemberData');
+        Route::get('getMemberCicilanData', 'CicilanManagerController@getMemberCicilanData')->name('getMemberCicilanData');
+        Route::post('bayarCicilan', 'CicilanManagerController@bayarCicilan')->name('bayarCicilan');
+    });
 });
 
 Route::namespace('membership')->prefix('membership')->name('membership.')->group(function () {
@@ -180,4 +191,12 @@ Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
 Route::namespace('management')->prefix('management')->name('management.')->group(function () {
     Route::get('getAccountData', 'UserDataController@getAccountData')->name('getAccountData');
     Route::post('editAccountData', 'UserDataController@editAccountData')->name('editAccountData');
+});
+
+Route::namespace('sesi')->prefix('sesi')->name('sesi.')->group(function () {
+    Route::get('getSesiData', 'SesiManagerController@getSesiData')->name('getSesiData');
+    Route::post('createSesi', 'SesiManagerController@createSesi')->name('createSesi');
+    Route::get('edit', 'SesiManagerController@edit')->name('edit');
+    Route::post('update', 'SesiManagerController@update')->name('update');
+    Route::post('deleteSesi', 'SesiManagerController@deleteSesi')->name('deleteSesi');
 });

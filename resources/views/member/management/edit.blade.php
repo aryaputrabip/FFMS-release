@@ -531,7 +531,7 @@
             '<p class="text-danger" id="deleteValidationLabel" style="display: none;">' +
             'Oops! Member ID salah.</p> ' +
             'Mohon isikan Member ID untuk mengkonfirmasi aksi! ' +
-            '<b>'+ {{ $data->member_id }} + '</b> ' +
+            '<b>'+ id + '</b> ' +
             '<br> ' +
             '<input type="text" class="form-control mt-2" id="deleteValidationInput">';
 

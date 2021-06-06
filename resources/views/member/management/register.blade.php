@@ -222,10 +222,10 @@
                                         </button>
                                     </label>
                                     <div class="col-sm-3">
-                                        <select class="form-control select2" style="width: 100%;">
-                                            <option value="1" selected="selected">Semuanya</option>
-                                            <option value="2">All Access</option>
-                                            <option value="3">GYM Only</option>
+                                        <select class="form-control select2" id="membershipFilter" style="width: 100%;">
+                                            <option value="" selected>Semuanya</option>
+                                            <option value="All-Access">All Access</option>
+                                            <option value="GYM-Only">GYM Only</option>
                                         </select>
                                     </div>
                                 </div>
@@ -241,7 +241,7 @@
                                     <div class="attachment-block attachment-block-selector clearfix" id="membership-{{ $mship->mship_id }}" style="padding: 15px; cursor: pointer;" onclick="selectMembership({{$mship->mship_id}})">
                                         <h5 class="attachment-heading" id="membership-{{ $mship->mship_id }}-name">{{ $mship->name }}</h5>
                                         <div class="attachment-text"><b>Durasi: </b> <span id="membership-{{ $mship->mship_id }}-duration">{{ $mship->duration }}</span> Bulan</div>
-                                        <div class="attachment-text"><b>Tipe: </b> <span id="membership-{{ $mship->type }}-type">{{ $mship->type }}</span></div>
+                                        <div class="attachment-text @if($mship->type == "All Access") All-Access @else GYM-Only @endif"><b>Tipe: </b> <span id="membership-{{ $mship->type }}-type">{{ $mship->type }}</span></div>
                                         <div class="attachment-text"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
                                         <input type="hidden" id="membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
                                     </div><?php
@@ -306,20 +306,40 @@
                                 </div>
                             </div>
 
+                            <div class="form-group mb-0">
+                                <h6 class="font-weight-bold">+ Harga By Approval</h6>
+                            </div>
+                            <hr>
+
                             <div class="form-group row mb-0">
                                 <label for="dataMembershipApproval" class="col-sm-6 col-form-label">
                                     <div class="icheck-success d-inline">
                                         <input type="checkbox" id="dataMembershipApproval">
-                                        <label for="dataUserMarketing">
-                                            + Harga By Approval
+                                        <label for="dataMembershipApproval">
+                                            + Paket Member By Approval
                                         </label>
                                     </div>
                                 </label>
 
                                 <div class="col-sm-6">
                                     <button type="button" class="btn btn-danger w-100" id="changeApprovalBtn" data-target="#approvalModal" data-toggle="modal" disabled="true">
-{{--                                        <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga--}}
-                                        -
+                                    -
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group row mb-0" id="sesiApprovalContainer" style="display: none;">
+                                <label for="dataSesiApproval" class="col-sm-6 col-form-label">
+                                    <div class="icheck-success d-inline">
+                                        <input type="checkbox" id="dataSesiApproval">
+                                        <label for="dataSesiApproval">
+                                            + Paket PT By Approval
+                                        </label>
+                                    </div>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <button type="button" class="btn btn-danger w-100" id="changeApprovalSesiBtn" data-target="#approvalSesiModal" data-toggle="modal" disabled="true">
+                                    -
                                     </button>
                                 </div>
                             </div>
@@ -330,6 +350,7 @@
                             <input type="hidden" id="cacheMemberSessionPrice" name="cacheMemberSessionPrice" readonly>
                             <input type="hidden" id="cacheMemberMarketing" name="cacheMemberMarketing" readonly>
                             <input type="hidden" id="cacheMemberApproval" name="cacheMemberApproval" readonly>
+                            <input type="hidden" id="cachePTApproval" name="cachePTApproval" readonly>
 
                             <hr>
                             <div class="form-group row mb-0" id="familyMemberGroup" style="display: none;">
@@ -440,7 +461,7 @@
                             <div class="card">
                                 <div class="row p-3">
                                     <label for="paymentGroup" class="col-sm-9 col-form-label">
-                                        Pilih Pembayaran<span class="color-danger">*</span>
+                                        Pilih Pembayaran<span class="text-danger">*</span>
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                             <i class="fas fa-caret-up"></i>
                                         </button>
@@ -457,6 +478,24 @@
                                 </div>
                                 <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>
                                 <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>
+                            </div>
+
+                            <div class="card">
+                                <div class="row pt-3 pr-3 pb-2 pl-3">
+                                    <label for="paymentMethodGroup" class="col-sm-9 col-form-label">
+                                        Metode Pembayaran<span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                <div class="card-body pt-0" id="paymentMGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
+                                    <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="paymentMethodGroup" name="paymentMethodGroup">
+                                        <option value="full" selected>Lunas</option>
+                                        <option value="cicilan">Cicilan</option>
+                                    </select>
+                                    <div id="paymentCicilanDurationContainer" style="display: none;">
+                                        <input class="form-control w-auto float-left" type="number" min="1" value="1" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
+                                        <h6 class="float-left mt-2 ml-2">Bulan</h6>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="card">
@@ -479,12 +518,15 @@
                                     </div>
                                     <div class="row text-right">
                                         <div class="col-12">
-                                            <h6>Total Charge</h6>
+                                            <h6 class="font-weight-bold">Total Charge</h6>
                                         </div>
                                     </div>
                                     <div class="row text-right">
                                         <div class="col-12">
-                                            <h2><b>Rp. </b><b id="total_price">0</b></h2>
+                                            <h1><b>Rp. </b><b id="total_price">0</b></h1>
+                                            <h4 class="font-weight-bold" id="cicilanChargeContainer" style="display: none;">
+                                                <i><b>Rp. </b><b id="cicilan_per_bulan">0</b><small>/bulan</small></i>
+                                            </h4>
                                         </div>
                                     </div>
                                 </div>
@@ -557,6 +599,18 @@
             }
         });
 
+        $("#dataSesiApproval").on('change', function(){
+            if($(this).prop('checked')){
+                $("#changeApprovalSesiBtn").prop('disabled',false);
+                $("#cachePTApproval").val("usingIt");
+                refreshApprovalBtn("#changeApprovalSesiBtn");
+            }else{
+                $("#changeApprovalSesiBtn").prop('disabled',true);
+                $("#cachePTApproval").val("");
+                refreshApprovalBtn("#changeApprovalSesiBtn");
+            }
+        });
+
         $("#registrationForm").on('keyup keypress keydown', function(e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode === 13) {
@@ -573,6 +627,9 @@
             $("#cacheMemberSession").val($("#dataUserPTSession").val());
             $("#cacheMemberSessionTitle").val($("#dataUserPTSession").find(':selected').data('title'));
             $("#cacheMemberSessionPrice").val($("#dataUserPTSession").find(':selected').data('price'));
+
+            $("#sesiApprovalContainer").show();
+
         }else{
             $("#dataUserPT").prop('disabled',true);
             $("#dataUserPTSession").prop('disabled',true);
@@ -580,7 +637,37 @@
             $("#cacheMemberSession").val("");
             $("#cacheMemberSessionTitle").val("");
             $("#cacheMemberSessionPrice").val("");
+
+            $("#sesiApprovalContainer").hide();
         }
+
+        $("#cachePTApproval").val("");
+        $("#approvalSesiPrice").val("");
+        refreshApprovalBtn("#changeApprovalSesiBtn");
+    });
+
+    $("#membershipFilter").on("change", function(){
+        if($(this).val() == ""){
+            $(".All-Access").parent().show();
+            $(".GYM-Only").parent().show();
+        }else if($(this).val() == "All-Access"){
+            $(".All-Access").parent().show();
+            $(".GYM-Only").parent().hide();
+        }else{
+            $(".GYM-Only").parent().show();
+            $(".All-Access").parent().hide();
+        }
+
+        $("#cacheMembership").val("");
+        $("#cacheMembershipID").val("");
+        $("#cacheMembershipDuration").val("");
+        $("#cacheMembershipPrice").val("");
+        $("#cacheMembershipCategory").val("");
+
+        if(selectedMembership != null){
+            $(selectedMembership).removeClass('block_active');
+        }
+        selectedMembership = null;
     });
 
     $("#dataUserMarketingToggler").on('change', function(){
@@ -593,8 +680,72 @@
         }
     });
 
+    $("#paymentMethodGroup").on("change", function(){
+       if($(this).val() == "cicilan"){
+           $("#paymentCicilanDuration").val(1);
+           $("#paymentCicilanDurationContainer").show();
+
+           var tMembership = 0;
+           var tSesi = 0;
+
+           if($("#cacheMemberApproval").val() != ""){
+               tMembership = $("#approvalPrice").val();
+           }else{
+               tMembership = $("#cacheMembershipPrice").val();
+           }
+
+           if($("#dataUserPTToggler").prop("checked")){
+               if($("#cachePTApproval").val() != ""){
+                   tSesi = $("#approvalSesiPrice").val();
+               }else{
+                   tSesi = $("#dataUserPTSession").find(':selected').data('price');
+               }
+           }
+
+           if($("#paymentCicilanDuration").val() > 0){
+               $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+           }
+
+           $("#cicilanChargeContainer").show();
+       }else{
+           $("#paymentCicilanDuration").val("");
+           $("#paymentCicilanDurationContainer").hide();
+
+           $("#cicilanChargeContainer").hide();
+       }
+    });
+
+    $("#paymentCicilanDuration").on("keyup change", function(){
+        if($(this).val() > 0){
+            var tMembership = 0;
+            var tSesi = 0;
+
+            if($("#cacheMemberApproval").val() != ""){
+                tMembership = $("#approvalPrice").val();
+            }else{
+                tMembership = $("#cacheMembershipPrice").val();
+            }
+
+            if($("#dataUserPTToggler").prop("checked")){
+                if($("#cachePTApproval").val() != ""){
+                    tSesi = $("#approvalSesiPrice").val();
+                }else{
+                    tSesi = $("#dataUserPTSession").find(':selected').data('price');
+                }
+            }
+
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+        }
+    });
+
     $("#approvalPrice").on('change', function(){
         refreshApprovalBtn("#changeApprovalBtn");
+    });
+
+    $("#approvalSesiPrice").on('change', function(){
+        refreshApprovalBtn("#changeApprovalSesiBtn");
     });
 
     $("#dataUserPT").on("change", function(){
@@ -687,14 +838,26 @@
     }
 
     function refreshApprovalBtn(element){
-        if($("#approvalPrice").val() == "" || $("#approvalPrice").val() == null){
-            if($("#dataMembershipApproval").prop('checked')){
-                $(element).html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga')
+        if(element == "#changeApprovalBtn"){
+            if($("#approvalPrice").val() == "" || $("#approvalPrice").val() == null){
+                if($("#dataMembershipApproval").prop('checked')){
+                    $(element).html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga')
+                }else{
+                    $(element).html(" - ");
+                }
             }else{
-                $(element).html(" - ");
+                $(element).html("Rp. " + asRupiah($("#approvalPrice").val()));
             }
         }else{
-            $(element).html("Rp. " + asRupiah($("#approvalPrice").val()));
+            if($("#approvalSesiPrice").val() == "" || $("#approvalSesiPrice").val() == null){
+                if($("#dataSesiApproval").prop('checked')){
+                    $(element).html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga')
+                }else{
+                    $(element).html(" - ");
+                }
+            }else{
+                $(element).html("Rp. " + asRupiah($("#approvalSesiPrice").val()));
+            }
         }
     }
 
@@ -755,9 +918,16 @@
         }
 
         if($("#dataUserPTToggler").prop("checked")){
-            $("#total_pt").html(asRupiah($("#dataUserPTSession").find(':selected').data('price')));
+            if($("#dataSesiApproval").prop("checked")){
+                $("#total_pt").html("<i style='text-decoration: line-through;'>"+asRupiah($("#dataUserPTSession").find(':selected').data('price'))+"</i> <b>"+asRupiah($("#approvalSesiPrice").val())+"</b>");
 
-            generateTotalCharge($("#cacheMembershipPrice").val(), $("#dataUserPTSession").find(':selected').data('price'));
+                generateTotalCharge($("#cacheMembershipPrice").val(), $("#approvalSesiPrice").val());
+            }else{
+                $("#total_pt").html(asRupiah($("#dataUserPTSession").find(':selected').data('price')));
+
+                generateTotalCharge($("#cacheMembershipPrice").val(), $("#dataUserPTSession").find(':selected').data('price'));
+            }
+
             $("#totalPTContainer").show();
         }else{
 
@@ -814,6 +984,12 @@
                         }
                     }
 
+                    if($("#cachePTApproval").val() != ""){
+                        if($("#approvalSesiPrice").val() == ""){
+                            return false;
+                        }
+                    }
+
                     $("#confirm_name").html($("#dataUserNama").val());
                     $("#confirm_gender").html($("#dataUserGender").val());
                     $("#confirm_phone").html($("#dataUserPhone").val());
@@ -835,13 +1011,31 @@
                     return false;
                 }else{
                     if($("#cachePaymentModel").val() == "Cash"){
-                        return true;
+                        if($("#paymentMethodGroup").val() == "cicilan"){
+                            if($("#paymentCicilanDuration").val() == ""){
+                                messagingErrorCustom("Durasi Cicilan Belum Diisi!");
+                                return false;
+                            }else{
+                                return true;
+                            }
+                        }else{
+                            return true;
+                        }
                     }else{
                         if($("#cachePaymentType").val() == ""){
                             messagingErrorCustom("Bank Pembayaran Belum Dipilih!");
                             return false;
                         }else{
-                            return true;
+                            if($("#paymentMethodGroup").val() == "cicilan"){
+                                if($("#paymentCicilanDuration").val() == ""){
+                                    messagingErrorCustom("Durasi Cicilan Belum Diisi!");
+                                    return false;
+                                }else{
+                                    return true;
+                                }
+                            }else{
+                                return true;
+                            }
                         }
                     }
                 }

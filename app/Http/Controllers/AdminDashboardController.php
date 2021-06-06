@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Auth\ValidateRole;
 use App\Http\Controllers\report\reportController;
+use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use Carbon\Carbon;
@@ -35,6 +36,7 @@ class AdminDashboardController extends Controller
 
         $chartData = new reportController();
         $memberChart = $chartData->getChart('member_total');
+        $cutiChart = $chartData->getChart('cuti_total');
 
         $current_month = $datenow->month;
         $current_year = $datenow->year;
@@ -42,7 +44,7 @@ class AdminDashboardController extends Controller
         $monthList = $this->getMonthList();
         $yearlist = $this->getYearList();
 
-        return view('admin_dashboard', compact('title','username','role','jMember','memberActive','memberCuti','totalSales', 'memberChart', 'current_month', 'current_year','monthList','yearlist'));
+        return view('admin_dashboard', compact('title','username','role','jMember','memberActive','memberCuti','totalSales', 'memberChart', 'cutiChart', 'current_month', 'current_year','monthList','yearlist'));
     }
 
     public function getMemberData(Request $r){
@@ -118,8 +120,16 @@ class AdminDashboardController extends Controller
     function queryData($type, $filterBy, $filterMonth, $filterYear, $index){
         if($filterBy != "year"){
             $memberQuery = MemberModel::whereMonth('created_at', '=', $index);
+
+            $cutiQuery = CutiMemberModel::from("cutidata as CUTI")
+                ->join("memberdata as MEMBER", "MEMBER.member_id", "=", "CUTI.member_id")
+                ->whereMonth('CUTI.created_at', '=', $index);
         }else{
-            $memberQuery = MemberModel::whereYear('created_at', '=', $index);
+            $memberQuery = MemberModel::whereYear('CUTI.created_at', '=', $index);
+
+            $cutiQuery = CutiMemberModel::from("cutidata as CUTI")
+                ->join("memberdata as MEMBER", "MEMBER.member_id", "=", "CUTI.member_id")
+                ->whereMonth('CUTI.created_at', '=', $index);
         }
 
         switch($type) {
@@ -164,6 +174,21 @@ class AdminDashboardController extends Controller
 
                 return MemberModel::whereBetween('created_at', [$from, $to])->count();
                 break;
+            case "cuti_new":
+                $query = $this->executeBaseQuery("cuti", $filterBy, $filterMonth, $filterYear, $cutiQuery);
+
+                return $query->count();
+                break;
+            case "cuti_lk":
+                $query = $this->executeBaseQuery("cuti", $filterBy, $filterMonth, $filterYear, $cutiQuery);
+
+                return $query->where("MEMBER.gender","Laki-laki")->count();
+                break;
+            case "member_pr":
+                $query = $this->executeBaseQuery("cuti", $filterBy, $filterMonth, $filterYear, $cutiQuery);
+
+                return $query->where("MEMBER.gender","Perempuan")->count();
+                break;
         }
     }
 
@@ -187,6 +212,32 @@ class AdminDashboardController extends Controller
                     }else{
                         if(isset($filterMonth)) {
                             return $query->whereMonth('created_at', '=', $filterMonth);
+                        } else {
+                            return $query;
+                        }
+                    }
+                }else{
+                    return $query;
+                }
+                break;
+            case "cuti":
+                if($filterBy == "month"){
+                    if(isset($filterYear)) {
+                        return $query->whereYear('CUTI.created_at', '=', $filterYear);
+                    }else{
+                        return $query;
+                    }
+                }else if($filterBy == "day"){
+                    if(isset($filterYear)) {
+                        if(isset($filterMonth)) {
+                            return $query->whereMonth('CUTI.created_at', '=', $filterMonth)
+                                ->whereYear('CUTI.created_at', '=', $filterYear);
+                        } else {
+                            return $query->whereYear('CUTI.created_at', '=', $filterYear);
+                        }
+                    }else{
+                        if(isset($filterMonth)) {
+                            return $query->whereMonth('CUTI.created_at', '=', $filterMonth);
                         } else {
                             return $query;
                         }
