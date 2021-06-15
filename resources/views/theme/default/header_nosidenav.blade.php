@@ -99,7 +99,11 @@
                     </div>
                 </li>
                 <li class="nav-item menu-border"></li>
-
+                <li class="nav-item menu-item">
+                    <a class="nav-link text-dark" href="{{ route('cs.cuti.index') }}">
+                        <span class="fas fa-users fa-sm mr-1"></span> Cuti
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

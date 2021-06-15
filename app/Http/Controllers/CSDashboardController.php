@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use Illuminate\Http\Request;
@@ -17,37 +18,34 @@ class CSDashboardController extends Controller
 
     public function index()
     {
-        $role = $role = Auth::user()->role_id;
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthCS();
+
+        $title = 'Dashboard';
+        $username = Auth::user()->name;
+        $app_layout = $validateRole->defineLayout($role);
 
         if(isset($role)){
-            if($role == 1){
-                return redirect()->route('suadmin.index');
-            }else if($role == 2){
-                return redirect()->route('suadmin.index');
-            }else{
-                $this->checkAuth();
+            $tMember = $this->getTotalMember();
+            $tMemberBaru = $this->getMemberToday();
+            $tAktivitas = $this->getActivityToday();
+            $tRevenue = $this->getRevenueToday();
 
-                $title = 'Dashboard';
-                $username = Auth::user()->name;
-                $tMember = $this->getTotalMember();
-                $tMemberBaru = $this->getMemberToday();
-                $tAktivitas = $this->getActivityToday();
-                $tRevenue = $this->getRevenueToday();
-
-                return view('cs_dashboard', compact('title','username','role','tMember','tMemberBaru','tAktivitas','tRevenue'));
-            }
+            return view('cs_dashboard', compact('title','username','role','app_layout','tMember','tMemberBaru','tAktivitas','tRevenue'));
         }
     }
 
-    public function checkAuth(){
-        $this->authorize('csdata');
-    }
-
     public function getTotalMember(){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         return MemberModel::from('memberdata')->count();
     }
 
     public function getMemberToday(){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Jakarta");
         $data = MemberModel::whereDate('created_at', '=', Carbon::today()->toDateString())->count();
 
@@ -55,6 +53,9 @@ class CSDashboardController extends Controller
     }
 
     public function getActivityToday(){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Jakarta");
         $data = MemberLogModel::whereDate('date', '=', Carbon::today())->count();
 
@@ -62,9 +63,11 @@ class CSDashboardController extends Controller
     }
 
     public function getRevenueToday(){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Jakarta");
         $data = MemberLogModel::whereDate('date', '=', Carbon::today()->toDateString())->sum('transaction');
-
 
         return $this->asRupiah($data);
     }

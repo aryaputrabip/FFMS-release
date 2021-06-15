@@ -18,7 +18,7 @@
     </style>
 
     @yield('bg')
-    <img src="{{ asset('/img/bg/bg-overlay.png') }}" style="position:absolute; bottom: 0; left: 0; opacity: 0.25;">
+    <img src="{{ asset('/img/bg/bg-overlay.png') }}" style="position:absolute; bottom: 0; left: 0; opacity: 0.25; width: 100%;">
 
     @include('theme.default.header_nosidenav')
     <div class="wrapper">

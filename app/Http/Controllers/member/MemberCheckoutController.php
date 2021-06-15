@@ -58,6 +58,7 @@ class MemberCheckoutController extends Controller
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
                 ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
                 ->join("member_status as mStatus", "mStatus.mstatus_id", "=", "PK.status")
+                ->join("logcheckin as logCheckin", "logCheckin.author", "=", "PK.member_id")
                 ->select(
                     'PK.id',
                     'PK.member_id',
@@ -69,7 +70,8 @@ class MemberCheckoutController extends Controller
                     'mStatus.status as status',
                     'mShipData.name as membership',
                     'mShipData.duration as duration',
-                    'mShipType.type as type'
+                    'mShipType.type as type',
+                    'logCheckin.date as checkinFrom'
                 )
                 ->where('checkin_status', '=', true)
                 ->get();
@@ -92,6 +94,9 @@ class MemberCheckoutController extends Controller
                 ->addColumn('membership_type', function ($data) {
                     return '<div class="text-left">'.$data->type.'</div>';
                 })
+                ->addColumn('checkin_date', function ($data) {
+                    return '<div class="text-left">'.date("d M Y (H:m:s)", strtotime($data->checkinFrom)).'</div>';
+                })
                 ->addColumn('action', function ($data) {
                     return '<div class="text-center">
                             <button class="btn btn-sm btn-danger" onclick="checkoutMember(\''.$data->member_id.'\');">
@@ -99,7 +104,7 @@ class MemberCheckoutController extends Controller
                             </button>
                             </div>';
                 })
-                ->rawColumns(['action', 'name', 'status', 'membership', 'membership_type', 'date_from', 'date_expired'])
+                ->rawColumns(['action', 'name', 'status', 'membership', 'membership_type', 'checkin_date', 'date_expired'])
                 ->make(true);
         }
     }

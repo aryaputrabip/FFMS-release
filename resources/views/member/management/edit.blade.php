@@ -120,6 +120,7 @@
                                         </select><br>
                                     </div>
 
+                                    @if($role == 1)
                                     <div class="col-12 mt-5">
                                         <div class="card collapsed-card">
                                             <div class="row p-3">
@@ -139,6 +140,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
 
                                     <input type="hidden" id="photoFile" name="photoFile" value="{{ $data->photo }}" readonly>
                                     <input type="hidden" id="cacheMarketing" name="cacheMarketing" readonly>
@@ -493,6 +495,7 @@
         }
     }
 
+    @if($role == 1)
     function deleteMember(){
         const DestroySwal = Swal.mixin({
             customClass: {
@@ -562,6 +565,7 @@
             $("#deleteValidationInput").addClass("is-invalid");
         }
     }
+    @endif
 
     function extendSession(){
 
@@ -759,12 +763,16 @@
                     $("#mShipType").val($("#cacheMembershipType").val());
                     $("#mShipCategory").val($("#cacheMembershipCategory").val());
                     $("#mShipApproval").val(mShipApprovalPrice);
+                    $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    $("#paymentCicilan").val($("#paymentCicilanDuration").val());
                 }else if($("#confirmPayment").data("action") == 'extend-membership'){
                     $("#mShipID").val($("#extend-membership-id").val());
                     $("#mShipName").val($("#extend-membership-name").html());
                     $("#mShipPrice").val($("#extend-membership-price").data("price"));
                     $("#mShipDuration").val($("#extend-membership-duration").html());
                     $("#mShipType").val($("#extend-membership-type").html());
+                    $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    $("#paymentCicilan").val($("#paymentCicilanDuration").val());
                 }
 
                 $("#nNotes").val($("#dataNote").val());
@@ -968,9 +976,11 @@
                     $("#modal-m-change").modal("hide");
                     $("#modal-f-payment").modal("show");
 
-                    $("#payment-title").html("Paket Member <br>" + $("#cacheMembershipDuration").val() + " Bulan <br>" + "("+$("#cacheMembershipType").val()+")");
+                    $("#payment-title").html("Paket Member <br>" + $("#cacheMembershipDuration").val() + " Bulan <br>" + "("+$("#extend-membership-type").html()+")");
                     $("#total_payment").html(asRupiah($("#cacheMembershipPrice").val()));
                     $("#total_price").html(asRupiah($("#cacheMembershipPrice").val()));
+
+                    $("#mShipType").val($("#extend-membership-type").html());
 
                     $("#confirmPayment").data("action", 'change-membership');
 
@@ -987,6 +997,86 @@
                 break;
         }
     }
+
+    $("#membershipFilter").on("change", function(){
+        if($(this).val() == ""){
+            $(".All-Access").parent().show();
+            $(".GYM-Only").parent().show();
+        }else if($(this).val() == "All-Access"){
+            $(".All-Access").parent().show();
+            $(".GYM-Only").parent().hide();
+        }else{
+            $(".GYM-Only").parent().show();
+            $(".All-Access").parent().hide();
+        }
+
+        $("#cacheMembership").val("");
+        $("#cacheMembershipID").val("");
+        $("#cacheMembershipDuration").val("");
+        $("#cacheMembershipPrice").val("");
+        $("#cacheMembershipCategory").val("");
+
+        if(selectedMembership != null){
+            $(selectedMembership).removeClass('block_active');
+        }
+        selectedMembership = null;
+    });
+
+    $("#paymentMethodGroup").on("change", function(){
+        if($(this).val() == "cicilan"){
+            $("#paymentCicilanDuration").val(1);
+            $("#paymentCicilanDurationContainer").show();
+
+            var tMembership = $("#cacheMembershipPrice").val();
+            var tSesi = 0;
+
+            if($("#approvalPrice").val() != ""){
+                tMembership = $("#approvalPrice").val();
+            }
+
+            // if($("#dataUserPTToggler").prop("checked")){
+            //     if($("#cachePTApproval").val() != ""){
+            //         tSesi = $("#approvalSesiPrice").val();
+            //     }else{
+            //         tSesi = $("#dataUserPTSession").find(':selected').data('price');
+            //     }
+            // }
+
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+
+            $("#cicilanChargeContainer").show();
+        }else{
+            $("#paymentCicilanDuration").val("");
+            $("#paymentCicilanDurationContainer").hide();
+
+            $("#cicilanChargeContainer").hide();
+        }
+    });
+
+    $("#paymentCicilanDuration").on("keyup change", function(){
+        if($(this).val() > 0){
+            var tMembership = $("#cacheMembershipPrice").val();
+            var tSesi = 0;
+
+            if($("#approvalPrice").val() != ""){
+                tMembership = $("#approvalPrice").val();
+            }
+
+            // if($("#dataUserPTToggler").prop("checked")){
+            //     if($("#cachePTApproval").val() != ""){
+            //         tSesi = $("#approvalSesiPrice").val();
+            //     }else{
+            //         tSesi = $("#dataUserPTSession").find(':selected').data('price');
+            //     }
+            // }
+
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+        }
+    });
 
     function isEmail(email){
         return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );

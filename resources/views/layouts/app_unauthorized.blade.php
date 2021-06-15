@@ -13,7 +13,7 @@
 
 </head>
 <body class="sidebar-mini layout-navbar-fixed overflow-hidden" style="background: url({{ asset('/img/bg/bg-1.png') }}); background-position: top center; background-size: cover;">
-<img src="{{ asset('/img/bg/bg-overlay.png') }}" style="position:absolute; bottom: 0; left: 0; opacity: 0.25;">
+<img src="{{ asset('/img/bg/bg-overlay.png') }}" style="position:absolute; bottom: 0; left: 0; opacity: 0.25; width: 100%;">
 
 <div class="wrapper">
 

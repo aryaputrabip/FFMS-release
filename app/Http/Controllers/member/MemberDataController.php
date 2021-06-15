@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\member;
 
 use App\Exports\MemberExport;
+use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
@@ -37,9 +38,14 @@ class MemberDataController extends Controller
 
     public function index()
     {
-        $role = $this->checkAuth();
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        $title = 'Data Member';
+        $username = Auth::user()->name;
+        $app_layout = $validateRole->defineLayout($role);
+
         if(isset($role)){
-            $title = 'Data Member';
             $jMember = MemberModel::from('memberdata')->count();
             $memberActive = MemberModel::from('memberdata')->where('status', 1)->count();
             $memberLK = MemberModel::from('memberdata')->where('gender', '=', 'Laki-laki')->count();
@@ -47,8 +53,6 @@ class MemberDataController extends Controller
             $membership = MembershipModel::select('name')->get();
             $membershipType = MembershipTypeModel::select('type')->get();
             $memberStatus = MemberStatusModel::select('status')->get();
-            $username = Auth::user()->name;
-            $app_layout = $this->defineLayout($role);
 
             return view('member.index', compact('title','username','role','jMember','memberActive','memberLK','memberPR','membership','membershipType','memberStatus','app_layout'));
         }
@@ -79,6 +83,9 @@ class MemberDataController extends Controller
     }
 
     public function getMemberData(Request $request){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         if($request->ajax()){
             $data = MemberModel::from("memberdata as PK")
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
@@ -193,9 +200,9 @@ class MemberDataController extends Controller
                     return '<button type="button" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="checkinMember(`'.$r->id.'`)">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
                             </button>
-                            <a href="'.$routeCuti.'" class="btn btn-outline-dark w-100">
+                            <button class="btn btn-outline-dark w-100" onclick="cutikanMember(`'.$r->id.'`)">
                                 <i class="fas fa-calendar-minus fa-sm mr-1"></i> Cutikan Member
-                            </a>
+                            </button>
                             <hr>
                             <a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
                                 <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
@@ -238,6 +245,9 @@ class MemberDataController extends Controller
     }
 
     public function getMemberMembership(Request $request, $id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         if($request->ajax() && $id != ""){
             $data = MemberModel::from("memberdata as PK")
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
@@ -309,6 +319,9 @@ class MemberDataController extends Controller
     }
 
     public function getMemberPT(Request $request, $id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         if($request->ajax() && $id != ""){
             $data = MemberModel::from("memberdata as PK")
                 ->join("cache_read as cData", "cData.author", "=", "PK.member_id")
@@ -352,6 +365,9 @@ class MemberDataController extends Controller
     }
 
     public function getMemberLog(Request $request, $id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Jakarta");
 
         if($request->ajax()){
@@ -437,7 +453,8 @@ class MemberDataController extends Controller
     }
 
     public function view($id){
-        $role = $this->checkAuth();
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
 
         if(isset($role)){
             $username = Auth::user()->name;
@@ -469,7 +486,8 @@ class MemberDataController extends Controller
     }
 
     public function edit($id){
-        $role = $this->checkAuth();
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
 
         if(isset($role)){
             $title = 'Edit Data Member';
@@ -529,6 +547,9 @@ class MemberDataController extends Controller
     }
 
     public function update(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('Y-m-d H:i:s');
 
@@ -633,6 +654,9 @@ class MemberDataController extends Controller
     }
 
     public function aktivasi(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
         $date_end = Carbon::now()->addMonths($r->duration)->toDateString();
@@ -653,6 +677,9 @@ class MemberDataController extends Controller
     }
 
     public function print($id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('d M Y');
 
@@ -770,6 +797,9 @@ class MemberDataController extends Controller
     }
 
     function printRegister($id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('d M Y');
 
@@ -928,6 +958,9 @@ class MemberDataController extends Controller
     }
 
     function dataChecking(){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now()->toDateString();
 
@@ -977,6 +1010,9 @@ class MemberDataController extends Controller
     }
 
     function addTransaction(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
 
@@ -1141,6 +1177,9 @@ class MemberDataController extends Controller
 
 
     function printPembelianSesi($log_id){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('d M Y');
 
@@ -1199,6 +1238,9 @@ class MemberDataController extends Controller
     }
 
     function changePT(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now()->toDateString();
 
@@ -1227,12 +1269,18 @@ class MemberDataController extends Controller
     }
 
     function exportExcelData(){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
         $namaFile = "members";
 
         return Excel::download(new MemberExport(), $namaFile.'.xlsx');
     }
 
     function deleteMember(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthADM();
+
         $exec = MemberModel::where('member_id', $r->hiddenID)->delete();
 
         if($this->checkAuth() == 1){

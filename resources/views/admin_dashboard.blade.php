@@ -89,69 +89,37 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <!-- CHART FILTER SECTION -->
-                    <div class="row">
-                        <div class="col-12">
-                            <span class="float-left">
-                                <select class="form-control" id="filterTypeMember" name="filterTypeMember">
-                                    <option value="day">Filter By (Daily)</option>
-                                    <option value="month" selected>Filter By (Monthly)</option>
-                                    <option value="year">Filter By (Yearly)</option>
-                                </select>
-                            </span>
-                            <span class="float-right">
-                                <select class="form-control" id="filterYearMember" name="filterYearMember">
-                                    <option value=""><b>Tahun (ALL)</b></option>
-                                    @foreach($yearlist as $year)
-                                        <option value="{{ $year }}" @if($year == $current_year) selected @endif>Tahun ({{ $year }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
-                            <span class="float-right mr-2">
-                                <select class="form-control" id="filterMonthMember" name="filterMonthMember" style="display: none;">
-                                    @foreach($monthList as $month)
-                                        <option value="{{ $month[1] }}" @if($month[1] == $current_month) selected @endif>Bulan ({{ $month[0] }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
-                        </div>
-                    </div>
-                    <!-- END OF CHART FILTER SECTION -->
-
+                <div class="modal-body pr-0">
                     <!-- CHART SECTION -->
                     <div class="row">
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberFrame">
-                            {!! $memberChart->render() !!}
+                        <div style="position:absolute; right: 20px; z-index: 10;">
+                            <select class="form-control" id="filterTypeMember" name="filterTypeMember" onchange="changeFilterType('member', this.id)">
+                                <option value="day">Filter By (Daily)</option>
+                                <option value="month" selected>Filter By (Monthly)</option>
+                                <option value="year">Filter By (Yearly)</option>
+                            </select>
+                        </div>
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberMonthlyFrame" class="col-12">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberDailyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberYearlyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
-
-                    <!-- TABLE SECTION -->
-                    <button class="btn btn-primary w-100 mt-4 mb-3" disabled>
-                        <i class="fas fa-download fa-sm mr-1"></i> Export Data
-                    </button>
-                    <div class="row">
-                        <div class="col-12">
-                            <table id="data_member" class="table table-bordered table-hover text-nowrap w-100">
-                                <thead>
-                                <tr>
-                                    <th colspan="5" class="text-center">
-                                        <b id="labelMemberParentYear" style="display: none">Total Member - Tahunan</b>
-                                        <b id="labelMemberParentNonYear" >Total Member - Tahun (<span id="labelMemberYear">{{ $current_year }}</span>)</b>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th></th>
-                                    <th class="font-weight-normal" id="data_member_index_title">Bulan</th>
-                                    <th class="font-weight-normal">Member (Laki-laki)</th>
-                                    <th class="font-weight-normal">Member (Perempuan)</th>
-                                    <th>Total Member</th>
-                                </thead>
-                            </table>
-                        </div>
-                        <!-- END OF TABLE SECTION -->
-                    </div>
                 </div>
             </div>
         </div>
@@ -168,40 +136,33 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <!-- CHART FILTER SECTION -->
+                <div class="modal-body pr-0">
                     <div class="row">
-                        <div class="col-12">
-                            <span class="float-left">
-                                <select class="form-control" id="filterTypeCuti" name="filterTypeCuti">
-                                    <option value="day">Filter By (Daily)</option>
-                                    <option value="month" selected>Filter By (Monthly)</option>
-                                    <option value="year">Filter By (Yearly)</option>
-                                </select>
-                            </span>
-                            <span class="float-right">
-                                <select class="form-control" id="filterYearCuti" name="filterYearCuti">
-                                    <option value=""><b>Tahun (ALL)</b></option>
-                                    @foreach($yearlist as $year)
-                                        <option value="{{ $year }}" @if($year == $current_year) selected @endif>Tahun ({{ $year }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
-                            <span class="float-right mr-2">
-                                <select class="form-control" id="filterMonthCuti" name="filterMonthCuti" style="display: none;">
-                                    @foreach($monthList as $month)
-                                        <option value="{{ $month[1] }}" @if($month[1] == $current_month) selected @endif>Bulan ({{ $month[0] }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
+                        <div style="position:absolute; right: 20px; z-index: 10;">
+                            <select class="form-control" id="filterTypeCuti" name="filterTypeCuti" onchange="changeFilterType('member_cuti', this.id)">
+                                <option value="day">Filter By (Daily)</option>
+                                <option value="month" selected>Filter By (Monthly)</option>
+                                <option value="year">Filter By (Yearly)</option>
+                            </select>
                         </div>
-                    </div>
-                    <!-- END OF CHART FILTER SECTION -->
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiMonthlyFrame" class="col-12">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiDailyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
 
-                    <!-- CHART SECTION -->
-                    <div class="row">
-                        <div style="max-width: 100%; overflow-x: auto;" id="cutiFrame">
-                            {!! $cutiChart->render() !!}
+                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiYearlyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
@@ -215,46 +176,39 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning">
                     <h6 class="modal-title font-weight-bold">
-                        <i class="fas fa-chart-line fa-sm mr-1"></i> Total Sales
+                        <i class="fas fa-chart-line fa-sm mr-1"></i> Total Revenue
                     </h6>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <!-- CHART FILTER SECTION -->
+                <div class="modal-body pr-0">
                     <div class="row">
-                        <div class="col-12">
-                            <span class="float-left">
-                                <select class="form-control" id="filterTypeRevenue" name="filterTypeRevenue">
-                                    <option value="day">Filter By (Daily)</option>
-                                    <option value="month" selected>Filter By (Monthly)</option>
-                                    <option value="year">Filter By (Yearly)</option>
-                                </select>
-                            </span>
-                            <span class="float-right">
-                                <select class="form-control" id="filterYearRevenue" name="filterYearRevenue">
-                                    <option value=""><b>Tahun (ALL)</b></option>
-                                    @foreach($yearlist as $year)
-                                        <option value="{{ $year }}" @if($year == $current_year) selected @endif>Tahun ({{ $year }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
-                            <span class="float-right mr-2">
-                                <select class="form-control" id="filterMonthRevenue" name="filterMonthRevenue" style="display: none;">
-                                    @foreach($monthList as $month)
-                                        <option value="{{ $month[1] }}" @if($month[1] == $current_month) selected @endif>Bulan ({{ $month[0] }})</option>
-                                    @endforeach
-                                </select>
-                            </span>
+                        <div style="position:absolute; right: 20px; z-index: 10;">
+                            <select class="form-control" id="filterTypeRevenue" name="filterTypeRevenue" onchange="changeFilterType('revenue', this.id)">
+                                <option value="day">Filter By (Daily)</option>
+                                <option value="month" selected>Filter By (Monthly)</option>
+                                <option value="year">Filter By (Yearly)</option>
+                            </select>
                         </div>
-                    </div>
-                    <!-- END OF CHART FILTER SECTION -->
+                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueMonthlyFrame" class="col-12">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueDailyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
 
-                    <!-- CHART SECTION -->
-                    <div class="row">
-                        <div style="max-width: 100%; overflow-x: auto;" id="revenueFrame">
-
+                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueYearlyFrame" class="col-12" style="display: none;">
+                            <iframe width="1000" height="500" class="w-100"
+                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
+                                    frameborder="0">
+                            </iframe>
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
@@ -276,116 +230,80 @@
 
 <script>
     @section('script')
+
     $(function () {
-        const options = {
-            searching: false,
-            lengthChange: false,
-            paging: false,
-            info: false,
-            columns: [
-                { name: "DT_RowIndex" },
-                { name: "bulan" },
-                { name: "total_lk" },
-                { name: "total_pr" },
-                { name: "total" }
-            ]
-        };
+        $("#memberDailyFrame").hide();
+        $("#memberMonthlyFrame").show();
+        $("#memberYearlyFrame").hide();
 
-        $('#data_member').DataTable(options);
+        $("#memberCutiDailyFrame").hide();
+        $("#memberCutiMonthlyFrame").show();
+        $("#memberCutiYearlyFrame").hide();
+
+        $("#RevenueDailyFrame").hide();
+        $("#RevenueMonthlyFrame").show();
+        $("#RevenueYearlyFrame").hide();
     });
 
-    $("#modal-chart-member").on('hidden.bs.modal', function () {
-        $('#data_member').DataTable().clear().draw();
-    });
+    function changeFilterType(filterType, action){
+        var actionData = $("#" + action).val();
 
-    $("#filterTypeMember").on("change", function(){
-       if($(this).val() == "day"){
-           $("#filterMonthMember").show();
-           $("#filterYearMember").show();
-
-           $("#labelMemberParentNonYear").show();
-           $("#labelMemberParentYear").hide();
-       }else if($(this).val() == "month"){
-           $("#filterMonthMember").hide();
-           $("#filterYearMember").show();
-
-           $("#labelMemberParentNonYear").show();
-           $("#labelMemberParentYear").hide();
-       }else{
-           $("#filterMonthMember").hide();
-           $("#filterYearMember").hide();
-
-           $("#labelMemberParentNonYear").hide();
-           $("#labelMemberParentYear").show();
-       }
-
-        refreshChartTable('member');
-    });
-
-    $("#filterMonthMember").on("change", function(){
-        refreshChartTable('member');
-    });
-
-    $("#filterYearMember").on("change", function(){
-        if($(this).val() == ""){
-            $("#labelMemberYear").html("ALL");
-        }else{
-            $("#labelMemberYear").html($(this).val());
-        }
-
-        refreshChartTable('member');
-    });
-
-    function refreshChartTable(data){
-        switch(data){
+        switch(filterType) {
             case "member":
-                $('#data_member').DataTable().clear().draw();
-                showChart("member_total", $("#filterTypeMember").val(), $("#filterMonthMember").val(), $("#filterYearMember").val());
-                settingDatatables("member", $("#filterTypeMember").val(), $("#filterMonthMember").val(), $("#filterYearMember").val());
+                if(actionData == "day"){
+                    $("#memberDailyFrame").show();
+                    $("#memberMonthlyFrame").hide();
+                    $("#memberYearlyFrame").hide();
+                }else if(actionData == "month"){
+                    $("#memberDailyFrame").hide();
+                    $("#memberMonthlyFrame").show();
+                    $("#memberYearlyFrame").hide();
+                }else{
+                    $("#memberDailyFrame").hide();
+                    $("#memberMonthlyFrame").hide();
+                    $("#memberYearlyFrame").show();
+                }
+                break;
+            case "member_aktif":
+
+                break;
+            case "member_cuti":
+                if(actionData == "day"){
+                    $("#memberCutiDailyFrame").show();
+                    $("#memberCutiMonthlyFrame").hide();
+                    $("#memberCutiYearlyFrame").hide();
+                }else if(actionData == "month"){
+                    $("#memberCutiDailyFrame").hide();
+                    $("#memberCutiMonthlyFrame").show();
+                    $("#memberCutiYearlyFrame").hide();
+                }else{
+                    $("#memberCutiDailyFrame").hide();
+                    $("#memberCutiMonthlyFrame").hide();
+                    $("#memberCutiYearlyFrame").show();
+                }
+                break;
+            case "revenue":
+                if(actionData == "day"){
+                    $("#RevenueDailyFrame").show();
+                    $("#RevenueMonthlyFrame").hide();
+                    $("#RevenueYearlyFrame").hide();
+                }else if(actionData == "month"){
+                    $("#RevenueDailyFrame").hide();
+                    $("#RevenueMonthlyFrame").show();
+                    $("#RevenueYearlyFrame").hide();
+                }else{
+                    $("#RevenueDailyFrame").hide();
+                    $("#RevenueMonthlyFrame").hide();
+                    $("#RevenueYearlyFrame").show();
+                }
                 break;
         }
-    }
-
-    function settingDatatables(type, filterType, filterMonth, filterYear){
-        if(filterType == "day"){
-            $("#data_member_index_title").html("Hari");
-        }else if(filterType == "month"){
-            $("#data_member_index_title").html("Bulan");
-        }else{
-            $("#data_member_index_title").html("Tahun");
-        }
-
-        if(type == "member"){
-            $.ajax({
-                type: 'GET',
-                dataType: 'html',
-                url: "{{ route('suadmin.getMemberData') }}",
-                data: {
-                    filterType: filterType,
-                    filterMonth: filterMonth,
-                    filterYear: filterYear
-                },
-                success: function(data){
-                    const dataset = JSON.parse(data);
-                    updateDatatable("data_member", dataset);
-                }
-            });
-        }
-    }
-
-    function updateDatatable(table, data){
-        var table = $('#' + table).DataTable();
-        table.clear();
-        table.rows.add(data).draw();
     }
 
     function dataToggle(data){
         switch(data) {
             case "member_total":
                 $("#modal-chart-member").modal("toggle");
-                settingDatatables("member", $("#filterTypeMember").val(), $("#filterMonthMember").val(), $("#filterYearMember").val());
-
-                showChart("member_total", $("#filterTypeMember").val(), $("#filterMonthMember").val(), $("#filterYearMember").val());
             break;
             case "member_aktif":
 
@@ -396,44 +314,6 @@
             case "revenue":
                 $("#modal-chart-revenue").modal("toggle");
             break;
-        }
-    }
-
-    function showChart(chart, filterType, filterMonth, filterYear) {
-        switch (chart) {
-            case "member_total":
-                $.ajax({
-                    type: 'GET',
-                    dataType: 'html',
-                    url: "{{ route('report.updateMemberChartData') }}",
-                    data: {
-                        type: filterType,
-                        month: filterMonth,
-                        year: filterYear
-                    },
-                    success: function (data) {
-                        var obj = JSON.parse(data);
-
-                        $("#memberFrame").html('<canvas id="memberChart" width="4000" height="1400"></canvas>');
-
-                        var ctxMember = document.getElementById('memberChart').getContext('2d');
-                        var chartMember = new Chart(ctxMember, {
-                            type: 'line',
-                            data: setData("member", [obj.memberData, obj.memberLK, obj.memberPR, obj.memberBaru]),
-                            options: setOptions('Member Data', 'top', 0),
-                        });
-                    }
-                });
-                break;
-            case "member_aktif":
-
-                break;
-            case "member_cuti":
-
-                break;
-            case "revenue":
-
-                break;
         }
     }
     @endsection

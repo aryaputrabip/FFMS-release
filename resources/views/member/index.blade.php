@@ -120,7 +120,8 @@
         <form id="checkinForm" action="{{ route('member.checkin') }}" method="POST">
             {{ csrf_field() }}
 
-            <input type="hidden" class="form-control" id="dataIDMemberCheckin" name="dataIDMemberCheckin">
+            <input type="hidden" class="form-control" id="dataIDMemberCheckin" name="dataIDMemberCheckin" readonly>
+            <input type="hidden" class="form-control" id="dataIDMemberCuti" name="dataIDMemberCuti" readonly>
             <input type="hidden" class="form-control" id="dataCheckinSource" name="dataCheckinSource" readonly>
         </form>
     </div>
@@ -145,6 +146,8 @@
                 </div>
             </div>
         </div>
+
+        @include('member.modal.modal_cuti')
     @endif
 @endsection
 
@@ -325,8 +328,6 @@
     }
     @endif
 
-    @endsection
-
     function checkinMember(member){
         $("#dataIDMemberCheckin").val(member);
 
@@ -337,5 +338,133 @@
             $("#checkinForm").submit();
         }
     }
+
+    $("#modal-cuti-entry").on('hide.bs.modal', function(){
+        $("#modal-action").modal("show");
+        $("#dataCutiDuration").attr("min", 1);
+        $("#dataCutiDuration").attr("max", 1);
+        $("#dataCutiDuration").val(1);
+    });
+
+    function cutikanMember(member){
+        $("#modal-action").modal("hide");
+        $("#modal-cuti-entry").modal("show");
+
+        $("#dataIDMemberCuti").val(member);
+    }
+
+    $("#confirmPengajuanCuti").on("click", function () {
+        checkRequired($("#dataCutiDuration").val(), this, $("#dataIDMemberCuti").val());
+    });
+
+    function checkRequired(duration, btn, member){
+
+        if(duration == "" || duration == null || duration <= 0){
+            messagingErrorCustom("Durasi Cuti Belum Diisi!");
+        }else{
+            setConfirmLoad();
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'html',
+                url: "{{ route('cuti.checkCapability') }}",
+                data: {
+                    userID: member,
+                    duration: $("#dataCutiDuration").val()
+                },
+                success: function(data){
+                    var obj = JSON.parse(data);
+
+                    if(obj.pass == null) {
+                        notifyErrorCustom("Member ini telah dicutikan! Tidak dapat memproses pengajuan cuti!");
+                        setConfirmNormal();
+                    }else if(obj.pass <= 0){
+                        notifyErrorCustom("Sisa Bulan Member kurang dari 1 Bulan setelah dikurangai waktu bulan cuti. Tidak dapat memproses pengajuan cuti!");
+                        setConfirmNormal();
+                    }else{
+                        if(obj.pass < $("#dataCutiDuration").val()){
+                            notifyErrorCustom("Durasi Cuti melebihi sisa masa berlaku membership! <br><b>Max : "+obj.pass+" Bulan</b>");
+                            setConfirmNormal();
+                        }else{
+                            $("#activeMemberID").val(member);
+
+                            setConfirmNormal();
+                            notifyCutiAccept(obj.olddate, obj.newdate, $("#dataCutiDuration").val(), obj.currentdate, obj.endcuti, obj.endcutiformat);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function notifyCutiAccept(olddate, newdate, duration, current, endcuti, endcutiformat){
+        const DestroySwal = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-primary mr-2',
+                cancelButton: 'btn btn-danger mr-2'
+            },
+            buttonsStyling: false
+        });
+
+        DestroySwal.fire({
+            icon: 'warning',
+            html: '<h6 class="mb-3 text-center">Apakah Anda yakin untuk men-cutikan member ini?</h6>' +
+                '<center>' +
+                '<table class="table table-bordered w-100"><thead>' +
+                '<tr>' +
+                '<th>Membership Expired (<b>old</b>)</th>' +
+                '<th>Membership Expired (<b>new</b>)</th>' +
+                '</tr>' +
+                '<tr>' +
+                '<td>'+olddate+'</td>' +
+                '<td>'+newdate+'</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th colspan="2">Durasi Cuti</th>' +
+                '</tr>' +
+                '<tr>' +
+                '<td colspan="2">'+duration+' Bulan (<i>'+current+' <b> - </b> '+endcuti+'</i>)</td>' +
+                '</tr>' +
+                '</thead></table>' +
+                '</center>',
+            showCancelButton: true,
+            cancelButtonText: `<i class="fas fa-arrow-left fa-sm mr-1"></i> Kembali`,
+            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Cutikan`,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.confirm
+            ){
+                $("#activeCutiDuration").val(duration);
+                $("#endCutiDate").val(endcuti);
+                $("#newMembershipEnd").val(newdate);
+                $("#oldEndDate").val(olddate);
+
+                $("#cutiForm").attr("action", "{{ route('cuti.approve') }}");
+                $("#cutiForm").submit();
+            }else{
+                return false;
+            }
+        });
+    }
+
+    function notifyErrorCustom(message){
+        Swal.fire({
+            icon: 'warning',
+            button: false,
+            html: message
+        });
+    }
+
+    function setConfirmNormal(){
+        $("#confirmPengajuanCuti").html('<i class="fas fa-check fa-sm mr-1"></i> Ajukan');
+        $("#confirmPengajuanCuti").attr("disabled", false);
+    }
+
+    function setConfirmLoad(){
+        $("#confirmPengajuanCuti").html('<span class="fas fa-sync fa-spin fa-sm mr-1"></span> Memproses...');
+        $("#confirmPengajuanCuti").attr("disabled", true);
+    }
+
+    @endsection
 </script>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cuti;
 
 use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\member\CutiMemberModel;
+use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipModel;
 use App\Model\pt\PersonalTrainerModel;
@@ -23,7 +24,7 @@ class CutiController extends Controller
     public function index()
     {
         $validateRole = new ValidateRole;
-        $role = $validateRole->checkAuthADM();
+        $role = $validateRole->checkAuthALL();
 
         $title = 'Data Cuti Member';
         $username = Auth::user()->name;
@@ -52,6 +53,9 @@ class CutiController extends Controller
     }
 
     public function getCutiData(Request $request){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         if($request->ajax()){
             $data = CutiMemberModel::from("cutidata as PK")
                 ->join("memberdata as mData", "mData.member_id", "=", "PK.member_id")
@@ -87,7 +91,7 @@ class CutiController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     return '<div class="text-center">
-                            <button class="btn btn-sm btn-dark" data-toggle="modal" data-target="#modal-cuti-manager" onclick="cutiManager('.$data->member_id.')">
+                            <button class="btn btn-sm btn-dark" data-toggle="modal" data-target="#modal-cuti-manager" onclick="cutiManager(`'.$data->member_id.'`)">
                                 <i class="fas fa-eye fa-sm"></i>
                             </button>
                             </div>';
@@ -98,6 +102,9 @@ class CutiController extends Controller
     }
 
     public function preview(Request $request){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         if($request->ajax()){
             $data['data'] = MemberModel::from("memberdata as PK")
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
@@ -121,6 +128,7 @@ class CutiController extends Controller
                     'mPTData.name as pt'
                 )->where("member_id", $request->uid)->first();
 
+
             $data['url'] = "";
             return $data;
 
@@ -128,6 +136,9 @@ class CutiController extends Controller
     }
 
     public function checkCapability(Request $request){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthALL();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
 
@@ -160,6 +171,9 @@ class CutiController extends Controller
     }
 
     public function approve(Request $r){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthADM();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('Y-m-d H:i:s');
 
@@ -170,6 +184,7 @@ class CutiController extends Controller
                 'member_id' => $r->activeMemberID,
                 'cuti_from' => $date_now,
                 'cuti_expired' => $r->endCutiDate,
+                'return_old_data' => $r->oldEndDate,
                 'created_by' => Auth::user()->role_id,
                 'created_at' => $date_now
             ]);
@@ -179,6 +194,15 @@ class CutiController extends Controller
                 'm_enddate' => $r->newMembershipEnd,
                 'updated_at' => $date_now,
                 'updated_by' =>Auth::user()->role_id
+            ]);
+
+            $log = MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Pengajuan Cuti Member Selama '.$r->activeStartDate.' Bulan',
+                'category' => 4,
+                'status' => 'Approved',
+                'author' => $r->activeMemberID,
+                'aksi' => 'cuti'
             ]);
 
             if(Auth::user()->role_id == 1){
@@ -192,6 +216,9 @@ class CutiController extends Controller
     }
 
     public function abortCuti(Request $request){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthADM();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
 
@@ -205,14 +232,19 @@ class CutiController extends Controller
 
             $data['old_cuti_expired'] = Carbon::parse($data['data']->cuti_expired)->format('d M Y');
             $data['old_expired'] = Carbon::parse($data['member']->m_enddate)->format('d M Y');
-            $data['new_expired'] = Carbon::parse($data['member']->m_startdate)
-                                    ->addMonths($data['membership']->duration)->format('d M Y');
+//            $data['new_expired'] = Carbon::parse($data['member']->m_startdate)
+//                                    ->addMonths($data['membership']->duration)->format('d M Y');
+
+            $data['new_expired'] = $data['data']->return_old_data;
 
             return $data;
         }
     }
 
     public function remove(Request $r){
+        $validateRole = new ValidateRole;
+        $validateRole->checkAuthADM();
+
         date_default_timezone_set("Asia/Bangkok");
         $date_now = Carbon::now();
 

@@ -244,6 +244,40 @@
 <script>
     @section('script')
     $(function(){
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const page_type = urlParams.get('mode');
+
+        if(page_type == "manual" || page_type == null){
+            $("#btnCheckinManual").removeClass();
+            $("#btnCheckingScan").removeClass();
+
+            $("#btnCheckinManual").addClass('btn btn-primary w-100 mb-2');
+            $("#btnCheckingScan").addClass('btn btn-outline-primary w-100 mb-2');
+
+            $("#dataIDMember").val("");
+            $("#dataIDMemberScan").val("");
+
+            $("#containerCheckinManual").show();
+            $("#containerCheckinScan").hide();
+
+            $("#dataIDMember").focus();
+        }else{
+            $("#btnCheckinManual").removeClass();
+            $("#btnCheckingScan").removeClass();
+
+            $("#btnCheckingScan").addClass('btn btn-primary w-100 mb-2');
+            $("#btnCheckinManual").addClass('btn btn-outline-primary w-100 mb-2');
+
+            $("#dataIDMember").val("");
+            $("#dataIDMemberScan").val("");
+
+            $("#containerCheckinScan").show();
+            $("#containerCheckinManual").hide();
+
+            $("#dataIDMemberScan").focus();
+        }
+
         $("#checkinForm").on('keypress', function(e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode === 13) {
@@ -257,6 +291,8 @@
         });
 
         $("#checkinFormScan").on('keypress', function(e) {
+            window.location.search = urlParams;
+
             var keyCode = e.keyCode || e.which;
             if (keyCode === 13) {
                 e.preventDefault();
@@ -270,6 +306,9 @@
         });
 
         $("#btnCheckinManual").on('click', function() {
+            var refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?mode=manual';
+            window.history.pushState({ path: refresh }, '', refresh);
+
             $("#btnCheckinManual").removeClass();
             $("#btnCheckingScan").removeClass();
 
@@ -286,6 +325,9 @@
         });
 
         $("#btnCheckingScan").on('click', function() {
+            var refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?mode=scan';
+            window.history.pushState({ path: refresh }, '', refresh);
+
             $("#btnCheckinManual").removeClass();
             $("#btnCheckingScan").removeClass();
 

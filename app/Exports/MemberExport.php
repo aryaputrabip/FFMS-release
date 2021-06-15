@@ -13,24 +13,25 @@ class MemberExport implements FromView
 {
     public function view(): View
     {
-        $memberQuery =
-            DB::table("public.memberdata as dt1")
-                ->join('secure.users as dt2', 'dt2.id', '=', 'dt1.created_by')
-                ->join("membership as mShipData", "mShipData.mship_id", "=", "membership")
-                ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
-                ->select(
-                    'dt1.created_at as join_date',
-                    'dt1.member_id',
-                    'dt1.name',
-                    'dt1.email',
-                    'mShipData.name as membership',
-                    'dt1.phone',
-                    'dt1.marketing as marketing',
-                    'dt1.pt as personal_trainer',
-                    'dt2.name as cs',
-                    'dt1.member_notes as notes'
-                )
-                ->get();
+        $memberQuery = DB::table("public.memberdata as MEMBER")
+                        ->join("membership as MEMBERSHIP", "MEMBERSHIP.mship_id", "=", "membership")
+                        ->join("membership_type as MSHIP_TYPE", "MSHIP_TYPE.mtype_id", "=", "MEMBERSHIP.type")
+                        ->join("cache_read as CACHE", "CACHE.author", "=", "MEMBER.member_id")
+                        ->join("marketingdata as MARKETING", "MARKETING.mark_id", "=", "CACHE.id_marketing")
+                        ->join("ptdata as PT", "PT.pt_id", "=", "CACHE.id_pt")
+                        ->join("secure.users as CS", "CS.id", "=", "MEMBER.created_by")
+                        ->select(
+                            'MEMBER.created_at as join_date',
+                            'MEMBER.member_id',
+                            'MEMBER.name',
+                            'MEMBER.email',
+                            'MEMBER.phone',
+                            'MEMBER.member_notes as notes',
+                            'MEMBERSHIP.name as membership',
+                            'MARKETING.name as marketing',
+                            'PT.name as pt',
+                            'CS.name as cs'
+                        )->get();
 
         return view('export.members', [
             'members' => $memberQuery

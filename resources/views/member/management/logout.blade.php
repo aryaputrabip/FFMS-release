@@ -77,6 +77,7 @@
                         <th class="align-middle text-center pl-2 pr-2 w-auto" style="border-top: 0 !important;">Status</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Membership</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Jenis Membership</th>
+                        <th class="align-middle w-auto" style="border-top: 0 !important;">Tanggal Checkin</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Aksi</th>
                     </tr>
                     </thead>
@@ -169,6 +170,7 @@
                 { data: 'status', name: 'status' },
                 { data: 'membership', name: 'membership' },
                 { data: 'membership_type', name: 'membership_type' },
+                { data: 'checkin_date', name: 'checkin_date' },
                 {
                     data: 'action',
                     name: 'action',

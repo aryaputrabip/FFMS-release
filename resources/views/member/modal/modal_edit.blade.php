@@ -223,7 +223,7 @@
 </div>
 
 <div class="modal fade" id="modal-f-payment" data-backdrop="static">
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <div class="modal-content" id="modal-f-payment-content">
             <div class="modal-header">
                 <h6 class="modal-title text-dark">
@@ -260,6 +260,24 @@
                         </div>
 
                         <div class="card">
+                            <div class="row pt-3 pr-3 pb-2 pl-3">
+                                <label for="paymentMethodGroup" class="col-sm-9 col-form-label">
+                                    Metode Pembayaran<span class="text-danger">*</span>
+                                </label>
+                            </div>
+                            <div class="card-body pt-0" id="paymentMGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
+                                <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="paymentMethodGroup">
+                                    <option value="full" selected>Lunas</option>
+                                    <option value="cicilan">Cicilan</option>
+                                </select>
+                                <div id="paymentCicilanDurationContainer" style="display: none;">
+                                    <input class="form-control w-auto float-left" type="number" min="1" value="1" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
+                                    <h6 class="float-left mt-2 ml-2">Bulan</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
                             <div class="card-body pt-3 pb-3 pl-3 pr-3">
                                 <div class="row">
                                     <div class="col-md-4">
@@ -277,6 +295,9 @@
                                 <div class="row text-right">
                                     <div class="col-12">
                                         <h2 id="total_price_parent"><b>Rp. </b><b id="total_price">0</b></h2>
+                                        <h4 class="font-weight-bold" id="cicilanChargeContainer" style="display: none;">
+                                            <i><b>Rp. </b><b id="cicilan_per_bulan">0</b><small>/bulan</small></i>
+                                        </h4>
                                     </div>
                                 </div>
                             </div>
@@ -334,6 +355,8 @@
                         <input type="hidden" id="mShipType" name="mShipType" readonly>
                         <input type="hidden" id="mShipCategory" name="mShipCategory" readonly>
                         <input type="hidden" id="mShipApproval" name="mShipApproval" readonly>
+                        <input type="hidden" id="paymentMethodGroup2" name="paymentMethodGroup" readonly>
+                        <input type="hidden" id="paymentCicilan" name="paymentCicilan" readonly>
                     </form>
 
                     <button type="button" class="btn btn-primary w-100 ml-2 mr-2 mt-2" id="confirmPayment" data-action="">
@@ -414,7 +437,7 @@
 </div>
 
 <div class="modal fade" id="modal-m-change" data-backdrop="static">
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title text-dark">
@@ -436,10 +459,10 @@
                                     </button>
                                 </label>
                                 <div class="col-sm-3">
-                                    <select class="form-control select2" style="width: 100%;">
-                                        <option value="1" selected="selected">Semuanya</option>
-                                        <option value="2">All Access</option>
-                                        <option value="3">GYM Only</option>
+                                    <select class="form-control select2" id="membershipFilter" style="width: 100%;">
+                                        <option value="" selected>Semuanya</option>
+                                        <option value="All-Access">All Access</option>
+                                        <option value="GYM-Only">GYM Only</option>
                                     </select>
                                 </div>
                             </div>
@@ -455,8 +478,8 @@
                                 <div class="attachment-block attachment-block-selector clearfix" id="membership-{{ $mship->mship_id }}" style="padding: 15px; cursor: pointer;" onclick="selectMembership({{$mship->mship_id}})">
                                     <h5 class="attachment-heading" id="membership-{{ $mship->mship_id }}-name">{{ $mship->name }}</h5>
                                     <div class="attachment-text"><b>Durasi: </b> <span id="membership-{{ $mship->mship_id }}-duration">{{ $mship->duration }}</span> Bulan</div>
-                                    <div class="attachment-text"><b>Tipe: </b> <span id="membership-{{ $mship->mship_id }}-type">{{ $mship->type   }}</span></div>
-                                    <div class="attachment-text mt-2"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
+                                    <div class="attachment-text @if($mship->type == "All Access") All-Access @else GYM-Only @endif"><b>Tipe: </b> <span id="membership-{{ $mship->type }}-type">{{ $mship->type }}</span></div>
+                                    <div class="attachment-text"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
                                     <input type="hidden" id="membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
                                 </div><?php
                                 }?>

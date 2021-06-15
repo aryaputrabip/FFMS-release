@@ -50,9 +50,11 @@
                 </div>
                 <div class="float-right">
                     <div class='input-group'>
+                        @if($role == 1)
                         <a href="#modal-pt" data-toggle="modal" onclick="newPTModal();" class="btn btn-sm btn-primary mt-2 mr-3" style="height: calc(1.8125rem + 2px); color: #FFFFFF;">
                             <i class="fas fa-plus fa-xs mr-1"></i> Tambah Member Cuti
                         </a>
+                        @endif
 
                         <div class='input-group-prepend mt-2' style="height: calc(1.8125rem + 2px);">
                             <span class='input-group-text'><i class="fas fa-search fa-xs"></i></span>
@@ -96,6 +98,7 @@
 @endsection
 
 @section('modal')
+    @if($role == 1)
     <div class="modal fade" id="modal-cuti" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -113,6 +116,7 @@
                         <input type="hidden" id="activeMemberID" name="activeMemberID" readonly>
                         <input type="hidden" id="activeCutiDuration" name="activeStartDate" readonly>
                         <input type="hidden" id="endCutiDate" name="endCutiDate" readonly>
+                        <input type="hidden" id="oldEndDate" name="oldEndDate" readonly>
                         <input type="hidden" id="newMembershipEnd" name="newMembershipEnd" readonly>
                         {{ csrf_field() }}
 
@@ -322,7 +326,7 @@
             <input type="text" id="formExpired" name="formExpired" readonly>
         </form>
     </div>
-
+    @endif
 @endsection
 
 @section('import_script')
@@ -682,6 +686,7 @@
                 $("#activeCutiDuration").val(duration);
                 $("#endCutiDate").val(endcuti);
                 $("#newMembershipEnd").val(newdate);
+                $("#oldEndDate").val(olddate);
 
                 $("#cutiForm").attr("action", "{{ route('cuti.approve') }}");
                 $("#cutiForm").submit();
