@@ -100,7 +100,7 @@ class PTDataController extends Controller
             'gender' => $r->PTGender,
             'join_from' => $date_now,
             'status' => 2,
-            'created_by' => Auth::user()->role_id,
+            'created_by' => Auth::user()->id,
             'created_at' => $date_now
         ]);
 
@@ -131,7 +131,7 @@ class PTDataController extends Controller
             'gender' => $r->PTGender,
             'status' => $r->PTStatus,
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'updated_by' => Auth::user()->id
         ]);
         return redirect()->route('suadmin.pt.index')->with(['success' => 'Data Personal Trainer Berhasil Diubah']);
     }

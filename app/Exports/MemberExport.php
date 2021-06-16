@@ -14,12 +14,13 @@ class MemberExport implements FromView
     public function view(): View
     {
         $memberQuery = DB::table("public.memberdata as MEMBER")
-                        ->join("membership as MEMBERSHIP", "MEMBERSHIP.mship_id", "=", "membership")
-                        ->join("membership_type as MSHIP_TYPE", "MSHIP_TYPE.mtype_id", "=", "MEMBERSHIP.type")
-                        ->join("cache_read as CACHE", "CACHE.author", "=", "MEMBER.member_id")
-                        ->join("marketingdata as MARKETING", "MARKETING.mark_id", "=", "CACHE.id_marketing")
-                        ->join("ptdata as PT", "PT.pt_id", "=", "CACHE.id_pt")
-                        ->join("secure.users as CS", "CS.id", "=", "MEMBER.created_by")
+                        ->leftJoin("membership as MEMBERSHIP", "MEMBERSHIP.mship_id", "=", "membership")
+                        ->leftJoin("membership_type as MSHIP_TYPE", "MSHIP_TYPE.mtype_id", "=", "MEMBERSHIP.type")
+                        ->leftJoin("cache_read as CACHE", "CACHE.author", "=", "MEMBER.member_id")
+                        ->leftJoin("marketingdata as MARKETING", "MARKETING.mark_id", "=", "CACHE.id_marketing")
+                        ->leftJoin("ptdata as PT", "PT.pt_id", "=", "CACHE.id_pt")
+                        ->leftJoin("secure.users as CS", "CS.id", "=", "MEMBER.created_by")
+                        ->leftJoin("logmember as LOG", "LOG.author", "=", "MEMBER.member_id")
                         ->select(
                             'MEMBER.created_at as join_date',
                             'MEMBER.member_id',
@@ -30,8 +31,22 @@ class MemberExport implements FromView
                             'MEMBERSHIP.name as membership',
                             'MARKETING.name as marketing',
                             'PT.name as pt',
-                            'CS.name as cs'
-                        )->get();
+                            'CS.name as cs',
+                            'LOG.transaction as last_transaction'
+                        )
+                        ->orderBy('LOG.date', 'DESC')
+                        ->get();
+
+        $totalQuery = count($memberQuery);
+        $arrayValidate = [];
+
+        for($i=0; $i<$totalQuery; $i++){
+            if (in_array($memberQuery[$i]->member_id, $arrayValidate)) {
+                $memberQuery->forget($i);
+            }else{
+                array_push($arrayValidate, $memberQuery[$i]->member_id);
+            }
+        }
 
         return view('export.members', [
             'members' => $memberQuery

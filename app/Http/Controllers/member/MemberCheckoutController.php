@@ -53,6 +53,9 @@ class MemberCheckoutController extends Controller
     }
 
     public function getCheckinMemberData(Request $request){
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = date('Y-m-d H:i:s');
+
         if($request->ajax()){
             $data = MemberModel::from("memberdata as PK")
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
@@ -74,6 +77,7 @@ class MemberCheckoutController extends Controller
                     'logCheckin.date as checkinFrom'
                 )
                 ->where('checkin_status', '=', true)
+                ->wheredate('date', "=", $date_now)
                 ->get();
 
             return DataTables::of($data)

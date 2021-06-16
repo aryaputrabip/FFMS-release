@@ -209,7 +209,7 @@ class MemberRegisterController extends Controller
             'session' => $session,
             'status' => 2,
 //            'm_startdate' => $date_now, //Karena Presale, Maka Tidak  Langsung Aktif
-            'created_by' => Auth::user()->role_id,
+            'created_by' => Auth::user()->id,
             'created_at' => $date_now,
             'visitlog' => 0,
             'photo' => $r->photoFile,

@@ -185,7 +185,7 @@ class CutiController extends Controller
                 'cuti_from' => $date_now,
                 'cuti_expired' => $r->endCutiDate,
                 'return_old_data' => $r->oldEndDate,
-                'created_by' => Auth::user()->role_id,
+                'created_by' => Auth::user()->id,
                 'created_at' => $date_now
             ]);
 
@@ -193,7 +193,7 @@ class CutiController extends Controller
                 'status' => 3,
                 'm_enddate' => $r->newMembershipEnd,
                 'updated_at' => $date_now,
-                'updated_by' =>Auth::user()->role_id
+                'updated_by' =>Auth::user()->id
             ]);
 
             $log = MemberLogModel::create([
@@ -253,7 +253,7 @@ class CutiController extends Controller
             'status' => 1,
             'm_enddate' => $r->formExpired,
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'updated_by' => Auth::user()->id
         ]);
 
         if($this->checkAuth() == 1){

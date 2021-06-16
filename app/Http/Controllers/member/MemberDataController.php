@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
@@ -477,6 +478,24 @@ class MemberDataController extends Controller
 
             $data['logCategory'] = MemberLogCategoryModel::select('category')->get();
 
+            $data['last_edited'] = DB::table("public.memberdata as MEMBER")
+                ->leftJoin("secure.users as CS", "CS.id", "=", "MEMBER.updated_by")
+                ->select(
+                    'CS.name as name'
+                )
+                ->where('member_id', "=", $id)
+                ->first();
+
+            if($data['last_edited'] == null){
+                $data['last_edited'] = DB::table("public.memberdata as MEMBER")
+                    ->leftJoin("secure.users as CS", "CS.id", "=", "MEMBER.created_by")
+                    ->select(
+                        'CS.name as name'
+                    )
+                    ->where('member_id', "=", $id)
+                    ->first();
+            }
+
             if($data['data'] != null){
                 return view('member.management.view', $data);
             }else{
@@ -581,7 +600,7 @@ class MemberDataController extends Controller
             'pt' => $ptName,
             'member_notes' => $r->dataUserNote,
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'updated_by' => Auth::user()->id
         ]);
 
         $cache = MemberCacheModel::where('author', $r->hiddenID)->update([
@@ -1023,7 +1042,7 @@ class MemberDataController extends Controller
                 'session_reg' => ($r->sOld + $r->nSession),
                 'session' => ($r->lOld + $r->nSession),
                 'updated_at' => $date_now,
-                'updated_by' => Auth::user()->role_id
+                'updated_by' => Auth::user()->id
             ]);
 
             if ($r->nTitle == "") {
@@ -1053,7 +1072,7 @@ class MemberDataController extends Controller
                 'session_reg' => $r->nSession,
                 'session' => $r->nSession,
                 'updated_at' => $date_now,
-                'updated_by' => Auth::user()->role_id
+                'updated_by' => Auth::user()->id
             ]);
 
             if($r->nPT == "nothing" || $r->nPT == ""){
@@ -1105,7 +1124,7 @@ class MemberDataController extends Controller
                         'm_startdate' => $date_now,
                         'm_enddate' => $new_enddate,
                         'updated_at' => $date_now,
-                        'updated_by' => Auth::user()->role_id
+                        'updated_by' => Auth::user()->id
                     ]);
                 }else{
                     $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
@@ -1114,7 +1133,7 @@ class MemberDataController extends Controller
                         'membership' => $r->mShipID,
                         'm_enddate' => $new_enddate,
                         'updated_at' => $date_now,
-                        'updated_by' => Auth::user()->role_id
+                        'updated_by' => Auth::user()->id
                     ]);
                 }
             }else if($r->sTransaction == "extend-membership"){
@@ -1129,7 +1148,7 @@ class MemberDataController extends Controller
                     'm_startdate' => $date_now,
                     'm_enddate' => $new_enddate,
                     'updated_at' => $date_now,
-                    'updated_by' => Auth::user()->role_id
+                    'updated_by' => Auth::user()->id
                 ]);
             }
 
@@ -1256,7 +1275,7 @@ class MemberDataController extends Controller
 
         $Member = MemberModel::where('member_id', $r->ptEditHiddenID)->update([
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'updated_by' => Auth::user()->id
         ]);
 
         if($this->checkAuth() == 1){

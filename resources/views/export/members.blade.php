@@ -24,6 +24,14 @@
     </tr>
     </thead>
     <tbody>
+        <?php
+        function asRupiah($value) {
+            if ($value<0) return "-".asRupiah(-$value);
+            return 'Rp. ' . number_format($value, 0);
+        }
+
+        ?>
+
         @foreach($members as $key => $member)
         <tr>
             <td align="center" style="border: 1px solid #000000;">{{ $loop->iteration }}</td>
@@ -33,7 +41,7 @@
             <td align="left" style="border: 1px solid #000000;">{{ $member->email }}</td>
             <td align="center" style="border: 1px solid #000000;">{{ $member->membership }}</td>
             <td align="center" style="border: 1px solid #000000;">{{ $member->phone }}</td>
-            <td align="center" style="border: 1px solid #000000;"> - </td>
+            <td align="right" style="border: 1px solid #000000;"> {{ asRupiah($member->last_transaction) }} </td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->marketing }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->cs }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->pt }}</td>

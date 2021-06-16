@@ -100,7 +100,7 @@ class MarketingDataController extends Controller
             'gender' => $r->marketingGender,
             'join_from' => $date_now,
             'status' => 2,
-            'created_by' => Auth::user()->role_id,
+            'created_by' => Auth::user()->id,
             'created_at' => $date_now
         ]);
 
@@ -132,7 +132,7 @@ class MarketingDataController extends Controller
             'gender' => $r->marketingGender,
             'status' => $r->marketingStatus,
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id
+            'updated_by' => Auth::user()->id
         ]);
         return redirect()->route('suadmin.marketing.index')->with(['success' => 'Marketing Berhasil Diubah']);
     }

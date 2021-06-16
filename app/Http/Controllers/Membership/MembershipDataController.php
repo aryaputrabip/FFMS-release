@@ -119,7 +119,7 @@ class MembershipDataController extends Controller
             'type' => $r->membershipType,
             'duration' => $r->membershipDuration,
             'price' => $r->membershipPrice,
-            'created_by' => Auth::user()->role_id,
+            'created_by' => Auth::user()->id,
             'created_at' => $date_now,
             'status' => 2,
             'category' => $r->membershipCategory
@@ -169,7 +169,7 @@ class MembershipDataController extends Controller
             'type' => $r->membershipType,
             'category' => $r->membershipCategory,
             'updated_at' => $date_now,
-            'updated_by' => Auth::user()->role_id,
+            'updated_by' => Auth::user()->id,
         ]);
         return redirect()->route('suadmin.membership.index')->with(['success' => 'Paket Member Berhasil Diubah']);
     }
