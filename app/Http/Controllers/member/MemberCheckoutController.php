@@ -77,8 +77,19 @@ class MemberCheckoutController extends Controller
                     'logCheckin.date as checkinFrom'
                 )
                 ->where('checkin_status', '=', true)
-                ->wheredate('date', "=", $date_now)
+                ->orderBy('logCheckin.date', 'DESC')
                 ->get();
+
+            $totalQuery = count($data);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++){
+                if (in_array($data[$i]->member_id, $arrayValidate)) {
+                    $data->forget($i);
+                }else{
+                    array_push($arrayValidate, $data[$i]->member_id);
+                }
+            }
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -99,7 +110,7 @@ class MemberCheckoutController extends Controller
                     return '<div class="text-left">'.$data->type.'</div>';
                 })
                 ->addColumn('checkin_date', function ($data) {
-                    return '<div class="text-left">'.date("d M Y (H:m:s)", strtotime($data->checkinFrom)).'</div>';
+                    return '<div class="text-left">'.date("d M Y (H:i:s)", strtotime($data->checkinFrom)).'</div>';
                 })
                 ->addColumn('action', function ($data) {
                     return '<div class="text-center">
