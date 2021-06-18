@@ -118,6 +118,7 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::get('getCheckinMemberData', 'MemberCheckoutController@getCheckinMemberData')->name('getCheckinMemberData');
     Route::get('getCheckoutMemberData', 'MemberCheckoutController@getCheckoutMemberData')->name('getCheckoutMemberData');
     Route::post('checkoutMember', 'MemberCheckoutController@checkoutMember')->name('checkoutMember');
+    Route::post('forceChangeStatus', 'MemberDataController@forceChangeStatus')->name('forceChangeStatus');
 
     Route::post('addTransaction', 'MemberDataController@addTransaction')->name('addTransaction');
 
@@ -146,6 +147,8 @@ Route::namespace('membership')->prefix('membership')->name('membership.')->group
     Route::get('edit', 'MembershipDataController@edit')->name('edit');
     Route::post('update', 'MembershipDataController@update')->name('update');
     Route::post('destroy', 'MembershipDataController@destroy')->name('destroy');
+
+    Route::get('dataChecking', 'MembershipDataController@dataChecking')->name('dataChecking');
 });
 
 Route::namespace('pt')->prefix('pt')->name('pt.')->group(function () {

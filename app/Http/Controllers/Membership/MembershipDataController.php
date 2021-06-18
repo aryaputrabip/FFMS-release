@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Membership;
 
+use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\gstatus\GlobalStatusModel;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\MemberCategoryModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipCategoryModel;
+use App\Model\membership\membershipListCacheModel;
 use App\Model\membership\MembershipModel;
 use App\Model\membership\MembershipStatusModel;
 use App\Model\membership\MembershipTypeModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -182,6 +185,16 @@ class MembershipDataController extends Controller
         }else{
             redirect()->route('suadmin.membership.index')->with(['error' => 'Paket Member Gagal Dihapus']);
         }
+    }
+
+    function dataChecking(){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now()->toDateString();
+
+        $data['data'] = membershipListCacheModel::whereDate('end_date', '<', $date_now)->delete();
     }
 
     function asRupiah($value) {

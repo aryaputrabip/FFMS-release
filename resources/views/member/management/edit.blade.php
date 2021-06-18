@@ -38,6 +38,50 @@
                    class="btn btn-outline-dark mb-2" style="width: 250px;">
                     <i class="fas fa-times fa-sm mr-1"></i> Batal
                 </a>
+                <hr style="width: 250px;" class="ml-0">
+                @if(isset($membership_startdate))
+                    <div class="card mt-2" style="width: 250px;" id="cardDataMember">
+                        <div class="card-body p-2">
+                            <h6 class="font-weight-bold">Membership</h6>
+                            <h4 class="font-weight-normal">{{ $membership_cache->membership }}</h4>
+                            <h6 class="font-weight-bold">{{ $membership_startdate }} - {{ $membership_enddate }}</h6>
+                            <h6 class="mt-4 font-weight-normal">Total Kunjungan : <span>{{ $data->visitlog }}</span></h6>
+                        </div>
+                    </div>
+                @endisset
+
+                @if($data->session > 0)
+                    <div class="card mt-2" style="width: 250px;" id="cardDataPT">
+                        <div class="card-body p-2">
+                            <h6 class="font-weight-bold">Personal Trainer</h6>
+                            <h4 class="font-weight-normal">@if(isset($pt->name)) {{ $pt->name }} @else - @endisset</h4>
+                            <h6 class="font-weight-bold">{{ $data->session_reg }} Sesi</h6>
+                            <h6 class="mt-4 font-weight-normal">Sisa Sesi : {{ $data->session }}</h6>
+                        </div>
+                    </div>
+                @endif
+
+                <?php
+                function asRupiah2($value) {
+                    if ($value<0) return "-".asRupiah(-$value);
+                    return 'Rp. ' . number_format($value, 0);
+                }?>
+
+                @if(isset($cicilan_member))
+                    <hr style="width: 250px;" class="ml-0 mt-3" id="cardDataAndCicilanDivider">
+
+                    @foreach($cicilan_member as $cc)
+                    <div class="card bg-danger mt-2" style="width: 250px;">
+                        <div class="card-body p-2">
+                            <h6 class="font-weight-bold">Cicilan Aktif</h6>
+                            <h4 class="font-weight-normal"><?php echo asRupiah2($cc->rest_price); ?></h4>
+                            <h6 class="font-weight-bold">{{ $cc->rest_membership }}</h6>
+                            <h6 class="mt-4 font-weight-normal">Sisa Tenor : {{ $cc->rest_duration }} Bulan</h6>
+                            <h6 class="font-weight-normal">Sisa Cicilan : <?php echo asRupiah2($cc->rest_data); ?></h6>
+                        </div>
+                    </div>
+                    @endforeach
+                @endisset
             </div>
             <div class="col-md col-sm-12">
                 <div class="card h-100">
@@ -133,6 +177,13 @@
                                             </div>
                                             <div class="card-body pt-0" style="overflow-y: auto; overflow-x: hidden;">
                                                 <hr style="margin: 0 0 20px 0;">
+                                                <button type="button" class="btn btn-outline-dark mb-2 w-100" onclick="changeDateMember();">
+                                                    <i class="fas fa-calendar-alt fa-sm mr-1"></i> Ubah Tanggal Mulai / Berakhir
+                                                </button>
+                                                <button type="button" class="btn btn-outline-dark mb-4 w-100" onclick="changeStatusMember();">
+                                                    <i class="fas fa-check fa-sm mr-1"></i> Ubah Status Member
+                                                </button>
+
                                                 <h6 class="mt-2 text-red"><b>Hapus Member</b></h6>
                                                 <button type="button" class="btn btn-danger w-100" onclick="deleteMember();">
                                                     <i class="fas fa-trash fa-sm mr-1"></i> Hapus Member ini
@@ -167,7 +218,6 @@
                                                 <th class="align-middle">Durasi</th>
                                                 <th class="align-middle">Tanggal Mulai</th>
                                                 <th class="align-middle">Tanggal Berakhir</th>
-                                                <th class="align-middle">Total Kunjungan</th>
                                             </tr>
                                             </thead>
                                         </table>
@@ -289,7 +339,6 @@
                 { data: 'duration', name: 'duration' },
                 { data: 'start_date', name: 'start_date' },
                 { data: 'expired_date', name: 'expired_date' },
-                { data: 'visit', name: 'visit' },
             ],
         });
 
@@ -565,6 +614,43 @@
             $("#deleteValidationInput").addClass("is-invalid");
         }
     }
+
+    function changeStatusMember(){
+        $("#changeStatusModal").modal("show");
+    }
+
+    function changeDateMember(){
+        $("#changeDateModal").modal("show");
+    }
+
+    function confirmStatusMemberChange(){
+        const DestroySwal = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-outline-secondary mr-2'
+            },
+            buttonsStyling: false
+        });
+
+        DestroySwal.fire({
+            icon: 'warning',
+            html: 'Apakah Anda yakin ingin mengubah status member ini ? <br><br> <i>(Perhatian! Paket Member Aktif akan terhapus jika status membership diubah menjadi Non-Aktif)</i>',
+            showCancelButton: true,
+            cancelButtonText: `<i class="fas fa-arrow-left fa-sm mr-1"></i> Kembali`,
+            confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Ubah`,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.confirm){
+                if($("#dataStatusMember").val() == 2){
+                    $("#statusEditForm").submit();
+                }else{
+                    $("#statusEditForm").submit();
+                }
+            }else{
+                return false;
+            }
+        });
+    }
     @endif
 
     function extendSession(){
@@ -750,11 +836,21 @@
                     $("#nSession").val($("#dataUserPTSession option:selected").val());
                     $("#nPrice").val($("#dataUserPTSession option:selected").data("price"));
                     $("#nTitle").val($("#dataUserPTSession option:selected").data("title"));
+
+                    // $("#nApproval").val(mShipApprovalPrice);
+                    // $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    // $("#durasiCicilan").val($("#paymentCicilanDuration").val());
+
                 }else if($("#confirmPayment").data("action") == 'register-session'){
                     $("#nSession").val($("#dataPTRegSession option:selected").val());
                     $("#nPrice").val($("#dataPTRegSession option:selected").data("price"));
                     $("#nTitle").val($("#dataPTRegSession option:selected").data("title"));
                     $("#nPT").val($("#dataPTReg option:selected").val());
+
+                    // $("#nApproval").val(mShipApprovalPrice);
+                    // $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    // $("#durasiCicilan").val($("#paymentCicilanDuration").val());
+
                 }else if($("#confirmPayment").data("action") == 'change-membership'){
                     $("#mShipID").val($("#cacheMembershipID").val());
                     $("#mShipName").val($("#cacheMembership").val());
@@ -764,7 +860,16 @@
                     $("#mShipCategory").val($("#cacheMembershipCategory").val());
                     $("#mShipApproval").val(mShipApprovalPrice);
                     $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
-                    $("#paymentCicilan").val($("#paymentCicilanDuration").val());
+                    $("#durasiCicilan").val($("#paymentCicilanDuration").val());
+
+                    if($("#paymentMethodGroup").val() == "cicilan"){
+                        if($("#approvalPrice").val() == ""){
+                            $("#jumlahCicilan").val((parseInt($("#mShipPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                        }else{
+                            $("#jumlahCicilan").val((parseInt($("#approvalPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                        }
+                    }
+
                 }else if($("#confirmPayment").data("action") == 'extend-membership'){
                     $("#mShipID").val($("#extend-membership-id").val());
                     $("#mShipName").val($("#extend-membership-name").html());
@@ -1077,6 +1182,18 @@
             }
         }
     });
+
+    function asRupiah(value){
+        var formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'IDR',
+        });
+
+        var split = formatter.format(value).split(".00");
+        var splitCurrency = split[0].split("IDR");
+
+        return splitCurrency[1];
+    }
 
     function isEmail(email){
         return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );

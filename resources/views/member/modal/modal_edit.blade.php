@@ -356,7 +356,8 @@
                         <input type="hidden" id="mShipCategory" name="mShipCategory" readonly>
                         <input type="hidden" id="mShipApproval" name="mShipApproval" readonly>
                         <input type="hidden" id="paymentMethodGroup2" name="paymentMethodGroup" readonly>
-                        <input type="hidden" id="paymentCicilan" name="paymentCicilan" readonly>
+                        <input type="hidden" id="durasiCicilan" name="durasiCicilan" readonly>
+                        <input type="hidden" id="jumlahCicilan" name="jumlahCicilan" readonly>
                     </form>
 
                     <button type="button" class="btn btn-primary w-100 ml-2 mr-2 mt-2" id="confirmPayment" data-action="">
@@ -545,3 +546,55 @@
         </div>
     </div>
 </div>
+
+@if($role == 1)
+    <div class="modal fade" id="changeStatusModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title text-dark">
+                        <i class="fas fa-check fa-sm mr-1"></i>Ubah Status Member
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body pb-0">
+                    <form id="statusEditForm" name="statusEditForm" method="POST" action="{{ route('member.forceChangeStatus') }}">
+                        {{ csrf_field() }}
+
+                        <input type="hidden" id="memberStatusHiddenID" name="memberStatusHiddenID" value="{{ $data->member_id }}" readonly>
+
+                        <h6><b>Status Member</b></h6>
+                        <select class="form-control select2 mb-2" style="width: 100%;" id="dataStatusMember" name="dataStatusMember" @if($data->status != 1) disabled @endif>
+                            <option value="1" @if($data->status != 2) selected @endif> Aktif </option>
+                            <option value="2" @if($data->status == 2) selected @endif> Non-Aktif </option>
+                        </select>
+
+                        <button type="button" class="btn btn-dark w-100 mt-3 mb-0" data-dismiss="modal" @if($data->status == 1) onclick="confirmStatusMemberChange();" @elseif($data->status == 2) disabled @endif>
+                            <i class="fas fa-check fa-sm mr-1"></i> Ubah Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeDateModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title text-dark">
+                        <i class="fas fa-calendar-alt fa-sm mr-1"></i>Ubah Tanggal Mulai / Berakhir
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+@endif

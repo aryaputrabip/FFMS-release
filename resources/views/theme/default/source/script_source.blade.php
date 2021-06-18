@@ -30,5 +30,11 @@
             dataType: 'html',
             url: "{{ route('member.dataChecking') }}"
         });
+
+        $.ajax({
+            type: 'GET',
+            dataType: 'html',
+            url: "{{ route('membership.dataChecking') }}"
+        });
     });
 </script>

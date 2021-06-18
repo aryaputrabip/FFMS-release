@@ -5,6 +5,7 @@ namespace App\Http\Controllers\member;
 use App\Exports\MemberExport;
 use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\marketing\MarketingModel;
+use App\Model\member\CicilanDataModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberCacheModel;
 use App\Model\member\MemberCheckinModel;
@@ -13,6 +14,7 @@ use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\member\MemberStatusModel;
 use App\Model\membership\MembershipCategoryModel;
+use App\Model\membership\membershipListCacheModel;
 use App\Model\membership\MembershipModel;
 use App\Model\membership\MembershipTypeModel;
 use App\Model\payment\BankModel;
@@ -250,20 +252,19 @@ class MemberDataController extends Controller
         $role = $validateRole->checkAuthALL();
 
         if($request->ajax() && $id != ""){
-            $data = MemberModel::from("memberdata as PK")
-                ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
+            $data = membershipListCacheModel::from("membership_memberlist as mShipCache")
+                ->join("membership as mShipData", "mShipData.mship_id", "=", "mShipCache.membership_id")
                 ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
+                ->join("memberdata as PK", "PK.member_id", "=", "mShipCache.author")
                 ->select(
-                    'PK.member_id',
                     'mShipData.name as name',
                     'mShipData.duration as duration',
-                    'PK.status as memberStatus',
-                    'PK.m_startdate as start_date',
-                    'PK.m_enddate as end_date',
+                    'mShipCache.start_date as start_date',
+                    'mShipCache.end_date as end_date',
                     'mShipType.type as type',
                     'PK.visitlog as visit'
                 )
-                ->where('PK.member_id', '=', $id)
+                ->where('mShipCache.author', '=', $id)
                 ->get();
 
             return DataTables::of($data)
@@ -465,6 +466,19 @@ class MemberDataController extends Controller
             $data['cache'] = MemberCacheModel::where('author', $id)->first();
             $data['membership'] = MembershipModel::where('mship_id', $data['data']->membership)->first();
 
+            $data['membership_cache'] = membershipListCacheModel::where('author', $id)->orderBy('start_date', 'ASC')->first();
+
+            if(isset($data['membership_cache']->start_date)){
+                $data['membership_startdate'] = date("d M y",strtotime($data['membership_cache']->start_date));
+            }
+
+            if(isset($data['membership_cache']->end_date)){
+                $data['membership_enddate'] = date("d M y",strtotime($data['membership_cache']->end_date));
+            }
+
+
+            $data['cicilan_member'] = CicilanDataModel::where('author', $id)->get();
+
             $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
             $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
 
@@ -522,6 +536,27 @@ class MemberDataController extends Controller
             }else{
                 abort(404);
             }
+
+            $data['membership_cache'] = membershipListCacheModel::from("membership_memberlist as PK")
+                ->join("membership as mShip", "mShip.mship_id", "=", "PK.membership_id")
+                ->select(
+                    "PK.id as id",
+                    "PK.membership_id as membership_id",
+                    "PK.start_date as start_date",
+                    "PK.end_date as end_date",
+                    "PK.author as author",
+                    "mShip.name as membership")
+                ->where('author', $id)->orderBy('start_date', 'ASC')->first();
+
+            if(isset($data['membership_cache']->start_date)){
+                $data['membership_startdate'] = date("d M y",strtotime($data['membership_cache']->start_date));
+            }
+
+            if(isset($data['membership_cache']->end_date)){
+                $data['membership_enddate'] = date("d M y",strtotime($data['membership_cache']->end_date));
+            }
+
+            $data['cicilan_member'] = CicilanDataModel::where('author', $id)->get();
 
             $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
             $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
@@ -1051,6 +1086,31 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
+//            if($r->paymentMethodGroup == "cicilan"){
+//                $status_transaksi = "cicilan";
+//                $jumlah_transaksi = $r->jumlahCicilan;
+//
+//                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+//                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
+//                $rest_membership = "Pembelian Paket PT  (" + $fullSessionName + ")";
+//
+//                $cicilanData = CicilanDataModel::create([
+//                    'author' => $r->sHiddenID,
+//                    'rest_duration' => $r->durasiCicilan,
+//                    'rest_price' => $rest_price,
+//                    'rest_data' => $rest_data,
+//                    'rest_membership' => $rest_membership,
+//                    'created_at' => $date_now
+//                ]);
+//            }else{
+//                $status_transaksi = "lunas";
+//                if($r->mShipApproval == ""){
+//                    $jumlah_transaksi = $r->nPrice;
+//                }else{
+//                    $jumlah_transaksi = $r->nApproval;
+//                }
+//            }
+
             $log = MemberLogModel::create([
                 'date' => $date_now,
                 'desc' => 'Pembelian Sesi PT - ' . $fullSessionName,
@@ -1092,6 +1152,31 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
+//            if($r->paymentMethodGroup == "cicilan"){
+//                $status_transaksi = "cicilan";
+//                $jumlah_transaksi = $r->jumlahCicilan;
+//
+//                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+//                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
+//                $rest_membership = "Pembelian Paket PT  (" + $fullSessionName + ")";
+//
+//                $cicilanData = CicilanDataModel::create([
+//                    'author' => $r->sHiddenID,
+//                    'rest_duration' => $r->durasiCicilan,
+//                    'rest_price' => $rest_price,
+//                    'rest_data' => $rest_data,
+//                    'rest_membership' => $rest_membership,
+//                    'created_at' => $date_now
+//                ]);
+//            }else{
+//                $status_transaksi = "lunas";
+//                if($r->mShipApproval == ""){
+//                    $jumlah_transaksi = $r->nPrice;
+//                }else{
+//                    $jumlah_transaksi = $r->nApproval;
+//                }
+//            }
+
             $log = MemberLogModel::create([
                 'date' => $date_now,
                 'desc' => 'Pembelian Paket Personal Trainer - ' . $fullSessionName,
@@ -1110,6 +1195,33 @@ class MemberDataController extends Controller
 
         }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
             $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
+
+            if($r->paymentMethodGroup == "cicilan"){
+                $status_transaksi = "cicilan";
+                $jumlah_transaksi = $r->jumlahCicilan;
+
+                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
+                $rest_membership = "Pembelian Paket Member";
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => $r->durasiCicilan,
+                    'rest_price' => $rest_price,
+                    'rest_data' => $rest_data,
+                    'rest_membership' => $rest_membership,
+                    'created_at' => $date_now
+                ]);
+            }else{
+                $status_transaksi = "lunas";
+                if($r->mShipApproval == ""){
+                    $jumlah_transaksi = $r->mShipPrice;
+                }else{
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+            }
+
+
             if($r->sTransaction == "change-membership"){
                 $log_desc = 'Pembelian Paket Member - '.$r->mShipName;
                 $successMessage = 'Pembelian Paket Member Berhasil!';
@@ -1128,12 +1240,20 @@ class MemberDataController extends Controller
                     ]);
                 }else{
                     $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+                    $cacheStartDate = Carbon::parse($member['member']->m_enddate)->addDays(1)->toDate();
 
                     $data = MemberModel::where('member_id', $r->sHiddenID)->update([
                         'membership' => $r->mShipID,
                         'm_enddate' => $new_enddate,
                         'updated_at' => $date_now,
                         'updated_by' => Auth::user()->id
+                    ]);
+
+                    $memberhipListCache = membershipListCacheModel::create([
+                        'author' => $r->sHiddenID,
+                        'membership_id' => $r->mShipID,
+                        'start_date' => $cacheStartDate,
+                        'end_date' => $new_enddate
                     ]);
                 }
             }else if($r->sTransaction == "extend-membership"){
@@ -1150,6 +1270,13 @@ class MemberDataController extends Controller
                     'updated_at' => $date_now,
                     'updated_by' => Auth::user()->id
                 ]);
+
+                $memberhipListCache = membershipListCacheModel::create([
+                    'author' => $r->sHiddenID,
+                    'membership_id' => $r->mShipID,
+                    'start_date' => $date_now,
+                    'end_date' => $new_enddate
+                ]);
             }
 
 
@@ -1158,13 +1285,13 @@ class MemberDataController extends Controller
                     'date' => $date_now,
                     'desc' => $log_desc,
                     'category' => 5,
-                    'transaction' => $r->mShipPrice,
-                    'status' => 'Lunas',
+                    'transaction' => $jumlah_transaksi,
+                    'status' => $status_transaksi,
                     'author' => $r->sHiddenID,
                     'additional' => $r->nPayment,
                     'reg_no' => ($r->nRegNo + 1),
                     'aksi' => 'membership',
-                    't_membership' => $r->mShipPrice,
+                    't_membership' => $jumlah_transaksi,
                     'notes' => $r->nNotes
                 ]);
             }else{
@@ -1172,13 +1299,13 @@ class MemberDataController extends Controller
                     'date' => $date_now,
                     'desc' => $log_desc,
                     'category' => 5,
-                    'transaction' => $r->mShipApproval,
-                    'status' => 'Lunas',
+                    'transaction' => $jumlah_transaksi,
+                    'status' => $status_transaksi,
                     'author' => $r->sHiddenID,
                     'additional' => $r->nPayment,
                     'reg_no' => ($r->nRegNo + 1),
                     'aksi' => 'membership',
-                    't_membership' => $r->mShipApproval,
+                    't_membership' => $jumlah_transaksi,
                     'notes' => $r->nNotes
                 ]);
             }
@@ -1314,6 +1441,34 @@ class MemberDataController extends Controller
             return redirect()->route($enroute)->with(['success' => 'Member Berhasil Dihapus']);
         }else{
             return redirect()->route($enroute)->with(['error' => 'Member Gagal Dihapus']);
+        }
+    }
+
+    function forceChangeStatus(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthADM();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now()->toDateString();
+
+        if($r->dataStatusMember == 2){
+            $Member = MemberModel::where('member_id', $r->memberStatusHiddenID)->update([
+                'm_enddate' => $date_now,
+                'status' => 4,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
+            $Member2 = membershipListCacheModel::where('author', $r->memberStatusHiddenID)->orderBy('start_date', 'ASC')->first();
+
+            $M3 = membershipListCacheModel::destroy($Member2->id);
+        }
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->memberStatusHiddenID)->with(['success' => 'Status Member Berhasil Diubah!']);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->memberStatusHiddenID)->with(['success' => 'Status Member Berhasil Diubah!']);
         }
     }
 }

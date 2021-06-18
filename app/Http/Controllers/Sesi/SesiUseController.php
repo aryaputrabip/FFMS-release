@@ -53,7 +53,7 @@ class SesiUseController extends Controller
                     'CACHE.id_pt as id_pt',
                     'PT.name as pt'
                 )
-                ->where('MEMBER.session','>',1)
+                ->where('MEMBER.session','>=',1)
                 ->where('CACHE.id_pt','!=',null)
                 ->get();
 

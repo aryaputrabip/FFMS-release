@@ -45,6 +45,50 @@
                    class="btn btn-outline-dark mb-2" style="width: 250px;">
                     <i class="fas fa-times fa-sm mr-1"></i> Batal
                 </a>
+                <hr style="width: 250px;" class="ml-0">
+                @if(isset($membership_startdate))
+                    <div class="card mt-2" style="width: 250px;" id="cardDataMember">
+                        <div class="card-body p-2">
+                            <h6 class="font-weight-bold">Membership</h6>
+                            <h4 class="font-weight-normal">{{ $membership_cache->membership }}</h4>
+                            <h6 class="font-weight-bold">{{ $membership_startdate }} - {{ $membership_enddate }}</h6>
+                            <h6 class="mt-4 font-weight-normal">Total Kunjungan : <span>{{ $data->visitlog }}</span></h6>
+                        </div>
+                    </div>
+                @endisset
+
+                <?php
+                function asRupiah2($value) {
+                    if ($value<0) return "-".asRupiah(-$value);
+                    return 'Rp. ' . number_format($value, 0);
+                }?>
+
+                @if($data->session > 0)
+                    <div class="card mt-2" style="width: 250px;" id="cardDataPT">
+                        <div class="card-body p-2">
+                            <h6 class="font-weight-bold">Personal Trainer</h6>
+                            <h4 class="font-weight-normal">@if(isset($pt->name)) {{ $pt->name }} @else - @endisset</h4>
+                            <h6 class="font-weight-bold">{{ $data->session_reg }} Sesi</h6>
+                            <h6 class="mt-4 font-weight-normal">Sisa Sesi : {{ $data->session }}</h6>
+                        </div>
+                    </div>
+                @endif
+
+                @if(isset($cicilan_member))
+                    <hr style="width: 250px;" class="ml-0 mt-3" id="cardDataAndCicilanDivider">
+
+                    @foreach($cicilan_member as $cc)
+                        <div class="card bg-danger mt-2" style="width: 250px;">
+                            <div class="card-body p-2">
+                                <h6 class="font-weight-bold">Cicilan Aktif</h6>
+                                <h4 class="font-weight-normal"><?php echo asRupiah2($cc->rest_price); ?></h4>
+                                <h6 class="font-weight-bold">{{ $cc->rest_membership }}</h6>
+                                <h6 class="mt-4 font-weight-normal">Sisa Tenor : {{ $cc->rest_duration }} Bulan</h6>
+                                <h6 class="font-weight-normal">Sisa Cicilan : <?php echo asRupiah2($cc->rest_data); ?></h6>
+                            </div>
+                        </div>
+                    @endforeach
+                @endisset
             </div>
             <div class="col-md col-sm-12">
                 <div class="card h-100">
@@ -131,7 +175,7 @@
                                                 <th class="align-middle">Durasi</th>
                                                 <th class="align-middle">Tanggal Mulai</th>
                                                 <th class="align-middle">Tanggal Berakhir</th>
-                                                <th class="align-middle">Total Kunjungan</th>
+                                                <!--<th class="align-middle">Total Kunjungan</th>-->
                                             </tr>
                                             </thead>
                                         </table>
@@ -250,7 +294,6 @@
                 { data: 'duration', name: 'duration' },
                 { data: 'start_date', name: 'start_date' },
                 { data: 'expired_date', name: 'expired_date' },
-                { data: 'visit', name: 'visit' },
             ],
         });
 
@@ -396,5 +439,17 @@
         });
     }
     @endif
+
+    function asRupiah(value){
+        var formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'IDR',
+        });
+
+        var split = formatter.format(value).split(".00");
+        var splitCurrency = split[0].split("IDR");
+
+        return splitCurrency[1];
+    }
     @endsection
 </script>
