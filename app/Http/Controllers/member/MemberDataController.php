@@ -94,6 +94,7 @@ class MemberDataController extends Controller
                 ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
                 ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
                 ->join("member_status as mStatus", "mStatus.mstatus_id", "=", "PK.status")
+                ->leftJoin("membership_memberlist as mShipList", "mShipList.author", "=", "PK.member_id")
                 ->select(
                     'PK.id',
                     'PK.member_id',
@@ -103,11 +104,29 @@ class MemberDataController extends Controller
                     'PK.m_enddate',
                     'mStatus.mstatus_id as mStatusID',
                     'mStatus.status as status',
-                    'mShipData.name as membership',
+                    //'mShipData.name as membership',
+                    'mShipList.membership_id as membership',
                     'mShipData.duration as duration',
                     'mShipType.type as type'
                 )
                 ->get();
+
+            $totalQuery = count($data);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++){
+                if (in_array($data[$i]->member_id, $arrayValidate)) {
+                    $data->forget($i);
+                }else{
+                    array_push($arrayValidate, $data[$i]->member_id);
+                    if(isset($data[$i]->membership)){
+                        $getMembershipName = MembershipModel::where('mship_id', $data[$i]->membership)->first();
+                        $data[$i]->membership = $getMembershipName->name;
+                    }else{
+                        $data[$i]->membership = "-";
+                    }
+                }
+            }
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -592,6 +611,8 @@ class MemberDataController extends Controller
             $data['creditType'] = BankModel::latest()->where('model', 3)->get();
             $data['reg_no'] = MemberLogModel::where('category', 5)->count();
 
+            $data['duration_left'] = Carbon::parse($data['data']->m_enddate)->diffInDays(Carbon::today());
+
             if($data['data'] != null){
                 return view('member.management.edit', $data);
             }else{
@@ -662,8 +683,11 @@ class MemberDataController extends Controller
         switch ($status){
             case 1:
                 return
-                    '<button type="button" class="btn btn-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
+                    '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
                         <i class="fas fa-plus mr-1 fa-sm"></i> Ganti Paket
+                    </button>
+                    <button type="button" class="btn btn-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="upgradePaket();">
+                        <i class="fas fa-upload mr-1 fa-sm"></i> Upgrade
                     </button>';
                 break;
             case 2:
@@ -678,10 +702,10 @@ class MemberDataController extends Controller
             case 4:
                 return
                     '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="extendPaket();">
-                        <i class="fas fa-plus mr-1 fa-sm"></i>  Perpanjang
+                        <i class="fas fa-sync mr-1 fa-sm"></i>  Renewal Paket
                      </button>
                      <button type="button" class="btn btn-outline-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
-                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti Paket
+                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti / Upgrade Paket
                      </button>';
                 break;
         }
@@ -715,10 +739,21 @@ class MemberDataController extends Controller
         $date_now = Carbon::now();
         $date_end = Carbon::now()->addMonths($r->duration)->toDateString();
 
+        $dataGET = MemberModel::select('membership')->where('member_id', $r->id)->first();
+        $payment = MemberLogModel::select('transaction')->where('author', $r->id)->first();
+
         $data = MemberModel::where('member_id', $r->id)->update([
             'status' => 1,
             'm_startdate' => $date_now,
             'm_enddate' => $date_end,
+        ]);
+
+        $membershiplist = membershipListCacheModel::create([
+            'membership_id' => $dataGET->membership,
+            'start_date' => $date_now,
+            'end_date' => $date_end,
+            'author' => $r->id,
+            'payment' => $payment->transaction
         ]);
 
         if($this->checkAuth() == 1){
@@ -1086,48 +1121,71 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
-//            if($r->paymentMethodGroup == "cicilan"){
-//                $status_transaksi = "cicilan";
-//                $jumlah_transaksi = $r->jumlahCicilan;
-//
-//                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
-//                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
-//                $rest_membership = "Pembelian Paket PT  (" + $fullSessionName + ")";
-//
-//                $cicilanData = CicilanDataModel::create([
-//                    'author' => $r->sHiddenID,
-//                    'rest_duration' => $r->durasiCicilan,
-//                    'rest_price' => $rest_price,
-//                    'rest_data' => $rest_data,
-//                    'rest_membership' => $rest_membership,
-//                    'created_at' => $date_now
-//                ]);
-//            }else{
-//                $status_transaksi = "lunas";
-//                if($r->mShipApproval == ""){
-//                    $jumlah_transaksi = $r->nPrice;
-//                }else{
-//                    $jumlah_transaksi = $r->nApproval;
-//                }
-//            }
+            if($r->paymentMethodGroup == "cicilan"){
+                $status_transaksi = "Dalam cicilan";
 
-            $log = MemberLogModel::create([
-                'date' => $date_now,
-                'desc' => 'Pembelian Sesi PT - ' . $fullSessionName,
-                'category' => 5,
-                'transaction' => $r->nPrice,
-                'status' => 'Lunas',
-                'author' => $r->sHiddenID,
-                'additional' => $r->nPayment,
-                'reg_no' => ($r->nRegNo + 1),
-                'aksi' => 'sesi',
-                't_sesi' => $r->nPrice,
-                'notes' => $r->nNotes
-            ]);
+                if($r->mShipApproval == ""){
+                    $jumlah_transaksi = $r->nPrice;
+                }else{
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+
+                $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                $rest_pt = 'Pembelian Sesi PT - ' . $fullSessionName;
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => ($r->durasiCicilan - 1),
+                    'rest_price' => $jumlah_transaksi,
+                    'rest_data' => ($jumlah_transaksi - $rest_data),
+                    'rest_membership' => $rest_pt,
+                    'created_at' => $date_now
+                ]);
+            }else{
+                $status_transaksi = "lunas";
+                $rest_pt = 'Pembelian Sesi PT - ' . $fullSessionName;
+
+                if($r->mShipApproval == ""){
+                    $jumlah_transaksi = $r->nPrice;
+                }else{
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+            }
+
+            if($r->paymentMethodGroup == "cicilan"){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => $rest_data,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => $rest_data,
+                    'notes' => $r->nNotes
+                ]);
+            }else{
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => $jumlah_transaksi,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => $jumlah_transaksi,
+                    'notes' => $r->nNotes
+                ]);
+            }
 
             $successMessage = 'Pembelian Sesi Berhasil!';
 
         }else if($r->sTransaction == "register-session"){
+
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
                 'session_reg' => $r->nSession,
                 'session' => $r->nSession,
@@ -1152,44 +1210,66 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
-//            if($r->paymentMethodGroup == "cicilan"){
-//                $status_transaksi = "cicilan";
-//                $jumlah_transaksi = $r->jumlahCicilan;
-//
-//                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
-//                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
-//                $rest_membership = "Pembelian Paket PT  (" + $fullSessionName + ")";
-//
-//                $cicilanData = CicilanDataModel::create([
-//                    'author' => $r->sHiddenID,
-//                    'rest_duration' => $r->durasiCicilan,
-//                    'rest_price' => $rest_price,
-//                    'rest_data' => $rest_data,
-//                    'rest_membership' => $rest_membership,
-//                    'created_at' => $date_now
-//                ]);
-//            }else{
-//                $status_transaksi = "lunas";
-//                if($r->mShipApproval == ""){
-//                    $jumlah_transaksi = $r->nPrice;
-//                }else{
-//                    $jumlah_transaksi = $r->nApproval;
-//                }
-//            }
+            if($r->paymentMethodGroup == "cicilan"){
+                $status_transaksi = "Dalam cicilan";
 
-            $log = MemberLogModel::create([
-                'date' => $date_now,
-                'desc' => 'Pembelian Paket Personal Trainer - ' . $fullSessionName,
-                'category' => 5,
-                'transaction' => $r->nPrice,
-                'status' => 'Lunas',
-                'author' => $r->sHiddenID,
-                'additional' => $r->nPayment,
-                'reg_no' => ($r->nRegNo + 1),
-                'aksi' => 'sesi',
-                't_sesi' => $r->nPrice,
-                'notes' => $r->nNotes
-            ]);
+                if($r->mShipApproval == ""){
+                    $jumlah_transaksi = $r->nPrice;
+                }else{
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+
+                $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                $rest_pt = 'Pembelian Paket Personal Trainer - ' . $fullSessionName;
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => ($r->durasiCicilan - 1),
+                    'rest_price' => $jumlah_transaksi,
+                    'rest_data' => ($jumlah_transaksi - $rest_data),
+                    'rest_membership' => $rest_pt,
+                    'created_at' => $date_now
+                ]);
+            }else{
+                $status_transaksi = "lunas";
+                $rest_pt = 'Pembelian Paket Personal Trainer - ' . $fullSessionName;
+
+                if($r->mShipApproval == ""){
+                    $jumlah_transaksi = $r->nPrice;
+                }else{
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+            }
+
+            if($r->paymentMethodGroup == "cicilan"){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => $rest_data,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => $rest_data,
+                    'notes' => $r->nNotes
+                ]);
+            }else{
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => $jumlah_transaksi,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => $jumlah_transaksi,
+                    'notes' => $r->nNotes
+                ]);
+            }
 
             $successMessage = "Pembelian Paket Personal Trainer Berhasil!";
 
@@ -1197,8 +1277,8 @@ class MemberDataController extends Controller
             $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
 
             if($r->paymentMethodGroup == "cicilan"){
-                $status_transaksi = "cicilan";
-                $jumlah_transaksi = $r->jumlahCicilan;
+                $status_transaksi = "Dalam Cicilan";
+                $jumlah_transaksi = (int)$r->jumlahCicilan;
 
                 $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
                 $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
@@ -1215,70 +1295,19 @@ class MemberDataController extends Controller
             }else{
                 $status_transaksi = "lunas";
                 if($r->mShipApproval == ""){
-                    $jumlah_transaksi = $r->mShipPrice;
+                    $jumlah_transaksi = (int)$r->mShipPrice;
                 }else{
-                    $jumlah_transaksi = $r->mShipApproval;
+                    $jumlah_transaksi = (int)$r->mShipApproval;
                 }
             }
 
-
-            if($r->sTransaction == "change-membership"){
+            if($r->upgradeRecord == ""){
                 $log_desc = 'Pembelian Paket Member - '.$r->mShipName;
                 $successMessage = 'Pembelian Paket Member Berhasil!';
-
-                if($member['member']->status == 4){
-                    //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE CHANGE TO...
-                    $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
-
-                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
-                        'status' => 1,
-                        'membership' => $r->mShipID,
-                        'm_startdate' => $date_now,
-                        'm_enddate' => $new_enddate,
-                        'updated_at' => $date_now,
-                        'updated_by' => Auth::user()->id
-                    ]);
-                }else{
-                    $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
-                    $cacheStartDate = Carbon::parse($member['member']->m_enddate)->addDays(1)->toDate();
-
-                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
-                        'membership' => $r->mShipID,
-                        'm_enddate' => $new_enddate,
-                        'updated_at' => $date_now,
-                        'updated_by' => Auth::user()->id
-                    ]);
-
-                    $memberhipListCache = membershipListCacheModel::create([
-                        'author' => $r->sHiddenID,
-                        'membership_id' => $r->mShipID,
-                        'start_date' => $cacheStartDate,
-                        'end_date' => $new_enddate
-                    ]);
-                }
-            }else if($r->sTransaction == "extend-membership"){
-                $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
-
-                $log_desc = 'Perpanjangan Paket Member - '.$r->mShipName;
-                $successMessage = 'Perpanjangan Paket Member Berhasil!';
-
-                $data = MemberModel::where('member_id', $r->sHiddenID)->update([
-                    'status' => 1,
-                    'membership' => $r->mShipID,
-                    'm_startdate' => $date_now,
-                    'm_enddate' => $new_enddate,
-                    'updated_at' => $date_now,
-                    'updated_by' => Auth::user()->id
-                ]);
-
-                $memberhipListCache = membershipListCacheModel::create([
-                    'author' => $r->sHiddenID,
-                    'membership_id' => $r->mShipID,
-                    'start_date' => $date_now,
-                    'end_date' => $new_enddate
-                ]);
+            }else{
+                $log_desc = 'Upgrade Paket Member - '.$r->mShipName;
+                $successMessage = 'Upgrade Paket Member Berhasil!';
             }
-
 
             if($r->mShipApproval == null || $r->mShipApproval == ""){
                 $log = MemberLogModel::create([
@@ -1307,6 +1336,145 @@ class MemberDataController extends Controller
                     'aksi' => 'membership',
                     't_membership' => $jumlah_transaksi,
                     'notes' => $r->nNotes
+                ]);
+            }
+
+            if($r->sTransaction == "change-membership"){
+
+                if($member['member']->status == 4){
+                    //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE CHANGE TO...
+                    $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                    $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                        'status' => 1,
+                        'membership' => $r->mShipID,
+                        'm_startdate' => $date_now,
+                        'm_enddate' => $new_enddate,
+                        'updated_at' => $date_now,
+                        'updated_by' => Auth::user()->id
+                    ]);
+
+                    $memberhipListCache = membershipListCacheModel::create([
+                        'author' => $r->sHiddenID,
+                        'membership_id' => $r->mShipID,
+                        'start_date' => $date_now,
+                        'end_date' => $new_enddate,
+                        'payment' => $log->transaction
+                    ]);
+                }else{
+                    if($r->upgradeRecord == ""){
+                        $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+                        $cacheStartDate = Carbon::parse($member['member']->m_enddate)->addDays(1)->toDate();
+
+                        $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                            'membership' => $r->mShipID,
+                            'm_enddate' => $new_enddate,
+                            'updated_at' => $date_now,
+                            'updated_by' => Auth::user()->id
+                        ]);
+
+                        $memberhipListCache = membershipListCacheModel::create([
+                            'author' => $r->sHiddenID,
+                            'membership_id' => $r->mShipID,
+                            'start_date' => $cacheStartDate,
+                            'end_date' => $new_enddate,
+                            'payment' => $log->transaction
+                        ]);
+                    }else{
+                        $member['membershipCacheList'] = membershipListCacheModel::where('author', $r->sHiddenID)->orderBy('start_date', 'ASC')->first();
+                        $member['membershipData'] = MembershipModel::where('mship_id', $member['membershipCacheList']->membership_id)->first();
+
+                        $upgrade_start = Carbon::parse($member['membershipCacheList']->start_date);
+                        $upgrade_end = Carbon::parse($member['membershipCacheList']->end_date);
+
+                        $upgrade_duration_new_month = Carbon::parse($upgrade_start)->diffInMonths($upgrade_end);
+
+                        $upgrade_price_divider = $member['membershipData']->price / $member['membershipData']->duration;
+                        $upgrade_price_final = $upgrade_price_divider * $upgrade_duration_new_month;
+
+//                        echo "Start Date : ".$upgrade_start. " | ";
+//                        echo "End Date : ".$upgrade_end. " | ";
+//                        echo "Sisa Durasi : ".$upgrade_duration_new_month." Bulan | ";
+//                        echo "New End Date : ".$upgrade_end->subMonths($upgrade_duration_new_month)." | ";
+//                        echo "Real Price : ".$this->asRupiah($member['membershipData']->price)." | ";
+//                        echo "New Price : ".$this->asRupiah($upgrade_price_final)." | ";
+//                        echo "Apakah Paket Lebih Kecil atau sama? : ".$hf." | ";
+//                        echo "Paket Baru Member : ".$r->mShipName." | ";
+//                        echo "Durasi Paket : ".$r->mShipDuration." | ";
+//                        echo "Durasi Paket Dimasukkan : ".($r->mShipDuration - $upgrade_duration_new_month)." | ";
+//                        echo "Transaksi : ".($r->mShipPrice);
+
+                        if($r->mShipDuration <= $member['membershipData']->duration){
+                            $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+                            $cacheStartDate = Carbon::parse($member['member']->m_enddate)->addDays(1)->toDate();
+
+                            $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                                'membership' => $r->mShipID,
+                                'm_enddate' => $new_enddate,
+                                'updated_at' => $date_now,
+                                'updated_by' => Auth::user()->id
+                            ]);
+
+                            $memberhipListCache = membershipListCacheModel::create([
+                                'author' => $r->sHiddenID,
+                                'membership_id' => $r->mShipID,
+                                'start_date' => $cacheStartDate,
+                                'end_date' => $new_enddate,
+                                'payment' => $log->transaction
+                            ]);
+
+                        }else{
+                            $new_enddate = Carbon::parse($member['member']->m_enddate)->addMonths($r->mShipDuration)->toDateString();
+
+                            $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                                'membership' => $r->mShipID,
+                                'm_enddate' => $new_enddate,
+                                'updated_at' => $date_now,
+                                'updated_by' => Auth::user()->id
+                            ]);
+
+                            $membershipListCache = membershipListCacheModel::where('author', $r->sHiddenID)->orderBy('start_date', 'ASC')->get();
+
+                            for($i=0; $i < count($membershipListCache); $i++){
+                                if($i <= 0){
+                                    $MLIST_UPDATE = membershipListCacheModel::where('id', $membershipListCache[$i]->id)->update([
+                                        'end_date' => Carbon::parse($membershipListCache[$i]->end_date)->addMonths(($r->mShipDuration - $upgrade_duration_new_month)),
+                                        'membership_id' => $r->mShipID,
+                                        'payment' => (int)$r->mShipPrice
+                                        ]);
+                                }else{
+                                    $MLIST_UPDATE = membershipListCacheModel::where('id', $membershipListCache[$i]->id)->update([
+                                        'start_date' => Carbon::parse($membershipListCache[$i]->start_date)->addMonths(($r->mShipDuration - $upgrade_duration_new_month)),
+                                        'end_date' => Carbon::parse($membershipListCache[$i]->end_date)->addMonths(($r->mShipDuration - $upgrade_duration_new_month)),
+                                        'membership_id' => $r->mShipID,
+                                        'payment' => (int)$r->mShipPrice
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }else if($r->sTransaction == "extend-membership"){
+                $new_enddate = Carbon::now()->addMonths($r->mShipDuration)->toDateString();
+
+                $log_desc = 'Perpanjangan Paket Member - '.$r->mShipName;
+                $successMessage = 'Perpanjangan Paket Member Berhasil!';
+
+                $data = MemberModel::where('member_id', $r->sHiddenID)->update([
+                    'status' => 1,
+                    'membership' => $r->mShipID,
+                    'm_startdate' => $date_now,
+                    'm_enddate' => $new_enddate,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->id
+                ]);
+
+                $memberhipListCache = membershipListCacheModel::create([
+                    'author' => $r->sHiddenID,
+                    'membership_id' => $r->mShipID,
+                    'start_date' => $date_now,
+                    'end_date' => $new_enddate,
+                    'payment' => $log->transaction
                 ]);
             }
         }
@@ -1452,23 +1620,57 @@ class MemberDataController extends Controller
         $date_now = Carbon::now()->toDateString();
 
         if($r->dataStatusMember == 2){
+            $Member2 = membershipListCacheModel::where('author', $r->memberStatusHiddenID)->orderBy('start_date', 'ASC')->first();
+            $M3 = membershipListCacheModel::destroy($Member2->id);
+
             $Member = MemberModel::where('member_id', $r->memberStatusHiddenID)->update([
                 'm_enddate' => $date_now,
                 'status' => 4,
                 'updated_at' => $date_now,
                 'updated_by' => Auth::user()->id
             ]);
-            $Member2 = membershipListCacheModel::where('author', $r->memberStatusHiddenID)->orderBy('start_date', 'ASC')->first();
-
-            $M3 = membershipListCacheModel::destroy($Member2->id);
         }
 
         if($this->checkAuth() == 1){
             return redirect()->route('suadmin.member.edit', $r->memberStatusHiddenID)->with(['success' => 'Status Member Berhasil Diubah!']);
-        }else if($this->checkAuth() == 2){
-            //STILL EMPTY
-        }else if($this->checkAuth() == 3){
+        }else{
             return redirect()->route('cs.member.edit', $r->memberStatusHiddenID)->with(['success' => 'Status Member Berhasil Diubah!']);
         }
+    }
+
+    function HistoryMemberChart(Request $r)
+    {
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        $query_membership = MemberLogModel::where('author', $r->member_id)
+            ->where('aksi', "membership")
+            ->orWhere('aksi', 'registrasi');
+
+        $query_pt = MemberLogModel::where('author', $r->member_id)
+            ->where('aksi', "membership")
+            ->orWhere('aksi', 'registrasi');
+
+        if($r->filterType == "monthly"){
+            $transaction_membership = $query_membership->whereMonth('date', '=', $r->filterMonth)->sum('transaction');
+            $transaction_pt = $query_pt->whereMonth('date', '=', $r->filterMonth)->sum('transaction');
+        }else if($r->filterType == "daily"){
+
+        }else if($r->filterType == "yearly"){
+
+        }
+
+        $data['dataset_membership'] = [];
+        $data['dataset_pt'] = [];
+
+        for($i=0; $i< count($transaction_membership); $i++){
+            array_push($data['dataset_membership'], $transaction_membership[$i]->transaction);
+        }
+
+        for($i=0; $i< count($transaction_pt); $i++){
+            array_push($data['dataset_pt'], $transaction_pt[$i]->transaction);
+        }
+
+        return $data;
     }
 }

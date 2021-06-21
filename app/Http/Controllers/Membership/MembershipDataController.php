@@ -195,6 +195,14 @@ class MembershipDataController extends Controller
         $date_now = Carbon::now()->toDateString();
 
         $data['data'] = membershipListCacheModel::whereDate('end_date', '<', $date_now)->delete();
+
+        if(Auth::user()->role_id == 1){
+            return redirect()->route('suadmin.index');
+        }elseif(Auth::user()->role_id == 2){
+//              //
+        }elseif(Auth::user()->role_id == 3){
+            return redirect()->route('cs.index');
+        }
     }
 
     function asRupiah($value) {

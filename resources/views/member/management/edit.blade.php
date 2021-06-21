@@ -249,11 +249,52 @@
                             </div>
                             <div class="tab-pane fade" id="member-manage-accounts" role="tabpanel" aria-labelledby="member-manage-accounts-tab">
                                 <div class="row pb-0">
-                                    {{--                                    <div class="col-12">--}}
-                                    {{--                                        <h3 class="text-left mt-0 mb-2 col-12 mb-2">Pengeluaran</h3>--}}
-                                    {{--                                        <hr>--}}
-                                    {{--                                        <h2>CHART_HERE</h2>--}}
-                                    {{--                                    </div>--}}
+                                    <div class="col-12">
+                                        <div class="float-right">
+                                            <div class="input-group-prepend">
+                                                <select data-column="3" class="form-control form-control-sm mr-2 w-auto" id="tableFilterHistoryChartType">
+                                                    <option value="daily" class="font-weight-bold">Filter By (Daily)</option>
+                                                    <option value="monthly" selected>Filter By (Monthly)</option>
+                                                    <option value="yearly">Filter By (Yearly)</option>
+                                                </select>
+
+                                                <select data-column="13" class="form-control form-control-sm w-auto" id="tableFilterHistoryChartMonth">
+                                                    <option value="" class="font-weight-bold" selected>Bulan (All)</option>
+                                                    <option value="1">Januari</option>
+                                                    <option value="2">Februari</option>
+                                                    <option value="3">Maret</option>
+                                                    <option value="4">April</option>
+                                                    <option value="5">Mei</option>
+                                                    <option value="6">Juni</option>
+                                                    <option value="7">Juli</option>
+                                                    <option value="8">Agustus</option>
+                                                    <option value="9">September</option>
+                                                    <option value="10">Oktober</option>
+                                                    <option value="11">November</option>
+                                                    <option value="12">Desember</option>
+                                                </select>
+
+                                                <select data-column="3" class="form-control form-control-sm ml-2 w-auto" id="tableFilterHistoryChartYear">
+                                                    <option value="" class="font-weight-bold" selected>Tahun (All)</option>
+                                                    <option value="2020">2020</option>
+                                                    <option value="2021">2021</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <h3 class="text-left mt-0 mb-2 mb-2">Pengeluaran</h3>
+                                        <hr>
+                                        <div class="overflow-auto text-center group-history-chart-daily" style="max-width: 100%;">
+                                            <canvas id="memberHistoryChartDaily" width="100" height="30" style="max-width: 100%;"></canvas>
+                                        </div>
+                                        <div class="overflow-auto text-center group-history-chart-monthly" style="max-width: 100%;">
+                                            <canvas id="memberHistoryChartMonthly" width="100" height="30" style="max-width: 100%;"></canvas>
+                                        </div>
+                                        <div class="overflow-auto text-center group-history-chart-yearly" style="max-width: 100%;">
+                                            <canvas id="memberHistoryChartYearly" width="100" height="30" style="max-width: 100%;"></canvas>
+                                        </div>
+
+                                        <hr>
+                                    </div>
                                     <div class="col-12">
                                         <div class="row">
                                             <h3 class="text-left col-8 mt-0 mb-2 mb-2">Riwayat Member</h3>
@@ -415,8 +456,19 @@
             $("#modal-s-add").modal("hide");
             $("#modal-f-payment").modal("show");
             $("#payment-title").html("+ " + $("#dataUserPTSession option:selected").val() + " Sesi");
-            $("#total_payment").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
-            $("#total_price").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
+
+            if(ptApprovalPrice != null){
+                $("#total_payment").html(
+                    "<i style='text-decoration: line-through;'>" +
+                    asRupiah($("#dataUserPTSession option:selected").data("price")) +
+                    "</i><b>" + asRupiah(ptApprovalPrice)+"</b>"
+                );
+
+                $("#total_price").html(asRupiah(ptApprovalPrice));
+            }else{
+                $("#total_payment").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
+                $("#total_price").html(asRupiah($("#dataUserPTSession option:selected").data("price")));
+            }
 
             $("#confirmPayment").data("action", 'extend-session');
         });
@@ -460,6 +512,14 @@
            toggleModal("modal-m-change");
         });
 
+        $("#changeApprovalPTBtn").on("click", function() {
+            toggleModal("modal-pt-add");
+        });
+
+        $("#changeApprovalPTBtn2").on("click", function() {
+            toggleModal("modal-s-add");
+        });
+
         $("#payPTRegister").on("click", function() {
            if($("#dataPTRegSession").find(':selected').val() == null || $("#dataPTRegSession").find(':selected').val() == ""){
                messagingErrorCustom("Sesi Belum Dipilih!");
@@ -480,8 +540,18 @@
                    $("#payment-title").html("Paket PT <br>" + "("+ currentSessionTitle.data("title") + " - <br>" + currentSessionTitle.val() +" Sesi)");
                }
 
-               $("#total_payment").html(asRupiah(currentSessionTitle.data("price")));
-               $("#total_price").html(asRupiah(currentSessionTitle.data("price")));
+               if(ptApprovalPrice != null){
+                   $("#total_payment").html(
+                       "<i style='text-decoration: line-through;'>" +
+                       asRupiah(currentSessionTitle.data("price")) +
+                       "</i><b>" + asRupiah(ptApprovalPrice)+"</b>"
+                   );
+
+                   $("#total_price").html(asRupiah(ptApprovalPrice));
+               }else{
+                   $("#total_payment").html(asRupiah(currentSessionTitle.data("price")));
+                   $("#total_price").html(asRupiah(currentSessionTitle.data("price")));
+               }
 
                $("#confirmPayment").data("action", 'register-session');
            }
@@ -837,18 +907,25 @@
                     $("#nPrice").val($("#dataUserPTSession option:selected").data("price"));
                     $("#nTitle").val($("#dataUserPTSession option:selected").data("title"));
 
+                    $("#durasiCicilan").val($("#paymentCicilanDuration").val());
+                    $("#mShipApproval").val(ptApprovalPrice);
+                    $("#nPT").val($("#dataUserPTSession option:selected").val());
+
                     // $("#nApproval").val(mShipApprovalPrice);
-                    // $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
                     // $("#durasiCicilan").val($("#paymentCicilanDuration").val());
 
                 }else if($("#confirmPayment").data("action") == 'register-session'){
                     $("#nSession").val($("#dataPTRegSession option:selected").val());
                     $("#nPrice").val($("#dataPTRegSession option:selected").data("price"));
                     $("#nTitle").val($("#dataPTRegSession option:selected").data("title"));
+
+                    $("#durasiCicilan").val($("#paymentCicilanDuration").val());
+                    $("#mShipApproval").val(ptApprovalPrice);
                     $("#nPT").val($("#dataPTReg option:selected").val());
 
                     // $("#nApproval").val(mShipApprovalPrice);
-                    // $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
+                    $("#paymentMethodGroup2").val($("#paymentMethodGroup").val());
                     // $("#durasiCicilan").val($("#paymentCicilanDuration").val());
 
                 }else if($("#confirmPayment").data("action") == 'change-membership'){
@@ -863,10 +940,19 @@
                     $("#durasiCicilan").val($("#paymentCicilanDuration").val());
 
                     if($("#paymentMethodGroup").val() == "cicilan"){
-                        if($("#approvalPrice").val() == ""){
-                            $("#jumlahCicilan").val((parseInt($("#mShipPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                        if($("#confirmPayment").data("action") == 'register-session'){
+                            if($("#approvalPTPrice").val() != "") {
+                                $("#jumlahCicilan").val((parseInt($("#approvalPTPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                            }else{
+                                var tSesi = $("#dataPTRegSession option:selected").data("price");
+                                $("#jumlahCicilan").val((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0));
+                            }
                         }else{
-                            $("#jumlahCicilan").val((parseInt($("#approvalPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                            if($("#approvalPrice").val() == ""){
+                                $("#jumlahCicilan").val((parseInt($("#mShipPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                            }else{
+                                $("#jumlahCicilan").val((parseInt($("#approvalPrice").val()) / $("#paymentCicilanDuration").val()).toFixed(0));
+                            }
                         }
                     }
 
@@ -910,6 +996,20 @@
         mShipApprovalPrice = $("#approvalPrice").val();
 
         toggleModal('modal-m-change');
+    }
+    var ptApprovalPrice;
+    function setApprovalPTPrice(){
+        $("#changeApprovalPTBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalPTPrice").val()));
+        ptApprovalPrice = $("#approvalPTPrice").val();
+
+        toggleModal('modal-pt-add');
+    }
+
+    function setApprovalSesiPrice(){
+        $("#changeApprovalPTBtn2").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalSesiPrice").val()));
+        ptApprovalPrice = $("#approvalSesiPrice").val();
+
+        toggleModal('modal-s-add');
     }
 
     function resetMembershipTransaction(){
@@ -1033,13 +1133,25 @@
     }
 
     function extendPaket(){
+        $("#upgradeRecord").val("");
+
         $("#modal-m-extend").modal("show");
         $("#cacheMembershipAction").val("extend-membership");
     }
 
     function ubahPaket(){
+        $("#upgradeRecord").val("");
+
         $("#modal-m-change").modal("show");
         $("#cacheMembershipAction").val("change-membership");
+    }
+
+    function upgradePaket(){
+        $("#upgradeRecord").val("");
+
+        $("#modal-m-change").modal("show");
+        $("#cacheMembershipAction").val("change-membership");
+        $("#upgradeRecord").val("upgrade-paket");
     }
 
     var selectedMembership;
@@ -1083,7 +1195,37 @@
 
                     $("#payment-title").html("Paket Member <br>" + $("#cacheMembershipDuration").val() + " Bulan <br>" + "("+$("#extend-membership-type").html()+")");
                     $("#total_payment").html(asRupiah($("#cacheMembershipPrice").val()));
-                    $("#total_price").html(asRupiah($("#cacheMembershipPrice").val()));
+
+                    if($("#upgradeRecord").val() == ""){
+                        $("#total_payment_rest").hide();
+
+                        $("#total_price").html(asRupiah($("#cacheMembershipPrice").val()));
+                    }else{
+
+                        var start_date = "{{ $membership_cache->start_date }}";
+                        var end_date = "{{ $membership_cache->end_date }}";
+
+                        var month_rest = Math.round(moment(end_date).diff(moment(start_date), 'months', true));
+                        var price_divider = $("#cacheMembershipPrice").val() / $("#cacheMembershipDuration").val();
+                        var price_final = price_divider * ($("#cacheMembershipDuration").val() - month_rest);
+
+                        $("#total_payment_rest").show();
+
+                        $("#total_payment").html(
+                            "<i style='text-decoration: line-through;'>" +
+                            asRupiah($("#cacheMembershipPrice").val())
+                        );
+
+                        if($("#cacheMembershipDuration").val() <= month_rest){
+                            price_final = $("#cacheMembershipPrice").val();
+                        }else{
+                            $("#cacheMembershipPrice").val(price_final);
+                        }
+
+                        $("#total_price").html(asRupiah(Math.round(price_final)));
+
+                        $("#total_payment_rest").html(asRupiah(Math.round(price_final)) + " - (Ekstensi Member " + ($("#cacheMembershipDuration").val() - month_rest) + " Bulan)");
+                    }
 
                     $("#mShipType").val($("#extend-membership-type").html());
 
@@ -1135,8 +1277,22 @@
             var tMembership = $("#cacheMembershipPrice").val();
             var tSesi = 0;
 
-            if($("#approvalPrice").val() != ""){
-                tMembership = $("#approvalPrice").val();
+            if($("#confirmPayment").data("action") == 'register-session'){
+                if($("#approvalPTPrice").val() != ""){
+                    tMembership = $("#approvalPTPrice").val();
+                }else{
+                    tMembership = $("#dataPTRegSession option:selected").data("price");
+                }
+            }else if($("#confirmPayment").data("action") == 'extend-session'){
+                if($("#approvalSesiPrice").val() != ""){
+                    tMembership = $("#approvalSesiPrice").val();
+                }else{
+                    tMembership = $("#dataUserPTSession option:selected").data("price");
+                }
+            }else{
+                if($("#approvalPrice").val() != ""){
+                    tMembership = $("#approvalPrice").val();
+                }
             }
 
             // if($("#dataUserPTToggler").prop("checked")){
@@ -1162,23 +1318,37 @@
 
     $("#paymentCicilanDuration").on("keyup change", function(){
         if($(this).val() > 0){
-            var tMembership = $("#cacheMembershipPrice").val();
-            var tSesi = 0;
+            if($("#confirmPayment").data("action") == 'register-session') {
+                var tSesi = $("#dataPTRegSession option:selected").data("price");
 
-            if($("#approvalPrice").val() != ""){
-                tMembership = $("#approvalPrice").val();
-            }
+                if ($("#approvalPTPrice").val() != "") {
+                    tSesi = $("#approvalPTPrice").val();
+                }
 
-            // if($("#dataUserPTToggler").prop("checked")){
-            //     if($("#cachePTApproval").val() != ""){
-            //         tSesi = $("#approvalSesiPrice").val();
-            //     }else{
-            //         tSesi = $("#dataUserPTSession").find(':selected').data('price');
-            //     }
-            // }
+                if ($("#paymentCicilanDuration").val() > 0) {
+                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                }
+            }else if($("#confirmPayment").data("action") == 'extend-session'){
+                var tSesi = $("#dataUserPTSession option:selected").data("price");
 
-            if($("#paymentCicilanDuration").val() > 0){
-                $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                if ($("#approvalSesiPrice").val() != "") {
+                    tSesi = $("#approvalSesiPrice").val();
+                }
+
+                if ($("#paymentCicilanDuration").val() > 0) {
+                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                }
+            }else{
+                var tMembership = $("#cacheMembershipPrice").val();
+                var tSesi = 0;
+
+                if($("#approvalPrice").val() != ""){
+                    tMembership = $("#approvalPrice").val();
+                }
+
+                if($("#paymentCicilanDuration").val() > 0){
+                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                }
             }
         }
     });
@@ -1194,6 +1364,93 @@
 
         return splitCurrency[1];
     }
+
+    var dtd = {
+        labels: ['qweq', 'qweq', 'weq', 'wq', 'qw', 'Juen', 'Jwul', 'few', 'Sesp', 'Oact', 'Nodv', 'g'],
+        datasets: [
+            {
+                type: 'line',
+                label: 'Pengeluaran (Bulanan)',
+                data: [1,5,20,34,3, 10, 6, 3, 6,1,30,1],
+                borderColor: 'rgb(6,173,41)',
+                backgroundColor: 'rgba(252,87,94,0.0)',
+                borderWidth: 2
+            },
+            {
+                type: 'bar',
+                label: 'Paket Member',
+                data: [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5],
+                borderColor: 'rgb(6,115,173)',
+                backgroundColor: 'rgba(23,152,222,0)',
+                borderWidth: 2,
+            },
+            {
+                type: 'bar',
+                label: 'Paket PT',
+                data: [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5],
+                borderColor: 'rgb(224,7,7)',
+                backgroundColor: 'rgba(224,13,97,0)',
+                borderWidth: 2,
+            }
+        ]
+    };
+
+    $("#editBtn").on("click", function(){
+        const context = document.getElementById('memberHistoryChartMonthly').getContext('2d');
+        chart = new Chart(context).Line(dtd);
+
+        chart.data.datasets[0].data = [140,100,50];
+        chart.update();
+    });
+
+    //GENERATE CHART
+    var chart_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var chart_data_pengelauran_total = [3,7,7,8,9,12,20,22,32,38,45,56];
+    var chart_data_pengeluaran_membership = [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5];
+    var chart_data_pengelauran_pt = [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5];
+    var ctx = document.getElementById('memberHistoryChartMonthly').getContext('2d');
+
+    var config = {
+        type: 'bar',
+        data: {
+            labels: chart_labels,
+            datasets: [
+                {
+                    type: 'line',
+                    label: 'Pengeluaran (Bulanan)',
+                    data: chart_data_pengelauran_total,
+                    borderColor: 'rgb(6,173,41)',
+                    backgroundColor: 'rgba(252,87,94,0.0)',
+                    borderWidth: 2
+                },
+                {
+                    type: 'bar',
+                    label: 'Paket Member',
+                    data: chart_data_pengeluaran_membership,
+                    borderColor: 'rgb(6,115,173)',
+                    backgroundColor: 'rgba(23,152,222,0)',
+                    borderWidth: 2,
+                },
+                {
+                    type: 'bar',
+                    label: 'Paket PT',
+                    data: chart_data_pengelauran_pt,
+                    borderColor: 'rgb(224,7,7)',
+                    backgroundColor: 'rgba(224,13,97,0)',
+                    borderWidth: 2,
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    };
+
+    var historyChartMonthly = new Chart(ctx, config);
 
     function isEmail(email){
         return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );

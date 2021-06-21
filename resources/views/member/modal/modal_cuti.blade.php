@@ -24,11 +24,12 @@
                 </div>
 
                 <form id="cutiForm" action="#" method="POST">
-                    <input type="text" id="activeMemberID" name="activeMemberID" readonly>
-                    <input type="text" id="activeCutiDuration" name="activeStartDate" readonly>
-                    <input type="text" id="endCutiDate" name="endCutiDate" readonly>
-                    <input type="text" id="oldEndDate" name="oldEndDate" readonly>
-                    <input type="text" id="newMembershipEnd" name="newMembershipEnd" readonly>
+                    <input type="hidden" id="activeMemberID" name="activeMemberID" readonly>
+                    <input type="hidden" id="activeCutiDuration" name="activeStartDate" readonly>
+                    <input type="hidden" id="endCutiDate" name="endCutiDate" readonly>
+                    <input type="hidden" id="oldEndDate" name="oldEndDate" readonly>
+                    <input type="hidden" id="newMembershipEnd" name="newMembershipEnd" readonly>
+
                     {{ csrf_field() }}
                 </form>
             </div>

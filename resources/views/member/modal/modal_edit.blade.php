@@ -98,6 +98,9 @@
                     }
                     ?>
                 </select>
+                <button type="button" class="btn btn-danger w-100 mb-2" id="changeApprovalPTBtn" data-target="#approvalPTModal" data-toggle="modal">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
+                </button>
 
                 <button type="button" class="btn btn-primary w-100" id="payPTRegister">
                     <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
@@ -214,6 +217,10 @@
 
             </div>
             <div class="modal-footer" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-danger w-100 mb-2" id="changeApprovalPTBtn2" data-target="#approvalPTModal2" data-toggle="modal">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
+                </button>
+
                 <button type="button" id="addSessionConfirm" class="btn btn-primary w-100">
                     <i class="fas fa-plus fa-sm mr-1"></i> Tambah Sesi
                 </button>
@@ -285,6 +292,7 @@
                                     </div>
                                     <div class="col-md-8">
                                         Rp. <span id="total_payment">0</span>
+                                        <span id="total_payment_rest" style="display: none;">0</span>
                                     </div>
                                 </div>
                                 <div class="row text-right">
@@ -358,6 +366,8 @@
                         <input type="hidden" id="paymentMethodGroup2" name="paymentMethodGroup" readonly>
                         <input type="hidden" id="durasiCicilan" name="durasiCicilan" readonly>
                         <input type="hidden" id="jumlahCicilan" name="jumlahCicilan" readonly>
+
+                        <input type="hidden" id="upgradeRecord" name="upgradeRecord" readonly>
                     </form>
 
                     <button type="button" class="btn btn-primary w-100 ml-2 mr-2 mt-2" id="confirmPayment" data-action="">
@@ -540,6 +550,66 @@
             </div>
             <div class="modal-footer pt-1 pb-1" style="border-top: 1px solid #dde0e6!important;">
                 <button type="button" class="btn btn-dark pt-1 pb-1" data-dismiss="modal" onclick="setApprovalPrice();">
+                    <i class="fas fa-check fa-sm mr-1"></i> Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="approvalPTModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga By Approval
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('modal-pt-add');">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-1">
+                        <h6 class="pt-1">Rp. </h6>
+                    </div>
+                    <div class="col">
+                        <input type="number" id="approvalPTPrice" name="approvalPTPrice" class="form-control" autocomplete="off" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer pt-1 pb-1" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-dark pt-1 pb-1" data-dismiss="modal" onclick="setApprovalPTPrice();">
+                    <i class="fas fa-check fa-sm mr-1"></i> Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="approvalPTModal2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga By Approval
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('modal-s-add');">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-1">
+                        <h6 class="pt-1">Rp. </h6>
+                    </div>
+                    <div class="col">
+                        <input type="number" id="approvalSesiPrice" name="approvalSesiPrice" class="form-control" autocomplete="off" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer pt-1 pb-1" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-dark pt-1 pb-1" data-dismiss="modal" onclick="setApprovalSesiPrice();">
                     <i class="fas fa-check fa-sm mr-1"></i> Ok
                 </button>
             </div>

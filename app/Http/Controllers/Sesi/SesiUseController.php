@@ -145,13 +145,9 @@ class SesiUseController extends Controller
         $logPT = LogPTModel::insert($log);
 
         if(Auth::user()->role_id == 1){
-            if(Auth::user()->role_id == 1){
-                return redirect()->route('suadmin.sesi.index')->with(['success' => 'Sesi Berhasil Diubah']);
-            }elseif(Auth::user()->role_id == 2){
-//              //
-            }elseif(Auth::user()->role_id == 3){
-                return redirect()->route('cs.sesi.index')->with(['success' => 'Sesi Berhasil Diubah']);
-            }
+            return redirect()->route('suadmin.sesi.index')->with(['success' => 'Sesi Berhasil Diubah']);
+        }else{
+            return redirect()->route('cs.sesi.index')->with(['success' => 'Sesi Berhasil Diubah']);
         }
     }
 }

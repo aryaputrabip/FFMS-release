@@ -117,6 +117,7 @@
                         <input type="hidden" id="activeCutiDuration" name="activeStartDate" readonly>
                         <input type="hidden" id="endCutiDate" name="endCutiDate" readonly>
                         <input type="hidden" id="oldEndDate" name="oldEndDate" readonly>
+                        <input type="hidden" id="durationCuti" name="durationCuti" readonly>
                         <input type="hidden" id="newMembershipEnd" name="newMembershipEnd" readonly>
                         {{ csrf_field() }}
 
@@ -687,6 +688,7 @@
                 $("#endCutiDate").val(endcuti);
                 $("#newMembershipEnd").val(newdate);
                 $("#oldEndDate").val(olddate);
+                $("#durationCuti").val($("#dataCutiDuration").val());
 
                 $("#cutiForm").attr("action", "{{ route('cuti.approve') }}");
                 $("#cutiForm").submit();

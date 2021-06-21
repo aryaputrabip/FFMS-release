@@ -141,10 +141,14 @@ class MemberRegisterController extends Controller
 
         $nSystemNum = 1;
 
-        if($data['log']->reg_no == null || $data['log']->reg_no == ""){
-            $nSystemNum = 1;
+        if(isset($data['log'])){
+            if($data['log']->reg_no == null || $data['log']->reg_no == ""){
+                $nSystemNum = 1;
+            }else{
+                $nSystemNum = $data['log']->reg_no;
+            }
         }else{
-            $nSystemNum = $data['log']->reg_no;
+            $nSystemNum = 1;
         }
 
         $nSystemDay = $data['systemDay']->value;
@@ -321,9 +325,7 @@ class MemberRegisterController extends Controller
 
         if(Auth::user()->role_id == 1){
             return redirect()->route('suadmin.member.registration.complete', ['mdata' => $data->member_id]);
-        }elseif(Auth::user()->role_id == 2){
-//            return redirect()->route('admin.registration.complete', ['mdata' => $data->member_id]);
-        }elseif(Auth::user()->role_id == 3){
+        }else{
             return redirect()->route('cs.member.registration.complete', ['mdata' => $data->member_id]);
         }
     }

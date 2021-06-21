@@ -86,7 +86,7 @@
                         <th class="align-middle w-auto" style="border-top: 0 !important;">No</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Nama</th>
                         <th class="align-middle text-center pl-2 pr-2 w-auto" style="border-top: 0 !important;">Status</th>
-                        <th class="align-middle w-auto" style="border-top: 0 !important;">Membership</th>
+                        <th class="align-middle w-auto" style="border-top: 0 !important;">Membership (Active)</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Jenis Membership</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Tanggal Berlaku</th>
                         <th class="align-middle w-auto" style="border-top: 0 !important;">Tanggal Berakhir</th>

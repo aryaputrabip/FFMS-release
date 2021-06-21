@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Model\member\MemberModel;
+use App\Model\membership\MembershipModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -21,6 +22,7 @@ class MemberExport implements FromView
                         ->leftJoin("ptdata as PT", "PT.pt_id", "=", "CACHE.id_pt")
                         ->leftJoin("secure.users as CS", "CS.id", "=", "MEMBER.created_by")
                         ->leftJoin("logmember as LOG", "LOG.author", "=", "MEMBER.member_id")
+                        ->leftJoin("membership_memberlist as MSHIP_LIST", "MSHIP_LIST.author", "=", "MEMBER.member_id")
                         ->select(
                             'MEMBER.created_at as join_date',
                             'MEMBER.member_id',
@@ -28,11 +30,13 @@ class MemberExport implements FromView
                             'MEMBER.email',
                             'MEMBER.phone',
                             'MEMBER.member_notes as notes',
-                            'MEMBERSHIP.name as membership',
+                            //'MEMBERSHIP.name as membership',
+                            'MSHIP_LIST.membership_id as membership',
                             'MARKETING.name as marketing',
                             'PT.name as pt',
                             'CS.name as cs',
-                            'LOG.transaction as last_transaction'
+                            'MSHIP_LIST.payment as last_transaction'
+                            //'LOG.transaction as last_transaction'
                         )
                         ->orderBy('LOG.date', 'DESC')
                         ->get();
@@ -45,6 +49,12 @@ class MemberExport implements FromView
                 $memberQuery->forget($i);
             }else{
                 array_push($arrayValidate, $memberQuery[$i]->member_id);
+                if(isset($memberQuery[$i]->membership)){
+                    $getMembershipName = MembershipModel::where('mship_id', $memberQuery[$i]->membership)->first();
+                    $memberQuery[$i]->membership = $getMembershipName->name;
+                }else{
+                    $memberQuery[$i]->membership = "-";
+                }
             }
         }
 

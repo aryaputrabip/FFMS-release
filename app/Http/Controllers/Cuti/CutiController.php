@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
+use App\Model\membership\membershipListCacheModel;
 use App\Model\membership\MembershipModel;
 use App\Model\pt\PersonalTrainerModel;
 use Carbon\Carbon;
@@ -147,6 +148,7 @@ class CutiController extends Controller
 
             if($data['check'] == 0){
                 $data['data'] = MemberModel::where('member_id', $request->userID)->first();
+                //$data['membership_cache'] = membershipListCacheModel::where('author', $request->userID)->orderBy('start_date', 'ASC')->first();
 
                 //DURASI CUTI MAKSIMAL ADALAH SISA BULAN - 1
                 //(sisakan 1 bulan terakhir agar tidak bisa mengajukan cuti)
@@ -196,6 +198,21 @@ class CutiController extends Controller
                 'updated_by' =>Auth::user()->id
             ]);
 
+            $data3 = membershipListCacheModel::where('author', $r->activeMemberID)->orderBy('start_date', 'ASC')->get();
+
+            for($i=0; $i < count($data3); $i++){
+                $the_start_date = Carbon::parse($data3[$i]->start_date);
+                $the_end_date = Carbon::parse($data3[$i]->end_date);
+
+                $the_start_date->addMonths($r->durationCuti);
+                $the_end_date->addMonths($r->durationCuti);
+
+                membershipListCacheModel::where('id', $data3[$i]->id)->update([
+                    "start_date" => $the_start_date,
+                    "end_date" => $the_end_date
+                ]);
+            }
+
             $log = MemberLogModel::create([
                 'date' => $date_now,
                 'desc' => 'Pengajuan Cuti Member Selama '.$r->activeStartDate.' Bulan',
@@ -207,9 +224,7 @@ class CutiController extends Controller
 
             if(Auth::user()->role_id == 1){
                 return redirect()->route('suadmin.cuti.index')->with(['success' => 'Member Berhasil Dicutikan!']);
-            }elseif(Auth::user()->role_id == 2){
-//              //
-            }elseif(Auth::user()->role_id == 3){
+            }else{
                 return redirect()->route('cs.cuti.index')->with(['success' => 'Member Berhasil Dicutikan!']);
             }
         }
@@ -235,7 +250,7 @@ class CutiController extends Controller
 //            $data['new_expired'] = Carbon::parse($data['member']->m_startdate)
 //                                    ->addMonths($data['membership']->duration)->format('d M Y');
 
-            $data['new_expired'] = $data['data']->return_old_data;
+            $data['new_expired'] = Carbon::parse($data['data']->return_old_data)->format('d M Y');
 
             return $data;
         }
@@ -249,6 +264,28 @@ class CutiController extends Controller
         $date_now = Carbon::now();
 
         $exec = CutiMemberModel::destroy($r->formCuti);
+
+        $data3 = membershipListCacheModel::where('author', $r->formMember)->orderBy('start_date', 'ASC')->get();
+        $memberdata = MemberModel::where('member_id', $r->formMember)->first();
+
+        $date_before_cuti = Carbon::createFromDate($r->formExpired);
+        $date_after_cuti = Carbon::createFromDate($memberdata->m_enddate);
+
+        $date_divided = $date_after_cuti->diffInMonths($date_before_cuti);
+
+        for($i=0; $i < count($data3); $i++){
+            $the_start_date = Carbon::parse($data3[$i]->start_date);
+            $the_end_date = Carbon::parse($data3[$i]->end_date);
+
+            $the_start_date->subMonths($date_divided);
+            $the_end_date->subMonths($date_divided);
+
+            membershipListCacheModel::where('id', $data3[$i]->id)->update([
+                "start_date" => $the_start_date,
+                "end_date" => $the_end_date
+            ]);
+        }
+
         $data = MemberModel::where('member_id', $r->formMember)->update([
             'status' => 1,
             'm_enddate' => $r->formExpired,
