@@ -13,6 +13,7 @@ use App\Model\member\MemberLogCategoryModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\member\MemberStatusModel;
+use App\Model\memberData;
 use App\Model\membership\MembershipCategoryModel;
 use App\Model\membership\membershipListCacheModel;
 use App\Model\membership\MembershipModel;
@@ -286,6 +287,21 @@ class MemberDataController extends Controller
                 ->where('mShipCache.author', '=', $id)
                 ->get();
 
+            if(count($data) <= 0){
+                $data = MemberModel::from("memberdata as PK")
+                    ->join("membership as mShipData", "mShipData.mship_id", "=", "PK.membership")
+                    ->join("membership_type as mShipType", "mShipType.mtype_id", "=", "mShipData.type")
+                    ->select(
+                        'mShipData.name as name',
+                        'mShipData.duration as duration',
+                        'PK.m_startdate as start_date',
+                        'PK.m_enddate as end_date',
+                        'mShipType.type as type',
+                        'PK.visitlog as visit'
+                    )->where('PK.member_id', '=', $id)
+                    ->get();
+            }
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('name', function ($data) {
@@ -298,24 +314,28 @@ class MemberDataController extends Controller
                     return '<div class="text-left">'.$data->duration.' Bulan</div>';
                 })
                 ->addColumn('start_date', function ($data) {
-                    if($data->memberStatus != 2){
-                        return '<div class="text-left">'.date("d M Y",strtotime($data->start_date)).'</div>';
+                    if(isset($data->start_date)){
+                        if($data->memberStatus != 2){
+                            return '<div class="text-left">'.date("d M Y",strtotime($data->start_date)).'</div>';
+                        }else{
+                            return '<div class="text-left"> - </div>';
+                        }
                     }else{
                         return '<div class="text-left"> - </div>';
                     }
                 })
                 ->addColumn('expired_date', function ($data) {
-
-                    if($data->memberStatus != 2){
-                        $nextMonth = date("d/m/Y",strtotime($data->start_date."+".$data->duration ." month"));
+                    if(isset($data->end_date)){
+                        if($data->memberStatus != 2){
+                            $nextMonth = date("d/m/Y",strtotime($data->start_date."+".$data->duration ." month"));
 //                      $endDate = date('d/m/Y',strtotime($data->start_date."+".$data->duration ." month"));
 
-                        $endDate = date("d M Y", strtotime($data->end_date));
-                    }else{
-                        $endDate = " - ";
-                    }
+                            $endDate = date("d M Y", strtotime($data->end_date));
+                        }else{
+                            $endDate = " - ";
+                        }
 
-                    return '<div class="text-left">'.$endDate.
+                        return '<div class="text-left">'.$endDate.
 
 
 //                        if($data->start_date==$nextMonth-1){
@@ -324,7 +344,11 @@ class MemberDataController extends Controller
 //                            echo $endDate = date('Y-m-d', strtotime("last day of next month",strtotime($data->start_date)));
 //                        }
 
-                        '</div>';
+                            '</div>';
+                    }else{
+                        return '<div class="text-left"> - </div>';
+                    }
+
                 })
                 ->addColumn('visit', function ($data) {
                     return '<div class="text-left">'.$data->visit.'</div>';

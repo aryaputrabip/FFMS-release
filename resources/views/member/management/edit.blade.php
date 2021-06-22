@@ -1201,9 +1201,11 @@
 
                         $("#total_price").html(asRupiah($("#cacheMembershipPrice").val()));
                     }else{
-
+                        @if(isset($membership_cache))
                         var start_date = "{{ $membership_cache->start_date }}";
                         var end_date = "{{ $membership_cache->end_date }}";
+                        @endif
+
 
                         var month_rest = Math.round(moment(end_date).diff(moment(start_date), 'months', true));
                         var price_divider = $("#cacheMembershipPrice").val() / $("#cacheMembershipDuration").val();
