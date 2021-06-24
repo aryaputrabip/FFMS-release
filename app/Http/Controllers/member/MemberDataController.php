@@ -106,7 +106,7 @@ class MemberDataController extends Controller
                     'mStatus.mstatus_id as mStatusID',
                     'mStatus.status as status',
                     //'mShipData.name as membership',
-                    'MEMBER.membership as membership_member',
+                    'PK.membership as membership_member',
                     'mShipList.membership_id as membership',
                     'mShipData.duration as duration',
                     'mShipType.type as type'
