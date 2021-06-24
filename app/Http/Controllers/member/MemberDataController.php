@@ -106,10 +106,12 @@ class MemberDataController extends Controller
                     'mStatus.mstatus_id as mStatusID',
                     'mStatus.status as status',
                     //'mShipData.name as membership',
+                    'MEMBER.membership as membership_member',
                     'mShipList.membership_id as membership',
                     'mShipData.duration as duration',
                     'mShipType.type as type'
                 )
+                ->orderBy('mShipList.start_date', 'ASC')
                 ->get();
 
             $totalQuery = count($data);
@@ -124,7 +126,17 @@ class MemberDataController extends Controller
                         $getMembershipName = MembershipModel::where('mship_id', $data[$i]->membership)->first();
                         $data[$i]->membership = $getMembershipName->name;
                     }else{
-                        $data[$i]->membership = "-";
+                        if(isset($memberQuery[$i]->membership_member)){
+                            $getMembershipName = MembershipModel::where('mship_id', $data[$i]->membership_member)->first();
+
+                            if(isset($getMembershipName)){
+                                $data[$i]->membership = $getMembershipName->name;
+                            }else{
+                                $data[$i]->membership = "-";
+                            }
+                        }else{
+                            $data[$i]->membership = "-";
+                        }
                     }
                 }
             }
@@ -522,7 +534,10 @@ class MemberDataController extends Controller
 
             $data['cicilan_member'] = CicilanDataModel::where('author', $id)->get();
 
-            $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
+            if(isset($data['cache']->id_pt)){
+                $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
+            }
+
             $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
 
             $data['marketingList'] = MarketingModel::get();
@@ -601,8 +616,14 @@ class MemberDataController extends Controller
 
             $data['cicilan_member'] = CicilanDataModel::where('author', $id)->get();
 
-            $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
-            $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
+            if(isset($data['cache']->id_pt)){
+                $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
+            }
+
+            if(isset($data['marketing'])){
+                $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
+            }
+
 
             $data['marketingList'] = MarketingModel::where('status', 1)->get();
             $data['ptList'] = PersonalTrainerModel::where('status', 1)->get();

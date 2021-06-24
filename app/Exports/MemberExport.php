@@ -29,6 +29,7 @@ class MemberExport implements FromView
                             'MEMBER.name',
                             'MEMBER.email',
                             'MEMBER.phone',
+                            'MEMBER.membership as membership_member',
                             'MEMBER.member_notes as notes',
                             //'MEMBERSHIP.name as membership',
                             'MSHIP_LIST.membership_id as membership',
@@ -53,7 +54,17 @@ class MemberExport implements FromView
                     $getMembershipName = MembershipModel::where('mship_id', $memberQuery[$i]->membership)->first();
                     $memberQuery[$i]->membership = $getMembershipName->name;
                 }else{
-                    $memberQuery[$i]->membership = "-";
+                    if(isset($memberQuery[$i]->membership_member)){
+                        $getMembershipName = MembershipModel::where('mship_id', $memberQuery[$i]->membership_member)->first();
+
+                        if(isset($getMembershipName)){
+                            $memberQuery[$i]->membership = $getMembershipName->name;
+                        }else{
+                            $memberQuery[$i]->membership = "-";
+                        }
+                    }else{
+                        $memberQuery[$i]->membership = "-";
+                    }
                 }
             }
         }
