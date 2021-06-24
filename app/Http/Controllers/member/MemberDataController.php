@@ -126,7 +126,7 @@ class MemberDataController extends Controller
                         $getMembershipName = MembershipModel::where('mship_id', $data[$i]->membership)->first();
                         $data[$i]->membership = $getMembershipName->name;
                     }else{
-                        if(isset($memberQuery[$i]->membership_member)){
+                        if(isset($data[$i]->membership_member)){
                             $getMembershipName = MembershipModel::where('mship_id', $data[$i]->membership_member)->first();
 
                             if(isset($getMembershipName)){
