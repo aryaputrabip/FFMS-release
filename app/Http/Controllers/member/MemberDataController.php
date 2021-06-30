@@ -635,9 +635,7 @@ class MemberDataController extends Controller
                 $data['pt'] = PersonalTrainerModel::where('pt_id', $data['cache']->id_pt)->first();
             }
 
-            if(isset($data['marketing'])){
-                $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
-            }
+            $data['marketing'] = MarketingModel::where('mark_id', $data['cache']->id_marketing)->first();
 
 
             $data['marketingList'] = MarketingModel::where('status', 1)->get();
