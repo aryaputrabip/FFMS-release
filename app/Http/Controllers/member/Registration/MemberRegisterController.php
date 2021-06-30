@@ -204,6 +204,7 @@ class MemberRegisterController extends Controller
             'gender' => $r->dataUserGender,
             'email' => $r->dataUserEmail,
             'phone' => $r->dataUserPhone,
+            'dob' => $r->dataUserDOB,
             'job' => $r->dataUserJob,
             'company' => $r->dataUserCompany,
             'membership' => $r->cacheMembershipID,

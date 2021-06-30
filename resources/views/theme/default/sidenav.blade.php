@@ -97,7 +97,7 @@
                     @if($role == 1 || $role == 2)
                         <li class="text-dark-default nav-header">Laporan</li>
                         <li class="nav-item">
-                            <a href="{{route('report.index')}}" class="nav-link text-dark-default">
+                            <a href="{{ route('suadmin.report.index') }}" class="nav-link text-dark-default">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Laporan</p>
                             </a>

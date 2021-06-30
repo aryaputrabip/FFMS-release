@@ -164,6 +164,16 @@
                         </div>
                         <div class="col-12">
                             <div class="form-group row">
+                                <label for="dataUserDOB" class="col-sm-3 col-form-label">
+                                    Tanggal Lahir
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="date" class="form-control" id="dataUserDOB" name="dataUserDOB">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group row">
                                 <label for="dataUserPhone" class="col-sm-3 col-form-label">
                                     No Telp.<span class="text-danger">*</span>
                                 </label>
@@ -402,6 +412,9 @@
                                         <h6 class="member-detail-show"><b>Jenis Kelamin:</b><br> <span id="confirm_gender">Laki-laki</span></h6>
                                     </div>
                                     <div class="col-md-6">
+                                        <h6 class="member-detail-show"><b>Tanggal Lahir:</b><br> <span id="confirm_dob"> - </span></h6>
+                                    </div>
+                                    <div class="col-md-6">
                                         <h6 class="member-detail-show"><b>Pekerjaan:</b><br> <span id="confirm_job">Mahasiswa</span></h6>
                                     </div>
                                     <div class="col-md-6">
@@ -410,7 +423,7 @@
                                     <div class="col-md-6">
                                         <h6 class="member-detail-show"><b>Perusahaan:</b><br> <span id="confirm_agency">PT Maxxima Innovative Engineering</span></h6>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <h6 class="member-detail-show"><b>Email:</b><br> <span id="confirm_email">aryaputrabip@gmail.com</span></h6>
                                     </div>
                                 </div>
@@ -956,7 +969,7 @@
         switch(step){
             case 1:
                 if($("#dataUserNama").val() != "" && $("#dataUserGender").val() != "" &&
-                    $("#dataUserEmail").val() != "" && $("#dataUserPhone").val() != "")
+                    $("#dataUserEmail").val() != "" && $("#dataUserPhone").val() != "" && $("#dataUserDOB").val() != "")
                     return true;
                     return false;
                 break;
@@ -994,8 +1007,19 @@
                     $("#confirm_gender").html($("#dataUserGender").val());
                     $("#confirm_phone").html($("#dataUserPhone").val());
                     $("#confirm_email").html($("#dataUserEmail").val());
-                    $("#confirm_job").html($("#dataUserJob").val());
-                    $("#confirm_agency").html($("#dataUserCompany").val());
+                    $("#confirm_dob").html($("#dataUserDOB").val());
+
+                    if($("#dataUserCompany").val() == ""){
+                        $("#confirm_agency").html("-");
+                    }else{
+                        $("#confirm_agency").html($("#dataUserCompany").val());
+                    }
+
+                    if($("#dataUserJob").val() == ""){
+                        $("#confirm_job").html("Tidak Bekerja");
+                    }else{
+                        $("#confirm_job").html($("#dataUserJob").val());
+                    }
 
                     return true;
                 }

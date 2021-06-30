@@ -135,6 +135,9 @@
                                         <h6><b>Email</b></h6>
                                         <input type="email" class="mb-3 w-100 form-control" id="dataEmail" name="dataEmail" value="@if(isset($data)) {{$data->email}} @endisset">
 
+                                        <h6><b>Tanggal Lahir</b></h6>
+                                        <input type="date" class="mb-3 w-100 form-control" id="dataDOB" name="dataDOB" value="{{$data->dob}}">
+
                                         <h6><b>Catatan</b></h6>
                                         <textarea class="form-control w-100" id="dataUserNote" name="dataUserNote" rows="6" placeholder="Catatan Member...">@if(isset($data->member_notes)){{ $data->member_notes }}@endisset</textarea>
 
@@ -252,14 +255,14 @@
                                     <div class="col-12">
                                         <div class="float-right">
                                             <div class="input-group-prepend">
-                                                <select data-column="3" class="form-control form-control-sm mr-2 w-auto" id="tableFilterHistoryChartType">
+                                                <select data-column="3" class="form-control form-control-sm w-auto" id="tableFilterHistoryChartType">
                                                     <option value="daily" class="font-weight-bold">Filter By (Daily)</option>
                                                     <option value="monthly" selected>Filter By (Monthly)</option>
                                                     <option value="yearly">Filter By (Yearly)</option>
                                                 </select>
 
-                                                <select data-column="13" class="form-control form-control-sm w-auto" id="tableFilterHistoryChartMonth">
-                                                    <option value="" class="font-weight-bold" selected>Bulan (All)</option>
+                                                <select data-column="13" class="form-control form-control-sm w-auto ml-2" id="tableFilterHistoryChartMonth" style="display: none;">
+                                                    <option value="all" class="font-weight-bold" selected>Bulan (All)</option>
                                                     <option value="1">Januari</option>
                                                     <option value="2">Februari</option>
                                                     <option value="3">Maret</option>
@@ -275,24 +278,25 @@
                                                 </select>
 
                                                 <select data-column="3" class="form-control form-control-sm ml-2 w-auto" id="tableFilterHistoryChartYear">
-                                                    <option value="" class="font-weight-bold" selected>Tahun (All)</option>
-                                                    <option value="2020">2020</option>
-                                                    <option value="2021">2021</option>
+                                                    <option value="all" class="font-weight-bold" selected>Tahun (All)</option>
+                                                    @foreach($filter_year_available as $FILTER_YEAR)
+                                                        <option value="{{ $FILTER_YEAR->date }}">{{ $FILTER_YEAR->date }}</option>
+                                                    @endforeach
+                                                </select>
+
+                                                <select data-column="5" class="form-control form-control-sm ml-2 w-auto" id="tableFilterHistoryChartYearDuration" style="display: none">
+                                                    <option value="2">2 Years</option>
+                                                    <option value="5" selected>5 Years</option>
+                                                    <option value="10">10 Years</option>
+                                                    <option value="15">15 Years</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <h3 class="text-left mt-0 mb-2 mb-2">Pengeluaran</h3>
                                         <hr>
-                                        <div class="overflow-auto text-center group-history-chart-daily" style="max-width: 100%;">
-                                            <canvas id="memberHistoryChartDaily" width="100" height="30" style="max-width: 100%;"></canvas>
-                                        </div>
                                         <div class="overflow-auto text-center group-history-chart-monthly" style="max-width: 100%;">
-                                            <canvas id="memberHistoryChartMonthly" width="100" height="30" style="max-width: 100%;"></canvas>
+                                            <canvas id="memberHistoryChart" width="100" height="30" style="max-width: 100%;"></canvas>
                                         </div>
-                                        <div class="overflow-auto text-center group-history-chart-yearly" style="max-width: 100%;">
-                                            <canvas id="memberHistoryChartYearly" width="100" height="30" style="max-width: 100%;"></canvas>
-                                        </div>
-
                                         <hr>
                                     </div>
                                     <div class="col-12">
@@ -335,6 +339,7 @@
 
 @section('import_script')
     @include('theme.default.import.modular.datatables.script')
+    @include('chart.member_spending_chart')
 @endsection
 
 @section('message')
@@ -1398,61 +1403,17 @@
     };
 
     $("#editBtn").on("click", function(){
-        const context = document.getElementById('memberHistoryChartMonthly').getContext('2d');
-        chart = new Chart(context).Line(dtd);
+        const context = document.getElementById('memberHistoryChart').getContext('2d');
+        chart = new Chart(context, {
+            type: "line",
+            data: dtd,
+        });
 
         chart.data.datasets[0].data = [140,100,50];
         chart.update();
     });
 
-    //GENERATE CHART
-    var chart_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var chart_data_pengelauran_total = [3,7,7,8,9,12,20,22,32,38,45,56];
-    var chart_data_pengeluaran_membership = [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5];
-    var chart_data_pengelauran_pt = [4, 6, 2, 3, 10, 6, 3, 6, 8, 13, 10, 5];
-    var ctx = document.getElementById('memberHistoryChartMonthly').getContext('2d');
-
-    var config = {
-        type: 'bar',
-        data: {
-            labels: chart_labels,
-            datasets: [
-                {
-                    type: 'line',
-                    label: 'Pengeluaran (Bulanan)',
-                    data: chart_data_pengelauran_total,
-                    borderColor: 'rgb(6,173,41)',
-                    backgroundColor: 'rgba(252,87,94,0.0)',
-                    borderWidth: 2
-                },
-                {
-                    type: 'bar',
-                    label: 'Paket Member',
-                    data: chart_data_pengeluaran_membership,
-                    borderColor: 'rgb(6,115,173)',
-                    backgroundColor: 'rgba(23,152,222,0)',
-                    borderWidth: 2,
-                },
-                {
-                    type: 'bar',
-                    label: 'Paket PT',
-                    data: chart_data_pengelauran_pt,
-                    borderColor: 'rgb(224,7,7)',
-                    backgroundColor: 'rgba(224,13,97,0)',
-                    borderWidth: 2,
-                }
-            ]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    };
-
-    var historyChartMonthly = new Chart(ctx, config);
+    var historyChartMonthly = new Chart(ctx, chartData);
 
     function isEmail(email){
         return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );

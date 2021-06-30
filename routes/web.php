@@ -71,6 +71,10 @@ Route::prefix('suadmin')->name('suadmin.')->group(function (){
         Route::get('/', 'SesiUseController@index')->name('index');
         Route::get('manager/', 'SesiManagerController@manager')->name('manager');
     });
+    Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
+        Route::get('getSpecifyMemberSpending','ReportGraphController@getSpecifyMemberSpending')->name('getSpecifyMemberSpending');
+        Route::get('/','ReportGraphController@index')->name('index');
+    });
 });
 
 Route::prefix('cs')->name('cs.')->group(function (){
@@ -168,12 +172,10 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
 });
 
 Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
-    Route::get('/','reportController@index')->name('index');
-    Route::post('/dataReg','reportController@dataReg')->name('dataReg');
-    Route::get('/data','reportController@dataReg')->name('dataReg');
-    Route::get('/dataRevenue','reportController@dataRevenue')->name('dataRevenue');
-    Route::get('/updateChartData','reportController@updateChartData')->name('updateChartData');
-    Route::get('/updateMemberChartData','reportController@updateMemberChartData')->name('updateMemberChartData');
+    Route::get('getSpecifyMemberSpending','ReportGraphController@getSpecifyMemberSpending')->name('getSpecifyMemberSpending');
+    Route::get('performaMember','ReportGraphController@performaMember')->name('performaMember');
+    Route::get('performaCuti','ReportGraphController@performaCuti')->name('performaCuti');
+    Route::get('performaRevenue','ReportGraphController@performaRevenue')->name('performaRevenue');
 });
 
 //

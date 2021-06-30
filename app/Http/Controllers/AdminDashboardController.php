@@ -44,7 +44,20 @@ class AdminDashboardController extends Controller
         $monthList = $this->getMonthList();
         $yearlist = $this->getYearList();
 
-        return view('admin_dashboard', compact('title','username','role','jMember','memberActive','memberCuti','totalSales', 'memberChart', 'cutiChart', 'current_month', 'current_year','monthList','yearlist'));
+        $filter_year_available = MemberLogModel::selectRaw('to_char(date, \'yyyy\') as date')->get();
+
+        $totalQuery = count($filter_year_available);
+        $arrayValidate = [];
+
+        for($i=0; $i<$totalQuery; $i++) {
+            if (in_array($filter_year_available[$i]->date, $arrayValidate)) {
+                $filter_year_available->forget($i);
+            } else {
+                array_push($arrayValidate, $filter_year_available[$i]->date);
+            }
+        }
+
+        return view('admin_dashboard', compact('title','username','role','jMember','memberActive','memberCuti','totalSales', 'memberChart', 'cutiChart', 'current_month', 'current_year','monthList','yearlist', 'filter_year_available'));
     }
 
     public function getMemberData(Request $r){

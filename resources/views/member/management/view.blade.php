@@ -132,12 +132,15 @@
                                         <h6><b>Email</b></h6>
                                         <h6 class="mb-3">@if(isset($data->email)) {{ $data->email }} @else - @endisset</h6>
 
+                                        <h6><b>Tanggal Lahir</b></h6>
+                                        <h6 class="mb-3">@if(isset($data->dob)) {{ $data->dob }} @else - @endisset</h6>
+
                                         <h6><b>Catatan</b></h6>
                                         <h6 class="mb-3">@if(isset($data->member_notes)) {{ $data->member_notes }} @else - @endisset</h6>
 
                                         <hr>
                                         <h6><b>Last Edited By</b></h6>
-                                        <h6 class="mb-3">@if(isset($last_edited)) {{ $last_edited->name }} @else - @endisset</h6>
+                                        <h6 class="mb-3">@if(isset($last_edited->name)) {{ $last_edited->name }} @else - @endisset</h6>
                                     </div>
                                     <div class="col-md-6 mt-4">
                                         <h6><b>ADDITIONAL INFO</b></h6>
@@ -204,11 +207,53 @@
                             </div>
                             <div class="tab-pane fade" id="member-manage-accounts" role="tabpanel" aria-labelledby="member-manage-accounts-tab">
                                 <div class="row pb-0">
-                                    {{--                                    <div class="col-12">--}}
-                                    {{--                                        <h3 class="text-left mt-0 mb-2 col-12 mb-2">Pengeluaran</h3>--}}
-                                    {{--                                        <hr>--}}
-                                    {{--                                        <h2>CHART_HERE</h2>--}}
-                                    {{--                                    </div>--}}
+                                    <div class="col-12">
+                                        <div class="float-right">
+                                            <div class="input-group-prepend">
+                                                <select data-column="3" class="form-control form-control-sm w-auto" id="tableFilterHistoryChartType">
+                                                    <option value="daily" class="font-weight-bold">Filter By (Daily)</option>
+                                                    <option value="monthly" selected>Filter By (Monthly)</option>
+                                                    <option value="yearly">Filter By (Yearly)</option>
+                                                </select>
+
+                                                <select data-column="13" class="form-control form-control-sm w-auto ml-2" id="tableFilterHistoryChartMonth" style="display: none;">
+                                                    <option value="all" class="font-weight-bold" selected>Bulan (All)</option>
+                                                    <option value="1">Januari</option>
+                                                    <option value="2">Februari</option>
+                                                    <option value="3">Maret</option>
+                                                    <option value="4">April</option>
+                                                    <option value="5">Mei</option>
+                                                    <option value="6">Juni</option>
+                                                    <option value="7">Juli</option>
+                                                    <option value="8">Agustus</option>
+                                                    <option value="9">September</option>
+                                                    <option value="10">Oktober</option>
+                                                    <option value="11">November</option>
+                                                    <option value="12">Desember</option>
+                                                </select>
+
+                                                <select data-column="3" class="form-control form-control-sm ml-2 w-auto" id="tableFilterHistoryChartYear">
+                                                    <option value="all" class="font-weight-bold" selected>Tahun (All)</option>
+                                                    @foreach($filter_year_available as $FILTER_YEAR)
+                                                        <option value="{{ $FILTER_YEAR->date }}">{{ $FILTER_YEAR->date }}</option>
+                                                    @endforeach
+                                                </select>
+
+                                                <select data-column="5" class="form-control form-control-sm ml-2 w-auto" id="tableFilterHistoryChartYearDuration" style="display: none">
+                                                    <option value="2">2 Years</option>
+                                                    <option value="5" selected>5 Years</option>
+                                                    <option value="10">10 Years</option>
+                                                    <option value="15">15 Years</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <h3 class="text-left mt-0 mb-2 mb-2">Pengeluaran</h3>
+                                        <hr>
+                                        <div class="overflow-auto text-center group-history-chart-monthly" style="max-width: 100%;">
+                                            <canvas id="memberHistoryChart" width="100" height="30" style="max-width: 100%;"></canvas>
+                                        </div>
+                                        <hr>
+                                    </div>
                                     <div class="col-12">
                                         <div class="row">
                                             <h3 class="text-left col-8 mt-0 mb-2 mb-2">Riwayat Member</h3>
@@ -248,6 +293,7 @@
 
 @section('import_script')
     @include('theme.default.import.modular.datatables.script')
+    @include('chart.member_spending_chart')
 @endsection
 
 @section('message')

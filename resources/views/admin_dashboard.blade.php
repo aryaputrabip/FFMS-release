@@ -91,32 +91,42 @@
                 </div>
                 <div class="modal-body pr-0">
                     <!-- CHART SECTION -->
-                    <div class="row">
-                        <div style="position:absolute; right: 20px; z-index: 10;">
-                            <select class="form-control" id="filterTypeMember" name="filterTypeMember" onchange="changeFilterType('member', this.id)">
-                                <option value="day">Filter By (Daily)</option>
-                                <option value="month" selected>Filter By (Monthly)</option>
-                                <option value="year">Filter By (Yearly)</option>
-                            </select>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberMonthlyFrame" class="col-12">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberDailyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
+{{--                    <div class="row">--}}
+{{--                        <div style="position:absolute; right: 20px; z-index: 10;">--}}
+{{--                            <select class="form-control" id="filterTypeMember" name="filterTypeMember" onchange="changeFilterType('member', this.id)">--}}
+{{--                                <option value="day">Filter By (Daily)</option>--}}
+{{--                                <option value="month" selected>Filter By (Monthly)</option>--}}
+{{--                                <option value="year">Filter By (Yearly)</option>--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberMonthlyFrame" class="col-12">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberDailyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
 
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberYearlyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberYearlyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+
+                    <div class="row" id="filterContainerMember">
+                        @include('chart.filter.filter_group')
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            @include('chart.total_member_chart')
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
@@ -137,32 +147,39 @@
                     </button>
                 </div>
                 <div class="modal-body pr-0">
-                    <div class="row">
-                        <div style="position:absolute; right: 20px; z-index: 10;">
-                            <select class="form-control" id="filterTypeCuti" name="filterTypeCuti" onchange="changeFilterType('member_cuti', this.id)">
-                                <option value="day">Filter By (Daily)</option>
-                                <option value="month" selected>Filter By (Monthly)</option>
-                                <option value="year">Filter By (Yearly)</option>
-                            </select>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiMonthlyFrame" class="col-12">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiDailyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
+{{--                    <div class="row">--}}
+{{--                        <div style="position:absolute; right: 20px; z-index: 10;">--}}
+{{--                            <select class="form-control" id="filterTypeCuti" name="filterTypeCuti" onchange="changeFilterType('member_cuti', this.id)">--}}
+{{--                                <option value="day">Filter By (Daily)</option>--}}
+{{--                                <option value="month" selected>Filter By (Monthly)</option>--}}
+{{--                                <option value="year">Filter By (Yearly)</option>--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiMonthlyFrame" class="col-12">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiDailyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
 
-                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiYearlyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="memberCutiYearlyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Member Cuti yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+
+                    <div class="row" id="filterContainerCuti"></div>
+                    <div class="row">
+                        <div class="col-12">
+                            @include('chart.member_cuti_chart')
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
@@ -183,32 +200,39 @@
                     </button>
                 </div>
                 <div class="modal-body pr-0">
-                    <div class="row">
-                        <div style="position:absolute; right: 20px; z-index: 10;">
-                            <select class="form-control" id="filterTypeRevenue" name="filterTypeRevenue" onchange="changeFilterType('revenue', this.id)">
-                                <option value="day">Filter By (Daily)</option>
-                                <option value="month" selected>Filter By (Monthly)</option>
-                                <option value="year">Filter By (Yearly)</option>
-                            </select>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueMonthlyFrame" class="col-12">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
-                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueDailyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
-                        </div>
+{{--                    <div class="row">--}}
+{{--                        <div style="position:absolute; right: 20px; z-index: 10;">--}}
+{{--                            <select class="form-control" id="filterTypeRevenue" name="filterTypeRevenue" onchange="changeFilterType('revenue', this.id)">--}}
+{{--                                <option value="day">Filter By (Daily)</option>--}}
+{{--                                <option value="month" selected>Filter By (Monthly)</option>--}}
+{{--                                <option value="year">Filter By (Yearly)</option>--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueMonthlyFrame" class="col-12">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue monthly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueDailyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue daily&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
 
-                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueYearlyFrame" class="col-12" style="display: none;">
-                            <iframe width="1000" height="500" class="w-100"
-                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"
-                                    frameborder="0">
-                            </iframe>
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="RevenueYearlyFrame" class="col-12" style="display: none;">--}}
+{{--                            <iframe width="1000" height="500" class="w-100"--}}
+{{--                                    src="http://localhost:8080/knowage/public/servlet/AdapterHTTP?ACTION_NAME=EXECUTE_DOCUMENT_ACTION&OBJECT_LABEL=Revenue yearly&TOOLBAR_VISIBLE=false&ORGANIZATION=DEMO"--}}
+{{--                                    frameborder="0">--}}
+{{--                            </iframe>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+
+                    <div class="row" id="filterContainerRevenue"></div>
+                    <div class="row">
+                        <div class="col-12">
+                            @include('chart.revenue_chart')
                         </div>
                     </div>
                     <!-- END OF CHART SECTION -->
@@ -304,17 +328,46 @@
         switch(data) {
             case "member_total":
                 $("#modal-chart-member").modal("toggle");
-            break;
-            case "member_aktif":
-
+                $("#chart_filter_group").appendTo("#filterContainerMember");
             break;
             case "member_cuti":
                 $("#modal-chart-cuti").modal("toggle");
+                $("#chart_filter_group").appendTo("#filterContainerCuti");
             break;
             case "revenue":
                 $("#modal-chart-revenue").modal("toggle");
+                $("#chart_filter_group").appendTo("#filterContainerRevenue");
             break;
         }
     }
+
+    function refreshChart(){
+        refreshMemberChart();
+        refreshCutiChart();
+        refreshRevenueChart();
+    }
+
+    function setChartContextData(id){
+        return document.getElementById(id).getContext('2d');
+    }
+
+    function setChartData(category, labels, datasetTotal, dataset_2, dataset_3){
+        switch(category){
+            case "member":
+                var data = initMemberChart(labels, datasetTotal, dataset_2, dataset_3);
+                break;
+            case "cuti":
+                var data = initCutiChart(labels, datasetTotal);
+                break;
+            case "revenue":
+                var data = initRevenueChart(labels, datasetTotal, dataset_2, dataset_3);
+                break;
+        }
+
+        return data;
+    }
+
+    //REFRESH CHART ON PAGE START
+    refreshChart();
     @endsection
 </script>

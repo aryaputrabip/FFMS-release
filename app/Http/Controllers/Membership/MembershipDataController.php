@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\gstatus\GlobalStatusModel;
 use App\Model\marketing\MarketingModel;
 use App\Model\member\MemberCategoryModel;
+use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
 use App\Model\membership\MembershipCategoryModel;
 use App\Model\membership\membershipListCacheModel;
@@ -102,10 +103,10 @@ class MembershipDataController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     return '<center>
-                            <a href="#modal-membership" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->mship_id.'); membershipEditMode();">
-                                <i class="fa fa-edit text-warning"></i>
-                            </a>
-                        </center>';
+                                <a href="#modal-membership" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->mship_id.'); membershipEditMode();">
+                                    <i class="fa fa-edit text-warning"></i>
+                                </a>
+                            </center>';
                 })
                 ->rawColumns(['action', 'name', 'membershipType', 'membershipCategory', 'duration', 'price', 'membershipStatus'])
                 ->make(true);

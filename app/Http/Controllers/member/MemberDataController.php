@@ -521,6 +521,8 @@ class MemberDataController extends Controller
             $data['cache'] = MemberCacheModel::where('author', $id)->first();
             $data['membership'] = MembershipModel::where('mship_id', $data['data']->membership)->first();
 
+            $data['data']->dob = Carbon::parse($data['data']->dob)->format("d M Y");
+
             $data['membership_cache'] = membershipListCacheModel::where('author', $id)->orderBy('start_date', 'ASC')->first();
 
             if(isset($data['membership_cache']->start_date)){
@@ -566,6 +568,19 @@ class MemberDataController extends Controller
                     )
                     ->where('member_id', "=", $id)
                     ->first();
+            }
+
+            $data['filter_year_available'] = MemberLogModel::selectRaw('to_char(date, \'yyyy\') as date')->get();
+
+            $totalQuery = count($data['filter_year_available']);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++) {
+                if (in_array($data['filter_year_available'][$i]->date, $arrayValidate)) {
+                    $data['filter_year_available']->forget($i);
+                } else {
+                    array_push($arrayValidate, $data['filter_year_available'][$i]->date);
+                }
             }
 
             if($data['data'] != null){
@@ -658,6 +673,19 @@ class MemberDataController extends Controller
 
             $data['duration_left'] = Carbon::parse($data['data']->m_enddate)->diffInDays(Carbon::today());
 
+            $data['filter_year_available'] = MemberLogModel::selectRaw('to_char(date, \'yyyy\') as date')->get();
+
+            $totalQuery = count($data['filter_year_available']);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++) {
+                if (in_array($data['filter_year_available'][$i]->date, $arrayValidate)) {
+                    $data['filter_year_available']->forget($i);
+                } else {
+                    array_push($arrayValidate, $data['filter_year_available'][$i]->date);
+                }
+            }
+
             if($data['data'] != null){
                 return view('member.management.edit', $data);
             }else{
@@ -696,6 +724,7 @@ class MemberDataController extends Controller
             'company' => $r->dataCompany,
             'phone' => $r->dataPhone,
             'email' => $r->dataEmail,
+            'dob' => $r->dataDOB,
             'photo' => $r->photoFile,
             'marketing' => $marketingName,
             'pt' => $ptName,

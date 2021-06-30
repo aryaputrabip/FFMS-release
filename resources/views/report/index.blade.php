@@ -14,37 +14,42 @@
             </div>
 
             <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-4">
-                        <select class="form-control" id="SortTypeFilter" name="SortTypeFilter" disabled>
-                            <option value="year" disabled>Sort By (Daily)</option>
-                            <option value="month" selected>Sort By (Monthly)</option>
-                            <option value="year">Sort By (Yearly)</option>
-                        </select>
-                    </div>
-                    <div class="col-4">
-                        <select class="form-control" id="SortMonthFilter" name="SortMonthFilter" disabled>
-                            <option value="1" selected>Bulan (Januari)</option>
-                            <option value="2">Bulan (Februari)</option>
-                            <option value="3">Bulan (Maret)</option>
-                            <option value="4">Bulan (April)</option>
-                            <option value="5">Bulan (Mei)</option>
-                            <option value="6">Bulan (Juni)</option>
-                            <option value="7">Bulan (Juli)</option>
-                            <option value="8">Bulan (Agustus)</option>
-                            <option value="9">Bulan (September)</option>
-                            <option value="10">Bulan(Oktober)</option>
-                            <option value="11">Bulan (November</option>
-                            <option value="12">Bulan (Desember)</option>
-                        </select>
-                    </div>
-                    <div class="col-4">
-                        <select class="form-control" id="SortYearFilter" name="SortYearFilter">
-                            <option class="font-weight-bold" value="">Tahun (All)</option>
-                            <option value="2021" selected>Tahun (2021)</option>
-                            //<option value="2022">Tahun (2022)</option>
-                        </select>
-                    </div>
+                <div class="input-group-prepend" id="chart_filter_group">
+                    <select data-column="3" class="form-control w-100" id="tableFilterChartType">
+                        <option value="daily" class="font-weight-bold">Filter By (Daily)</option>
+                        <option value="monthly" selected>Filter By (Monthly)</option>
+                        <option value="yearly">Filter By (Yearly)</option>
+                    </select>
+
+                    <select data-column="13" class="form-control w-100 ml-2" id="tableFilterChartMonth" style="display: none;">
+                        <option value="all" class="font-weight-bold" selected>Bulan (All)</option>
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+
+                    <select data-column="3" class="form-control ml-2 w-100" id="tableFilterChartYear">
+                        <option value="all" class="font-weight-bold" selected>Tahun (All)</option>
+                        @foreach($filter_year_available as $FILTER_YEAR)
+                            <option value="{{ $FILTER_YEAR->date }}">{{ $FILTER_YEAR->date }}</option>
+                        @endforeach
+                    </select>
+
+                    <select data-column="5" class="form-control ml-2 w-100" id="tableFilterChartYearDuration" style="display: none">
+                        <option value="2">2 Years</option>
+                        <option value="5" selected>5 Years</option>
+                        <option value="10">10 Years</option>
+                        <option value="15">15 Years</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -58,7 +63,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="revenueFrame">
-                            {!! $revenueChart->render() !!}
+                            @include('chart.revenue_chart')
                         </div>
                     </div>
 
@@ -68,7 +73,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="activityFrame">
-                            {!! $activityChart->render() !!}
+
                         </div>
                     </div>
 
@@ -78,7 +83,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="memberFrame">
-                            {!! $memberChart->render() !!}
+                            @include('chart.total_member_chart')
                         </div>
                     </div>
 
@@ -88,7 +93,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="marketingFrame">
-                            {!! $revenueChart->render() !!}
+
                         </div>
                     </div>
 
@@ -98,7 +103,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="topMarketingFrame">
-                            {!! $revenueChart->render() !!}
+
                         </div>
                     </div>
 
@@ -108,7 +113,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="ptFrame">
-                            {!! $revenueChart->render() !!}
+
                         </div>
                     </div>
 
@@ -118,7 +123,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="topPTFrame">
-                            {!! $revenueChart->render() !!}
+
                         </div>
                     </div>
 
@@ -128,7 +133,7 @@
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="cutiFrame">
-                            {!! $revenueChart->render() !!}
+                            @include('chart.member_cuti_chart')
                         </div>
                     </div>
                 </div>
@@ -140,193 +145,68 @@
 <!-- page script -->
 <script>
     @section('script')
-    $(function (){
-        $("#SortTypeFilter").on("change", function () {
-            // if($("#SortTypeFilter").val() == "year"){
-            //     $("#SortMonthFilter").hide();
-            // }else{
-            //     $("#SortMonthFilter").show();
-            // }
-        });
-        $("#SortMonthFilter").on("change", function() {
-            //getChartData($("#SortTypeFilter").val(), $("#SortMonthFilter").val(), $("#SortYearFilter").val());
-        });
-        $("#SortYearFilter").on("change", function () {
-            getChartData($("#SortTypeFilter").val(), null, $("#SortYearFilter").val());
-        });
+    $("#tableFilterChartMonth").on("change", function(){
+        refreshChart();
     });
 
-    function getChartData(typeFilter, monthFilter, yearFilter){
-        $.ajax({
-            type: 'GET',
-            dataType: 'html',
-            url: "{{ route('report.updateChartData') }}",
-            data: {
-                type: typeFilter,
-                month: monthFilter,
-                year: yearFilter
-            },
-            success: function(data){
-                var obj = JSON.parse(data);
+    $("#tableFilterChartYear").on("change", function(){
+        refreshChart();
+    });
 
-                $("#revenueFrame").html('<canvas id="profitChart" width="400" height="100"></canvas>');
-                $("#activityFrame").html('<canvas id="activityChart" width="400" height="100"></canvas>')
+    $("#tableFilterChartYearDuration").on("change", function(){
+        refreshChart();
+    });
 
-                var ctxProfit = document.getElementById('profitChart').getContext('2d');
-                var chartProfit = new Chart(ctxProfit, {
-                    type: 'line',
-                    data: setData("revenue", [obj.revenueData, obj.revenueDataMembership, obj.revenueDataSesi]),
-                    options: setOptions('Profit Data', 'top', 0),
-                });
+    $("#tableFilterChartType").on("change", function(){
+        switch($(this).val()){
+            case "daily":
+                $("#tableFilterChartMonth").show();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").hide();
+                refreshChart();
+                break;
+            case "monthly":
+                $("#tableFilterChartMonth").hide();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").hide();
+                refreshChart();
+                break;
+            case "yearly":
+                $("#tableFilterChartMonth").hide();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").show();
+                refreshChart();
+                break;
+        }
+    });
 
-                var ctxActivity = document.getElementById('activityChart').getContext('2d');
-                var chartActivity = new Chart(ctxActivity, {
-                    type: 'line',
-                    data: setData("activity", [obj.activityCheckin, obj.activityPembelian]),
-                    options: setOptions('Activity Data', 'top', 0),
-                });
-
-                var ctxMember = document.getElementById('memberChart').getContext('2d');
-                var chartMember = new Chart(ctxMember, {
-                    type: 'line',
-                    data: setData("member", [obj.memberData, obj.memberLK, obj.memberPR, obj.memberBaru]),
-                    options: setOptions('Member Data', 'top', 0),
-                });
-
-                //i < jumlah chart
-                //console.log(myChart);
-                //myChart.update();
-            }
-        });
+    function refreshChart(){
+        refreshMemberChart();
+        refreshCutiChart();
+        refreshRevenueChart();
     }
-    function setData(type, data){
-        switch(type){
-            case "revenue":
-                var dataGenerate = {
-                    labels: data[0].labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Total Revenue',
-                            data: data[0].dataset,
-                            borderColor: 'rgb(7,138,238)',
-                            backgroundColor: 'rgba(6,95,173,0.1)',
-                            borderWidth: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Total Revenue',
-                            data: data[1].dataset,
-                            borderColor: 'rgb(219,98,6)',
-                            backgroundColor: 'rgba(173,64,6,0.1)',
-                            borderWidth: 2,
-                            hidden: true
-                        },
-                        {
-                            type: 'line',
-                            label: 'Total Revenue',
-                            data: data[2].dataset,
-                            borderColor: 'rgb(219,6,6)',
-                            backgroundColor: 'rgba(173,6,20,0.1)',
-                            borderWidth: 2,
-                            hidden: true
-                        }
-                    ]
-                }
-                return dataGenerate;
-                break;
-            case "activity":
-                var dataGenerate = {
-                    labels: data[0].labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Check-In',
-                            data: data[0].dataset,
-                            borderColor: 'rgb(37,147,220)',
-                            backgroundColor: 'rgba(0,0,0,0)',
-                            borderWidth: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Pembelian',
-                            data: data[1].dataset,
-                            borderColor: 'rgb(9,187,89)',
-                            backgroundColor: 'rgba(0,0,0,0)',
-                            borderWidth: 2
-                        }
-                    ]
-                }
-                return dataGenerate;
-                break;
+
+    function setChartContextData(id){
+        return document.getElementById(id).getContext('2d');
+    }
+
+    function setChartData(category, labels, datasetTotal, dataset_2, dataset_3){
+        switch(category){
             case "member":
-                var dataGenerate = {
-                    labels: data[0].labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Total Member',
-                            data: data[0].dataset,
-                            borderColor: 'rgb(6,173,41)',
-                            backgroundColor: 'rgba(252,87,94,0.0)',
-                            borderWidth: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Total Member (Laki-laki)',
-                            data: data[1].dataset,
-                            borderColor: 'rgb(6,115,173)',
-                            backgroundColor: 'rgba(23,152,222,0)',
-                            borderWidth: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Total Member (Perempuan)',
-                            data: data[2].dataset,
-                            borderColor: 'rgb(224,7,68)',
-                            backgroundColor: 'rgba(224,13,97,0)',
-                            borderWidth: 2
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Member Baru',
-                            data: data[3].dataset,
-                            borderColor: 'rgb(37,147,220)',
-                            backgroundColor: 'rgba(37,147,220,0.2)',
-                            borderWidth: 2
-                        }
-                    ]
-                }
-                return dataGenerate;
+                var data = initMemberChart(labels, datasetTotal, dataset_2, dataset_3);
+                break;
+            case "cuti":
+                var data = initCutiChart(labels, datasetTotal);
+                break;
+            case "revenue":
+                var data = initRevenueChart(labels, datasetTotal, dataset_2, dataset_3);
                 break;
         }
+
+        return data;
     }
-    function setOptions(title, position, tension){
-        var options = {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: position,
-                },
-                title: {
-                    display: true,
-                    text: title
-                }
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            },
-            elements: {
-                line: {
-                    tension: tension
-                }
-            }
-        }
-        return options;
-    }
+
+    //REFRESH CHART ON PAGE START
+    refreshChart();
     @endsection
 </script>
