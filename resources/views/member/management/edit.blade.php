@@ -386,6 +386,7 @@
                 { data: 'start_date', name: 'start_date' },
                 { data: 'expired_date', name: 'expired_date' },
             ],
+            "order": [[ 3, "asc" ]]
         });
 
         $("#ptTable").DataTable({
@@ -727,6 +728,74 @@
         });
     }
     @endif
+
+    $("#dataStartDateMember").on("change", function(){
+        if($("#dataStartDateMember").val() == $("#memberStartDateOLD")){
+            $("#memberStartDateHidden").val(null);
+        }else{
+            $("#memberStartDateHidden").val($("#dataStartDateMember").val());
+        }
+    });
+
+    $("#dataEndDateMember").on("change", function(){
+        if($("#dataEndDateMember").val() == $("#memberEndDateOLD")){
+            $("#memberEndDateHidden").val(null);
+        }else{
+            $("#memberEndDateHidden").val($("#dataEndDateMember").val());
+        }
+    });
+
+
+    function confirmStartEndDateChange(){
+        var start_date = new Date($("#dataStartDateMember").val());
+        var end_date = new Date($("#dataEndDateMember").val());
+        var today = new Date();
+
+        if (end_date.getTime() <= start_date.getTime() || start_date.getTime() >= end_date.getTime()) {
+            messagingErrorCustom('Tanggal berakhir tidak boleh kurang dari atau sama dengan tanggal mulai');
+        }else{
+            if(start_date.getTime() > today.getTime()){
+                messagingErrorCustom('Tanggal mulai tidak boleh lebih dari hari ini!');
+            }else{
+                $("#changeDateModal").modal("hide");
+
+                const DestroySwal = Swal.mixin({
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-outline-secondary mr-2'
+                    },
+                    buttonsStyling: false
+                });
+
+                DestroySwal.fire({
+                    icon: 'warning',
+                    html: 'Apakah Anda yakin ingin Tanggal Mulai dan Berakhir Member ini ? <br><br> <i>(Perhatian! Paket Member Pending / Aktif akan terhapus jika tanggal mulai yang dipilih melebihi tanggal expired paket member tersebut dan sebaliknya (tanggal berakhir))</i>',
+                    showCancelButton: true,
+                    cancelButtonText: `<i class="fas fa-arrow-left fa-sm mr-1"></i> Kembali`,
+                    confirmButtonText: `<i class="fas fa-check fa-sm mr-1"></i> Ubah`,
+                    reverseButtons: true
+                }).then((result) => {
+
+                    if (result.dismiss === Swal.DismissReason.confirm){
+                        if (end_date.getTime() <= start_date.getTime() || start_date.getTime() >= end_date.getTime()) {
+                            messagingErrorCustom('Tanggal berakhir tidak boleh kurang dari atau sama dengan tanggal mulai');
+                            $("#changeDateModal").modal("show");
+                        }else{
+                            if(start_date.getTime() > today.getTime()) {
+                                messagingErrorCustom('Tanggal mulai tidak boleh lebih dari hari ini!');
+                                $("#changeDateModal").modal("show");
+                            }else{
+                                $("#startEndDateForm").submit();
+                            }
+                        }
+                    }else{
+                        $("#changeDateModal").modal("show");
+                        return false;
+                    }
+                });
+            }
+        }
+    }
 
     function extendSession(){
 

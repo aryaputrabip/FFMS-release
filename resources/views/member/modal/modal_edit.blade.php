@@ -661,8 +661,28 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body pb-0">
+                    <form id="startEndDateForm" name="startEndDateForm" method="POST" action="{{ route('member.forceChangeStartEndDate') }}">
+                        {{ csrf_field() }}
+                        <input type="hidden" id="dateHiddenID" name="dateHiddenID" value="{{ $data->member_id }}" readonly>
 
+                        <input type="hidden" id="memberStartDateOLD" value="{{ $data->m_startdate }}" readonly>
+                        <input type="hidden" id="memberEndDateOLD" value="{{ $data->m_enddate }}" readonly>
+
+                        <input type="hidden" id="memberStartDateHidden" name="memberStartDateHidden" readonly>
+                        <input type="hidden" id="memberEndDateHidden" name="memberEndDateHidden" readonly>
+
+                        <h6><b>Tanggal Mulai</b></h6>
+                        <input type="date" id="dataStartDateMember" name="dataStartDateMember" class="form-control w-100 mb-3" value="{{ $data->m_startdate }}" @if(isset($data->m_startdate)) @else disabled @endisset>
+
+                        <h6><b>Tanggal Berakhir</b></h6>
+                        <input type="date" id="dataEndDateMember" name="dataEndDateMember" class="form-control w-100" value="{{ $data->m_enddate }}" @if(isset($data->m_enddate)) @else disabled @endisset>
+
+
+                        <button type="button" class="btn btn-dark w-100 mt-4 mb-0" @if(isset($data->m_startdate) && isset($data->m_enddate)) onclick="confirmStartEndDateChange();" @else disabled @endisset>
+                            <i class="fas fa-check fa-sm mr-1"></i> Ubah Tanggal Mulai / Berakhir
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

@@ -236,17 +236,30 @@ class MemberRegisterController extends Controller
             }
         }
 
-        if($r->paymentMethodGroup == "cicilan"){
+        if($r->paymentMethodGroup == "cicilan") {
             $statusBayar = "Dalam Cicilan";
             $chargePrice = $membershipPrice + $sessionPrice;
             $restData = $chargePrice - ($chargePrice / $r->paymentCicilanDuration);
             $restDataTransaction = $chargePrice / $r->paymentCicilanDuration;
 
-            if($sessionPrice != null || $sessionPrice > 0){
-                $restDataMembership = ($chargePrice / $r->paymentCicilanDuration)/2;
-                $restDataSesi = (int) ($chargePrice / $r->paymentCicilanDuration)/2;
-            }else{
+            if ($sessionPrice != null || $sessionPrice > 0) {
+                $restDataMembership = ($chargePrice / $r->paymentCicilanDuration) / 2;
+                $restDataSesi = (int)($chargePrice / $r->paymentCicilanDuration) / 2;
+            } else {
                 $restDataMembership = $chargePrice / $r->paymentCicilanDuration;
+                $restDataSesi = null;
+            }
+        }else if($r->paymentMethodGroup == "tunda"){
+            $statusBayar = "Dalam Cicilan";
+            $chargePrice = $membershipPrice + $sessionPrice;
+            $restData = $chargePrice;
+            $restDataTransaction = 0;
+
+            if ($sessionPrice != null || $sessionPrice > 0) {
+                $restDataMembership = $chargePrice / 2;
+                $restDataSesi = (int)$chargePrice / 2;
+            } else {
+                $restDataMembership = $chargePrice;
                 $restDataSesi = null;
             }
         }else{
@@ -302,6 +315,15 @@ class MemberRegisterController extends Controller
                'rest_data' => (int) $restData,
                'rest_membership' => $logDesc,
                'created_at' => $date_now
+            ]);
+        }else if($r->paymentMethodGroup == "tunda"){
+            $cicilan = CicilanDataModel::create([
+                'author' => $data->member_id,
+                'rest_duration' => 1,
+                'rest_price' => $chargePrice,
+                'rest_data' => (int) $restData,
+                'rest_membership' => $logDesc,
+                'created_at' => $date_now
             ]);
         }
 

@@ -1193,12 +1193,12 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
-            if($r->paymentMethodGroup == "cicilan"){
+            if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam cicilan";
 
-                if($r->mShipApproval == ""){
+                if ($r->mShipApproval == "") {
                     $jumlah_transaksi = $r->nPrice;
-                }else{
+                } else {
                     $jumlah_transaksi = $r->mShipApproval;
                 }
 
@@ -1213,6 +1213,26 @@ class MemberDataController extends Controller
                     'rest_membership' => $rest_pt,
                     'created_at' => $date_now
                 ]);
+            }else if($r->paymentMethodGroup == "tunda"){
+                $status_transaksi = "Dalam cicilan";
+
+                if ($r->mShipApproval == "") {
+                    $jumlah_transaksi = $r->nPrice;
+                } else {
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+
+                $rest_data = $jumlah_transaksi;
+                $rest_pt = 'Pembelian Sesi PT - ' . $fullSessionName;
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => 1,
+                    'rest_price' => $jumlah_transaksi,
+                    'rest_data' => $rest_data,
+                    'rest_membership' => $rest_pt,
+                    'created_at' => $date_now
+                ]);
             }else{
                 $status_transaksi = "lunas";
                 $rest_pt = 'Pembelian Sesi PT - ' . $fullSessionName;
@@ -1224,7 +1244,7 @@ class MemberDataController extends Controller
                 }
             }
 
-            if($r->paymentMethodGroup == "cicilan"){
+            if($r->paymentMethodGroup == "cicilan") {
                 $log = MemberLogModel::create([
                     'date' => $date_now,
                     'desc' => $rest_pt,
@@ -1236,6 +1256,20 @@ class MemberDataController extends Controller
                     'reg_no' => ($r->nRegNo + 1),
                     'aksi' => 'sesi',
                     't_sesi' => $rest_data,
+                    'notes' => $r->nNotes
+                ]);
+            }else if($r->paymentMethodGroup == "tunda"){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => 0,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => 0,
                     'notes' => $r->nNotes
                 ]);
             }else{
@@ -1257,7 +1291,6 @@ class MemberDataController extends Controller
             $successMessage = 'Pembelian Sesi Berhasil!';
 
         }else if($r->sTransaction == "register-session"){
-
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
                 'session_reg' => $r->nSession,
                 'session' => $r->nSession,
@@ -1282,12 +1315,12 @@ class MemberDataController extends Controller
                 $fullSessionName = $r->nTitle . " - " . $r->nSession . " Session";
             }
 
-            if($r->paymentMethodGroup == "cicilan"){
+            if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam cicilan";
 
-                if($r->mShipApproval == ""){
+                if ($r->mShipApproval == "") {
                     $jumlah_transaksi = $r->nPrice;
-                }else{
+                } else {
                     $jumlah_transaksi = $r->mShipApproval;
                 }
 
@@ -1302,6 +1335,26 @@ class MemberDataController extends Controller
                     'rest_membership' => $rest_pt,
                     'created_at' => $date_now
                 ]);
+            }else if($r->paymentMethodGroup == "tunda"){
+                $status_transaksi = "Dalam cicilan";
+
+                if ($r->mShipApproval == "") {
+                    $jumlah_transaksi = $r->nPrice;
+                } else {
+                    $jumlah_transaksi = $r->mShipApproval;
+                }
+
+                $rest_data = $jumlah_transaksi;
+                $rest_pt = 'Pembelian Paket Personal Trainer - ' . $fullSessionName;
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => 1,
+                    'rest_price' => $jumlah_transaksi,
+                    'rest_data' => $jumlah_transaksi,
+                    'rest_membership' => $rest_pt,
+                    'created_at' => $date_now
+                ]);
             }else{
                 $status_transaksi = "lunas";
                 $rest_pt = 'Pembelian Paket Personal Trainer - ' . $fullSessionName;
@@ -1313,7 +1366,7 @@ class MemberDataController extends Controller
                 }
             }
 
-            if($r->paymentMethodGroup == "cicilan"){
+            if($r->paymentMethodGroup == "cicilan") {
                 $log = MemberLogModel::create([
                     'date' => $date_now,
                     'desc' => $rest_pt,
@@ -1325,6 +1378,20 @@ class MemberDataController extends Controller
                     'reg_no' => ($r->nRegNo + 1),
                     'aksi' => 'sesi',
                     't_sesi' => $rest_data,
+                    'notes' => $r->nNotes
+                ]);
+            }else if($r->paymentMethodGroup == "tunda"){
+                $log = MemberLogModel::create([
+                    'date' => $date_now,
+                    'desc' => $rest_pt,
+                    'category' => 5,
+                    'transaction' => 0,
+                    'status' => $status_transaksi,
+                    'author' => $r->sHiddenID,
+                    'additional' => $r->nPayment,
+                    'reg_no' => ($r->nRegNo + 1),
+                    'aksi' => 'sesi',
+                    't_sesi' => 0,
                     'notes' => $r->nNotes
                 ]);
             }else{
@@ -1348,11 +1415,27 @@ class MemberDataController extends Controller
         }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
             $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
 
-            if($r->paymentMethodGroup == "cicilan"){
+            if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam Cicilan";
                 $jumlah_transaksi = (int)$r->jumlahCicilan;
 
                 $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
+                $rest_membership = "Pembelian Paket Member";
+
+                $cicilanData = CicilanDataModel::create([
+                    'author' => $r->sHiddenID,
+                    'rest_duration' => $r->durasiCicilan,
+                    'rest_price' => $rest_price,
+                    'rest_data' => $rest_data,
+                    'rest_membership' => $rest_membership,
+                    'created_at' => $date_now
+                ]);
+            }else if($r->paymentMethodGroup == "tunda"){
+                $status_transaksi = "Dalam Cicilan";
+                $jumlah_transaksi = (int)$r->jumlahCicilan;
+
+                $rest_price = $r->jumlahCicilan * $r->durasiCicilan;
                 $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
                 $rest_membership = "Pembelian Paket Member";
 
@@ -1744,5 +1827,60 @@ class MemberDataController extends Controller
         }
 
         return $data;
+    }
+
+    public function forceChangeStartEndDate(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthADM();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = date('Y-m-d H:i:s');
+
+        $member = MemberModel::where('member_id', $r->dateHiddenID)->select('m_startdate','m_enddate','status')->first();
+
+        if($member->status == 3){
+            return redirect()->route('suadmin.member.edit', $r->dateHiddenID)->with(['failed' => 'Member ini sedang cuti! Tidak dapat mengubah data']);
+        }else{
+            if(isset($r->memberStartDateHidden)){
+                $start_new = Carbon::parse($r->memberStartDateHidden);
+
+                $membership = membershipListCacheModel::whereDate('end_date', '<', $start_new->format("Y-m-d"))->delete();
+                $membership = membershipListCacheModel::where('author', $r->dateHiddenID)->orderBy("start_date", "asc")->first()->update([
+                    'start_date' => $start_new->format("Y-m-d")
+                ]);
+            }
+
+            if(isset($r->memberEndDateHidden)){
+                $end_new = Carbon::parse($r->memberEndDateHidden);
+
+                $membership = membershipListCacheModel::whereDate('start_date', '>', $end_new->format("Y-m-d"))->delete();
+                $membership = membershipListCacheModel::where('author', $r->dateHiddenID)->orderBy("end_date", "desc")->first()->update([
+                    'end_date' => $end_new->format("Y-m-d")
+                ]);
+            }
+
+            if(isset($r->memberStartDateHidden) && isset($r->memberEndDateHidden)){
+                $data = MemberModel::where('member_id', $r->dateHiddenID)->update([
+                    'm_startdate' => $r->memberStartDateHidden,
+                    'm_enddate' => $r->memberEndDateHidden,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->id
+                ]);
+            }else if(isset($r->memberStartDateHidden)){
+                $data = MemberModel::where('member_id', $r->dateHiddenID)->update([
+                    'm_startdate' => $r->memberStartDateHidden,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->id
+                ]);
+            }else if(isset($r->memberEndDateHidden)){
+                $data = MemberModel::where('member_id', $r->dateHiddenID)->update([
+                    'm_enddate' => $r->memberEndDateHidden,
+                    'updated_at' => $date_now,
+                    'updated_by' => Auth::user()->id
+                ]);
+            }
+
+            return redirect()->route('suadmin.member.edit', $r->dateHiddenID)->with(['success' => 'Tanggal Mulai / Berakhir Member Berhasil Diubah!']);
+        }
     }
 }

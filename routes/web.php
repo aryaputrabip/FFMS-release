@@ -123,6 +123,7 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::get('getCheckoutMemberData', 'MemberCheckoutController@getCheckoutMemberData')->name('getCheckoutMemberData');
     Route::post('checkoutMember', 'MemberCheckoutController@checkoutMember')->name('checkoutMember');
     Route::post('forceChangeStatus', 'MemberDataController@forceChangeStatus')->name('forceChangeStatus');
+    Route::post('forceChangeStartEndDate', 'MemberDataController@forceChangeStartEndDate')->name('forceChangeStartEndDate');
 
     Route::post('addTransaction', 'MemberDataController@addTransaction')->name('addTransaction');
 
@@ -174,8 +175,11 @@ Route::namespace('marketing')->prefix('marketing')->name('marketing.')->group(fu
 Route::namespace('report')->prefix('report/')->name('report.')->group(function(){
     Route::get('getSpecifyMemberSpending','ReportGraphController@getSpecifyMemberSpending')->name('getSpecifyMemberSpending');
     Route::get('performaMember','ReportGraphController@performaMember')->name('performaMember');
+    Route::get('performaCheckin','ReportGraphController@performaCheckin')->name('performaCheckin');
     Route::get('performaCuti','ReportGraphController@performaCuti')->name('performaCuti');
     Route::get('performaRevenue','ReportGraphController@performaRevenue')->name('performaRevenue');
+    Route::get('performaMarketing','ReportGraphController@performaMarketing')->name('performaMarketing');
+    Route::get('performaPT','ReportGraphController@performaPT')->name('performaPT');
 });
 
 //

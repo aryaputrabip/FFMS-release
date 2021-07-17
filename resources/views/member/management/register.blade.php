@@ -502,10 +502,11 @@
                                 <div class="card-body pt-0" id="paymentMGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
                                     <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="paymentMethodGroup" name="paymentMethodGroup">
                                         <option value="full" selected>Lunas</option>
+                                        <option value="tunda">Tunda Bayar (30 Hari)</option>
                                         <option value="cicilan">Cicilan</option>
                                     </select>
                                     <div id="paymentCicilanDurationContainer" style="display: none;">
-                                        <input class="form-control w-auto float-left" type="number" min="1" value="1" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
+                                        <input class="form-control w-auto float-left" type="number" min="2" value="2" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
                                         <h6 class="float-left mt-2 ml-2">Bulan</h6>
                                     </div>
                                 </div>
@@ -969,7 +970,7 @@
         switch(step){
             case 1:
                 if($("#dataUserNama").val() != "" && $("#dataUserGender").val() != "" &&
-                    $("#dataUserEmail").val() != "" && $("#dataUserPhone").val() != "" && $("#dataUserDOB").val() != "")
+                    $("#dataUserEmail").val() != "" && $("#dataUserPhone").val() != "")
                     return true;
                     return false;
                 break;

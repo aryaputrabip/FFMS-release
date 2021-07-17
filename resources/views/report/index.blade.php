@@ -69,11 +69,11 @@
 
                     <div class="col-12 mt-5">
                         <hr>
-                        <h2 class="text-center">Performa Aktivitas Member</h2>
+                        <h2 class="text-center">Performa Check-In</h2>
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="activityFrame">
-
+                            @include('chart.member_checkin_chart')
                         </div>
                     </div>
 
@@ -89,43 +89,59 @@
 
                     <div class="col-12 mt-5">
                         <hr>
+                        <div class="position-absolute" style="right: 10px;">
+                            <select data-column="5" class="form-control w-100" id="tableFilterMarketing">
+                                <option value="" class="font-weight-bold" selected>Marketing (All)</option>
+                                @foreach($filter_marketing as $filter_marketing)
+                                    <option value="{{ $filter_marketing->mark_id }}">{{ $filter_marketing->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <h2 class="text-center">Performa Marketing</h2>
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="marketingFrame">
-
+                            @include('chart.marketing_chart')
                         </div>
                     </div>
 
+{{--                    <div class="col-12 mt-5">--}}
+{{--                        <hr>--}}
+{{--                        <h2 class="text-center">Top 10 Marketing</h2>--}}
+{{--                    </div>--}}
+{{--                    <div class="col-12">--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="topMarketingFrame">--}}
+
+{{--                        </div>--}}
+{{--                    </div>--}}
+
                     <div class="col-12 mt-5">
                         <hr>
-                        <h2 class="text-center">Top 10 Marketing</h2>
-                    </div>
-                    <div class="col-12">
-                        <div style="max-width: 100%; overflow-x: auto;" id="topMarketingFrame">
-
+                        <div class="position-absolute" style="right: 10px;">
+                            <select data-column="5" class="form-control w-100" id="tableFilterPT">
+                                <option value="" class="font-weight-bold" selected>PT (All)</option>
+                                @foreach($filter_pt as $filter_pt)
+                                    <option value="{{ $filter_pt->pt_id }}">{{ $filter_pt->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="col-12 mt-5">
-                        <hr>
                         <h2 class="text-center">Performa Personal Trainer</h2>
                     </div>
                     <div class="col-12">
                         <div style="max-width: 100%; overflow-x: auto;" id="ptFrame">
-
+                            @include('chart.pt_chart')
                         </div>
                     </div>
 
-                    <div class="col-12 mt-5">
-                        <hr>
-                        <h2 class="text-center">Top 10 Personal Trainer</h2>
-                    </div>
-                    <div class="col-12">
-                        <div style="max-width: 100%; overflow-x: auto;" id="topPTFrame">
+{{--                    <div class="col-12 mt-5">--}}
+{{--                        <hr>--}}
+{{--                        <h2 class="text-center">Top 10 Personal Trainer</h2>--}}
+{{--                    </div>--}}
+{{--                    <div class="col-12">--}}
+{{--                        <div style="max-width: 100%; overflow-x: auto;" id="topPTFrame">--}}
 
-                        </div>
-                    </div>
+{{--                        </div>--}}
+{{--                    </div>--}}
 
                     <div class="col-12 mt-5">
                         <hr>
@@ -180,10 +196,21 @@
         }
     });
 
+    $("#tableFilterMarketing").on("change", function(){
+        refreshMarketingChart();
+    });
+
+    $("#tableFilterPT").on("change", function(){
+        refreshPTChart();
+    });
+
     function refreshChart(){
         refreshMemberChart();
         refreshCutiChart();
         refreshRevenueChart();
+        refreshMarketingChart();
+        refreshPTChart();
+        refreshCheckinChart();
     }
 
     function setChartContextData(id){
@@ -195,11 +222,20 @@
             case "member":
                 var data = initMemberChart(labels, datasetTotal, dataset_2, dataset_3);
                 break;
+            case "checkin":
+                var data = initCheckinChart(labels, datasetTotal);
+                break;
             case "cuti":
                 var data = initCutiChart(labels, datasetTotal);
                 break;
             case "revenue":
                 var data = initRevenueChart(labels, datasetTotal, dataset_2, dataset_3);
+                break;
+            case "marketing":
+                var data = initMarketingChart(labels, datasetTotal);
+                break;
+            case "pt":
+                var data = initPTChart(labels, datasetTotal);
                 break;
         }
 

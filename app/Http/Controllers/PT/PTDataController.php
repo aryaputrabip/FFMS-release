@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PT;
 
 use App\Model\gstatus\GlobalStatusModel;
+use App\Model\member\MemberLogModel;
 use App\Model\pt\PersonalTrainerModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -31,8 +32,20 @@ class PTDataController extends Controller
             $app_layout = $this->defineLayout($role);
             $filterStatus = GlobalStatusModel::select("status")->get();
 
+            $filter_year_available = MemberLogModel::selectRaw('to_char(date, \'yyyy\') as date')->get();
+            $totalQuery = count($filter_year_available);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++) {
+                if (in_array($filter_year_available[$i]->date, $arrayValidate)) {
+                    $filter_year_available->forget($i);
+                } else {
+                    array_push($arrayValidate, $filter_year_available[$i]->date);
+                }
+            }
+
             return view('pt.index',
-                compact('title','username','role','app_layout','url','status','jPT','PTActive','PTLK','PTPR','filterStatus'));
+                compact('title','username','role','app_layout','url','status','jPT','PTActive','PTLK','PTPR','filterStatus', 'filter_year_available'));
         }
     }
 
@@ -81,10 +94,13 @@ class PTDataController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     return '<center>
-                            <a href="#modal-pt" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->pt_id.'); PTEditMode();">
-                                <i class="fa fa-edit text-warning"></i>
-                            </a>
-                        </center>';
+                                <a href="#modal-performa-pt" class="btn btn-default btn-sm mr-1" title="Performa" data-toggle="modal" onclick="viewPerformaPT('.$data->pt_id.', `'.$data->name.'`);">
+                                    <i class="fas fa-chart-line text-success"></i>
+                                </a>
+                                <a href="#modal-pt" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->pt_id.'); PTEditMode();">
+                                    <i class="fa fa-edit text-warning"></i>
+                                </a>
+                            </center>';
                 })
                 ->rawColumns(['action', 'name', 'gender', 'join_from', 'ptStatus'])
                 ->make(true);

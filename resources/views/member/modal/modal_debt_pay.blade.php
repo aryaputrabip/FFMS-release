@@ -56,11 +56,12 @@
                 <div class="card">
                     <div class="card-body p-3">
                         <h6 class="font-weight-bold">Pembayaran Cicilan</h6>
-                        <select id="paymentType" class="form-control float-left select2 w-auto mr-2" style="width: 100%;" id="dataUserGender" name="dataUserGender">
+                        <select id="paymentType" class="form-control float-left select2 w-auto mr-2" style="width: 100%;" name="paymentType">
                             <option value="cicilan" selected>Bayar Bulanan</option>
+                            <option value="tunda">Tunda Bayar (30 hari)</option>
                             <option value="penuh">Bayar Penuh</option>
                         </select>
-                        <div id="paymentFullGroup">
+                          <div id="paymentFullGroup">
                             <input id="paymentDuration" type="number" class="float-left form-control w-auto mr-2" style="max-width: 70px;" min="1" value="1">
                             <h6 class="float-left mt-2">Bulan</h6>
                         </div>

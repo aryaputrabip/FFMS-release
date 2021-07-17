@@ -43,8 +43,8 @@
                         type: 'line',
                         label: 'Total Member Baru',
                         data: datasetTotal,
-                        borderColor: 'rgb(6,173,41)',
-                        backgroundColor: 'rgba(252,87,94,0.0)',
+                        borderColor: 'rgb(196,129,0)',
+                        backgroundColor: 'rgba(252,236,87,0)',
                         borderWidth: 2
                     },
                     {

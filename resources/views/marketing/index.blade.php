@@ -143,6 +143,64 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modal-performa-marketing">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title text-dark">
+                        <i class="fas fa-chart-line fa-sm mr-1"></i> Performa Marketing (<span id="performaMarketingTitle"></span>)
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-pt-content">
+                    <input type="hidden" id="tableFilterMarketing" readonly>
+
+                    <div class="input-group-prepend" id="chart_filter_group">
+                        <select data-column="3" class="form-control w-100" id="tableFilterChartType">
+                            <option value="daily" class="font-weight-bold">Filter By (Daily)</option>
+                            <option value="monthly" selected>Filter By (Monthly)</option>
+                            <option value="yearly">Filter By (Yearly)</option>
+                        </select>
+
+                        <select data-column="13" class="form-control w-100 ml-2" id="tableFilterChartMonth" style="display: none;">
+                            <option value="all" class="font-weight-bold" selected>Bulan (All)</option>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+
+                        <select data-column="3" class="form-control ml-2 w-100" id="tableFilterChartYear">
+                            <option value="all" class="font-weight-bold" selected>Tahun (All)</option>
+                            @foreach($filter_year_available as $FILTER_YEAR)
+                                <option value="{{ $FILTER_YEAR->date }}">{{ $FILTER_YEAR->date }}</option>
+                            @endforeach
+                        </select>
+
+                        <select data-column="5" class="form-control ml-2 w-100" id="tableFilterChartYearDuration" style="display: none">
+                            <option value="2">2 Years</option>
+                            <option value="5" selected>5 Years</option>
+                            <option value="10">10 Years</option>
+                            <option value="15">15 Years</option>
+                        </select>
+                    </div>
+
+                    @include('chart.marketing_chart')
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('import_script')
@@ -387,5 +445,62 @@
             }
         });
     }
+
+    $("#tableFilterChartMonth").on("change", function(){
+        refreshMarketingChart();
+    });
+
+    $("#tableFilterChartYear").on("change", function(){
+        refreshMarketingChart();
+    });
+
+    $("#tableFilterChartYearDuration").on("change", function(){
+        refreshMarketingChart();
+    });
+
+    $("#tableFilterChartType").on("change", function(){
+        switch($(this).val()){
+            case "daily":
+                $("#tableFilterChartMonth").show();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").hide();
+                refreshMarketingChart();
+                break;
+            case "monthly":
+                $("#tableFilterChartMonth").hide();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").hide();
+                refreshMarketingChart();
+                break;
+            case "yearly":
+                $("#tableFilterChartMonth").hide();
+                $("#tableFilterChartYear").show();
+                $("#tableFilterChartYearDuration").show();
+                refreshMarketingChart();
+                break;
+        }
+    });
+
+    function setChartContextData(id){
+        return document.getElementById(id).getContext('2d');
+    }
+
+    function setChartData(category, labels, datasetTotal, dataset_2, dataset_3){
+        switch(category){
+            case "marketing":
+                var data = initMarketingChart(labels, datasetTotal);
+                break;
+        }
+
+        return data;
+    }
+
+    function viewPerformaMarketing(id, name){
+        $("#tableFilterMarketing").val(id);
+        $("#performaMarketingTitle").html(name);
+
+        refreshMarketingChart();
+    }
+
     @endsection
 </script>

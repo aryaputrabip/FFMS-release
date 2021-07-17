@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ $title }}</title>
 
+    <link rel="icon" href="{{ asset('/data/logo/logo.png') }}">
+
     <!-- INIT STYLE -->
     @include('theme.default.source.script_source')
     @include('theme.default.source.css_source')

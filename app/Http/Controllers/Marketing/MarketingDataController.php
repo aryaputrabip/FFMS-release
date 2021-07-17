@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Model\gstatus\GlobalStatusModel;
 use App\Model\marketing\MarketingModel;
+use App\Model\member\MemberLogModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -31,8 +32,20 @@ class MarketingDataController extends Controller
             $app_layout = $this->defineLayout($role);
             $filterStatus = GlobalStatusModel::select("status")->get();
 
+            $filter_year_available = MemberLogModel::selectRaw('to_char(date, \'yyyy\') as date')->get();
+            $totalQuery = count($filter_year_available);
+            $arrayValidate = [];
+
+            for($i=0; $i<$totalQuery; $i++) {
+                if (in_array($filter_year_available[$i]->date, $arrayValidate)) {
+                    $filter_year_available->forget($i);
+                } else {
+                    array_push($arrayValidate, $filter_year_available[$i]->date);
+                }
+            }
+
             return view('marketing.index',
-                compact('title','username','role','app_layout','url','status','jMarketing','marketingActive','marketingLK','marketingPR','filterStatus'));
+                compact('title','username','role','app_layout','url','status','jMarketing','marketingActive','marketingLK','marketingPR','filterStatus','filter_year_available'));
         }
     }
 
@@ -81,10 +94,13 @@ class MarketingDataController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     return '<center>
-                            <a href="#modal-marketing" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->mark_id.'); marketingEditMode();">
-                                <i class="fa fa-edit text-warning"></i>
-                            </a>
-                        </center>';
+                                <a href="#modal-performa-marketing" class="btn btn-default btn-sm mr-1" title="Performa" data-toggle="modal" onclick="viewPerformaMarketing('.$data->mark_id.', `'.$data->name.'`);">
+                                    <i class="fas fa-chart-line text-success"></i>
+                                </a>
+                                <a href="#modal-marketing" class="btn btn-default btn-sm" title="Ubah" data-toggle="modal" onclick="editDataOf('.$data->mark_id.'); marketingEditMode();">
+                                    <i class="fa fa-edit text-warning"></i>
+                                </a>
+                            </center>';
                 })
                 ->rawColumns(['action', 'name', 'gender', 'join_from', 'markStatus'])
                 ->make(true);

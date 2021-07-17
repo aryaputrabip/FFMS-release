@@ -1,39 +1,40 @@
 <hr>
 <div class="overflow-auto text-center group-history-chart-monthly" style="max-width: 100%;">
-    <canvas id="performaCutiChart" width="100" height="30" style="max-width: 100%;"></canvas>
+    <canvas id="performaPTChart" width="100" height="30" style="max-width: 100%;"></canvas>
 </div>
 
 <script>
     //GENERATE CHART
 
-    function refreshCutiChart() {
+    function refreshPTChart(){
         $.ajax({
             type: 'GET',
-            url: '{{ route('report.performaCuti') }}',
-            data: {
+            url: '{{ route('report.performaPT') }}',
+            data:{
                 FILTER_TYPE: $("#tableFilterChartType").val(),
                 FILTER_MONTH: $("#tableFilterChartMonth").val(),
                 FILTER_YEAR: $("#tableFilterChartYear").val(),
-                FILTER_YEAR_DURATION: $("#tableFilterChartYearDuration").val()
+                FILTER_YEAR_DURATION: $("#tableFilterChartYearDuration").val(),
+                FILTER_PT: $("#tableFilterPT").val()
             },
             success: function (data) {
-                if (typeof (ChartCuti) != "undefined") {
-                    ChartCuti.destroy();
+                if(typeof (ChartPT) != "undefined"){
+                    ChartPT.destroy();
                 }
 
-                var newChartContext = setChartContextData('performaCutiChart');
-                var newChartData = setChartData("cuti", data.chart_label, data.chart_dataset, null, null);
+                var newChartContext = setChartContextData('performaPTChart');
+                var newChartData = setChartData("pt", data.chart_label, data.chart_dataset, null, null);
 
-                ChartCuti = new Chart(newChartContext, newChartData);
-                ChartCuti.update();
+                ChartPT = new Chart(newChartContext, newChartData);
+                ChartPT.update();
             },
-            error: function () {
+            error: function() {
                 console.log("error");
             }
         });
     }
 
-    function initCutiChart(labels, datasetTotal){
+    function initPTChart(labels, datasetTotal){
         var data  = {
             type: 'bar',
             data: {
@@ -41,10 +42,10 @@
                 datasets: [
                     {
                         type: 'line',
-                        label: 'Total Member Cuti',
+                        label: 'Total Pemakaian Sesi',
                         data: datasetTotal,
-                        borderColor: 'rgb(227,35,35)',
-                        backgroundColor: 'rgba(252,87,94,0)',
+                        borderColor: 'rgb(6,126,173)',
+                        backgroundColor: 'rgba(87,252,252,0)',
                         borderWidth: 2
                     }
                 ]

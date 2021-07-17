@@ -1,15 +1,15 @@
 <hr>
 <div class="overflow-auto text-center group-history-chart-monthly" style="max-width: 100%;">
-    <canvas id="performaCutiChart" width="100" height="30" style="max-width: 100%;"></canvas>
+    <canvas id="performaCheckinChart" width="100" height="30" style="max-width: 100%;"></canvas>
 </div>
 
 <script>
     //GENERATE CHART
 
-    function refreshCutiChart() {
+    function refreshCheckinChart() {
         $.ajax({
             type: 'GET',
-            url: '{{ route('report.performaCuti') }}',
+            url: '{{ route('report.performaCheckin') }}',
             data: {
                 FILTER_TYPE: $("#tableFilterChartType").val(),
                 FILTER_MONTH: $("#tableFilterChartMonth").val(),
@@ -17,15 +17,15 @@
                 FILTER_YEAR_DURATION: $("#tableFilterChartYearDuration").val()
             },
             success: function (data) {
-                if (typeof (ChartCuti) != "undefined") {
-                    ChartCuti.destroy();
+                if (typeof (ChartCheckin) != "undefined") {
+                    ChartCheckin.destroy();
                 }
 
-                var newChartContext = setChartContextData('performaCutiChart');
-                var newChartData = setChartData("cuti", data.chart_label, data.chart_dataset, null, null);
+                var newChartContext = setChartContextData('performaCheckinChart');
+                var newChartData = setChartData("checkin", data.chart_label, data.chart_dataset, null, null);
 
-                ChartCuti = new Chart(newChartContext, newChartData);
-                ChartCuti.update();
+                ChartCheckin = new Chart(newChartContext, newChartData);
+                ChartCheckin.update();
             },
             error: function () {
                 console.log("error");
@@ -33,7 +33,7 @@
         });
     }
 
-    function initCutiChart(labels, datasetTotal){
+    function initCheckinChart(labels, datasetTotal){
         var data  = {
             type: 'bar',
             data: {
@@ -41,10 +41,10 @@
                 datasets: [
                     {
                         type: 'line',
-                        label: 'Total Member Cuti',
+                        label: 'Total Member Checkin',
                         data: datasetTotal,
-                        borderColor: 'rgb(227,35,35)',
-                        backgroundColor: 'rgba(252,87,94,0)',
+                        borderColor: 'rgb(6,101,173)',
+                        backgroundColor: 'rgba(87,128,252,0.0)',
                         borderWidth: 2
                     }
                 ]

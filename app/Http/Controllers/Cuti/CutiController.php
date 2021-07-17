@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Cuti;
 
 use App\Http\Controllers\Auth\ValidateRole;
+use App\Model\member\CutiLogModel;
 use App\Model\member\CutiMemberModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;

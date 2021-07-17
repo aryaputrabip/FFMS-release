@@ -11,7 +11,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <span class="nav-link font-weight-bold">{{ $title }}</span>
+                    <span class="nav-link font-weight-bold" style="padding-top: 6px !important;">{{ $title }}</span>
                 </li>
             </ul>
         </div>
