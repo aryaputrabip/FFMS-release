@@ -39,12 +39,12 @@
             <td align="center" style="border: 1px solid #000000;">{{ $member->member_id }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->name }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->email }}</td>
-            <td align="center" style="border: 1px solid #000000;">{{ $member->membership }}</td>
+            <td align="center" style="border: 1px solid #000000;">@if(isset($member->type_membership)) {{ $member->type_membership }} @else {{ $member->type_membership_2 }} @endisset</td>
             <td align="center" style="border: 1px solid #000000;">{{ $member->phone }}</td>
-            <td align="right" style="border: 1px solid #000000;"> {{ asRupiah($member->last_transaction) }} </td>
-            <td align="left" style="border: 1px solid #000000;">{{ $member->marketing }}</td>
-            <td align="left" style="border: 1px solid #000000;">{{ $member->cs }}</td>
-            <td align="left" style="border: 1px solid #000000;">{{ $member->pt }}</td>
+            <td align="right" style="border: 1px solid #000000;">@if(isset($member->total_payment)) {{ asRupiah($member->total_payment) }} @else {{ asRupiah($member->total_payment_2) }} @endisset</td>
+            <td align="left" style="border: 1px solid #000000;">{{ $member->FC }}</td>
+            <td align="left" style="border: 1px solid #000000;">{{ $member->CS }}</td>
+            <td align="left" style="border: 1px solid #000000;">{{ $member->PT }}</td>
         </tr>
         @endforeach
     </tbody>
