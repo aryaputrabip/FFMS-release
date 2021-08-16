@@ -1182,7 +1182,7 @@ class MemberDataController extends Controller
         if($r->sTransaction == "extend-session") {
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
                 'session_reg' => ($r->sOld + $r->nSession),
-                'session' => ($r->lOld + $r->nSession),
+                'session' => ($r->sOld + $r->nSession),
                 'updated_at' => $date_now,
                 'updated_by' => Auth::user()->id
             ]);
