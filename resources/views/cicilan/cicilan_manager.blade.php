@@ -168,8 +168,13 @@
     $("#paymentType").on("change",  function(){
        if($(this).val() == "penuh"){
            $("#paymentFullGroup").hide();
+           $("#paymentManualGroup").hide();
+       }else if($(this).val() == "manual"){
+           $("#paymentFullGroup").hide();
+           $("#paymentManualGroup").show();
        }else{
            $("#paymentFullGroup").show();
+           $("#paymentManualGroup").hide();
        }
     });
 
@@ -202,6 +207,10 @@
         });
     }
 
+    $("#paymentDuration").on("change", function(){
+        $("#paymentConfigAutoPrice").html("Rp. " + hitungCicilan($("#hiddenDataPrice").val(), $("#paymentDuration").val()));
+    });
+
     function getMemberContentData(data){
         var obj = JSON.parse(data);
 
@@ -209,6 +218,7 @@
         $("#detailMemberName").html(obj.data.name);
         $("#detailMemberGender").html(obj.data.gender);
         $("#detailMemberTotalCicilan").html("Rp. " + asRupiah(obj.data.total_cicilan));
+        $("#paymentConfigAutoPrice").html("Rp. " + hitungCicilan(obj.data.total_cicilan, $("#paymentDuration").val()));
         $("#detailMemberTenor").html(obj.data.tenor + " Bulan");
         $("#detailMemberSisaCicilan").html("Rp. " + asRupiah(obj.data.sisa_cicilan));
 
@@ -247,8 +257,17 @@
                     $("#hiddenDataDuration").val($("#hiddenDataResDuration").val());
                 }
 
-                $("#total_payment").html(asRupiah(dataPay));
-                $("#total_price").html(asRupiah(dataPay));
+                if($("#paymentType").val() == "manual"){
+                    $("#total_payment").html(asRupiah($("#paymentManualPrice").val()));
+                    $("#total_price").html(asRupiah($("#paymentManualPrice").val()));
+                    $("#hiddenDataPaymentType").val("manual");
+
+                    $("#hiddenDataPrice").val($("#paymentManualPrice").val());
+                }else{
+                    $("#total_payment").html(asRupiah(dataPay));
+                    $("#total_price").html(asRupiah(dataPay));
+                }
+
                 $("#modal-debt_pay").modal("hide");
                 $("#modal-f-payment").modal("show");
             }
@@ -361,6 +380,11 @@
             '   <i class="fas fa-2x fa-sync fa-spin"></i>' +
             '</div>'
         );
+    }
+
+    function hitungCicilan(price, tenor){
+        var cicilan = price / tenor;
+        return asRupiah(cicilan);
     }
 
     function asRupiah(value){

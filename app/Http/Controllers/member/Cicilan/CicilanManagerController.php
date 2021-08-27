@@ -127,35 +127,83 @@ class CicilanManagerController extends Controller
         $data['data'] = CicilanDataModel::where('author', $r->hiddenID)->first();
         $data['logcount'] = MemberLogModel::where('category', 5)->count();
 
-        $data['price_source'] = $data['data']->rest_data / $data['data']->rest_duration;
 
-        $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
-                                'rest_duration' => ($data['data']->rest_duration - $r->hiddenDataDuration),
-                                'rest_data' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)),
-                                'updated_at' => $date_now
-                            ]);
+        if($r->hiddenDataPaymentType == "manual"){
+            $data['price_source'] = $data['data']->rest_data - $r->hiddenDataPrice;
 
-        if(($data['data']->rest_duration - $r->hiddenDataDuration) < 1){
-            $data['paymentStatus'] = "Lunas";
+            $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+                'rest_data' => (int) $data['price_source'],
+                'updated_at' => $date_now
+            ]);
 
-            $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->delete();
+            if((int) $data['price_source'] <= 0){
+                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->delete();
+                $data['paymentStatus'] = "Lunas";
+            }else{
+                $data['paymentStatus'] = "Dalam Cicilan";
+            }
+
+            $data['log'] = MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Pembayaran Cicilan - ' . $data['data']->rest_membership,
+                'category' => 5,
+                'transaction' => $r->hiddenDataPrice,
+                'status' => $data['paymentStatus'],
+                'author' => $r->hiddenID,
+                'additional' => $r->cachepaymentType,
+                'reg_no' => ($data['logcount'] + 1),
+                'aksi' => 'membership',
+                't_membership' => $r->hiddenDataPrice
+            ]);
+
         }else{
-            $data['paymentStatus'] = "Dalam Cicilan";
+            $data['price_source'] = $data['data']->rest_data / $data['data']->rest_duration;
+
+            //if(($data['data']->rest_duration - $r->hiddenDataDuration) < 1){
+                //$data['paymentStatus'] = "Lunas";
+            //}else{
+                //$data['paymentStatus'] = "Dalam Cicilan";
+            //}
+
+            if((int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)) <= 0){
+
+
+                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->delete();
+                $data['paymentStatus'] = "Lunas";
+            }else{
+                $data['paymentStatus'] = "Dalam Cicilan";
+            }
+
+            if($data['data']->rest_duration - $r->hiddenDataDuration > 1){
+                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+                    'rest_duration' => ($data['data']->rest_duration - $r->hiddenDataDuration),
+                    'rest_data' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)),
+                    'updated_at' => $date_now
+                ]);
+            }else{
+                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+                    'rest_data' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)),
+                    'updated_at' => $date_now
+                ]);
+            }
+
+            $data['log'] = MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Pembayaran Cicilan - ' . $data['data']->rest_membership,
+                'category' => 5,
+                'transaction' => (int) ($data['price_source'] * $r->hiddenDataDuration),
+                'status' => $data['paymentStatus'],
+                'author' => $r->hiddenID,
+                'additional' => $r->cachepaymentType,
+                'reg_no' => ($data['logcount'] + 1),
+                'aksi' => 'membership',
+                't_membership' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration))
+            ]);
         }
 
 
-        $data['log'] = MemberLogModel::create([
-            'date' => $date_now,
-            'desc' => 'Pembayaran Cicilan - ' . $data['data']->rest_membership,
-            'category' => 5,
-            'transaction' => (int) ($data['price_source'] * $r->hiddenDataDuration),
-            'status' => $data['paymentStatus'],
-            'author' => $r->hiddenID,
-            'additional' => $r->cachepaymentType,
-            'reg_no' => ($data['logcount'] + 1),
-            'aksi' => 'membership',
-            't_membership' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration))
-        ]);
+
+
 
         return redirect()->route('suadmin.member.cicilan.index')->with(['payment_success' => $data['log']->log_id]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\member;
 
+use App\Exports\MemberCheckinExport;
 use App\Exports\MemberExport;
 use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\marketing\MarketingModel;
@@ -224,14 +225,6 @@ class MemberDataController extends Controller
                         $routeCuti = route("cs.cuti.index");
                     }
 
-                    //<button class="btn btn-outline-secondary w-100 mb-2" disabled>
-                    //                                <i class="fas fa-address-card fa-sm mr-1"></i> Perpanjang Paket Member
-                    //                            </button>
-                    //                            <button class="btn btn-outline-secondary w-100" disabled>
-                    //                                <i class="fas fa-dumbbell fa-sm mr-1"></i> Perpanjang Sesi Latihan Member
-                    //                            </button>
-                    //                            <hr>
-
                     return '<button type="button" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="checkinMember(`'.$r->id.'`)">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Check-In
                             </button>
@@ -245,6 +238,7 @@ class MemberDataController extends Controller
                             <a href="'.$editLink.'" class="btn btn-warning w-100">
                                 <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
                             </a>';
+
                 }else if($data['data']->status == 2){
                     return '<button href="#" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="activateMember(`'.$r->id.'`, '.$r->duration.')">
                                 <i class="fas fa-calendar-check fa-sm mr-1"></i> Aktivasi Member
@@ -699,12 +693,14 @@ class MemberDataController extends Controller
         date_default_timezone_set("Asia/Bangkok");
         $date_now = date('Y-m-d H:i:s');
 
-        if($r->dataMarketing == "nothing"){
-            $marketingName = null;
-            $marketingID = null;
-        }else{
-            $marketingName = $r->cacheMarketing;
-            $marketingID = $r->dataMarketing;
+        if(Auth::user()->role_id == 1){
+            if($r->dataMarketing == "nothing"){
+                $marketingName = null;
+                $marketingID = null;
+            }else{
+                $marketingName = $r->cacheMarketing;
+                $marketingID = $r->dataMarketing;
+            }
         }
 
         if($r->dataPT == "nothing"){
@@ -715,34 +711,38 @@ class MemberDataController extends Controller
             $ptID = $r->dataPT;
         }
 
-        $data = MemberModel::where('member_id', $r->hiddenID)->update([
-            'name' => $r->dataNama,
-            'gender' => $r->dataGender,
-            'job' => $r->dataJob,
-            'company' => $r->dataCompany,
-            'phone' => $r->dataPhone,
-            'email' => $r->dataEmail,
-            'dob' => $r->dataDOB,
-            'photo' => $r->photoFile,
-            'marketing' => $marketingName,
-            'pt' => $ptName,
-            'member_notes' => $r->dataUserNote,
-            'updated_at' => $date_now,
-            'updated_by' => Auth::user()->id
-        ]);
+        if(Auth::user()->role_id == 1){
+            $data = MemberModel::where('member_id', $r->hiddenID)->update([
+                'name' => $r->dataNama,
+                'gender' => $r->dataGender,
+                'job' => $r->dataJob,
+                'company' => $r->dataCompany,
+                'phone' => $r->dataPhone,
+                'email' => $r->dataEmail,
+                'dob' => $r->dataDOB,
+                'photo' => $r->photoFile,
+                'marketing' => $marketingName,
+                'pt' => $ptName,
+                'member_notes' => $r->dataUserNote,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
 
-        $cache = MemberCacheModel::where('author', $r->hiddenID)->update([
-            'id_pt' => $ptID,
-            'id_marketing' => $marketingID
-        ]);
+            $cache = MemberCacheModel::where('author', $r->hiddenID)->update([
+                'id_pt' => $ptID,
+                'id_marketing' => $marketingID
+            ]);
+        }else{
+            $data = MemberModel::where('member_id', $r->hiddenID)->update([
+                'member_notes' => $r->dataUserNote
+            ]);
+        }
 
-        $role = Auth::user()->role_id;
-
-        if($this->checkAuth() == 1){
+        if(Auth::user()->role_id== 1){
             return redirect()->route('suadmin.member.index')->with(['success' => 'Data Member Berhasil Diubah']);
-        }else if($this->checkAuth() == 2){
+        }else if(Auth::user()->role_id == 2){
             //STILL EMPTY
-        }else if($this->checkAuth() == 3){
+        }else if(Auth::user()->role_id == 3){
             return redirect()->route('cs.member.index')->with(['success' => 'Data Member Berhasil Diubah']);
         }
     }
@@ -1741,9 +1741,19 @@ class MemberDataController extends Controller
         $validateRole = new ValidateRole;
         $role = $validateRole->checkAuthALL();
 
-        $namaFile = "members";
+        $namaFile = "Members";
 
         return Excel::download(new MemberExport(), $namaFile.'.xlsx');
+    }
+
+    function exportCheckinExcelData(){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+        $datenow = Carbon::now()->format('d-m-Y');
+
+        $namaFile = "MemberCheckin-".$datenow;
+
+        return Excel::download(new MemberCheckinExport(), $namaFile.'.xlsx');
     }
 
     function deleteMember(Request $r){

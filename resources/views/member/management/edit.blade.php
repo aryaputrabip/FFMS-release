@@ -29,7 +29,7 @@
     <div class="container-fluid ml-2">
         <div class="row">
             <div class="col-photo">
-                <img @if(isset($data->photo)) src="{{ $data->photo }}" @endisset width="250" height="250" data-target="#webcamModal" data-toggle="modal" data-backdrop="static" style="background-color: gray;" onclick="openWebcam();" id="photo">
+                <img @if(isset($data->photo)) src="{{ $data->photo }}" @endisset width="250" height="250" data-target="@if($role == 1) #webcamModal @endif" data-toggle="modal" data-backdrop="static" style="background-color: gray;" onclick="@if($role == 1) openWebcam(); @endif" id="photo">
                 <button type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="edit();">
                     <i class="fas fa-edit fa-sm mr-1"></i> Ubah
                 </button>
@@ -108,37 +108,66 @@
                                         <h6><b>IDENTITAS</b></h6>
                                         <hr>
                                         <h6 class="mt-2"><b>Nama Lengkap</b></h6>
-                                        <input type="text" class="mb-3 w-100 form-control" id="dataNama" name="dataNama" value="@if(isset($data)) {{$data->name}} @endisset">
+                                        @if($role == 1)
+                                            <input type="text" class="mb-3 w-100 form-control" id="dataNama" name="dataNama" value="@if(isset($data)) {{$data->name}} @endisset">
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->name}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Jenis Kelamin</b></h6>
-                                        <select class="form-control select2 mb-3 w-100" style="width: 100%;" id="dataGender" name="dataGender">
-                                            <option value="Laki-laki" @if(isset($data) && $data->gender == 'Laki-laki') selected="selected" @endisset>Laki-laki</option>
-                                            <option value="Perempuan" @if(isset($data) && $data->gender == 'Perempuan') selected="selected" @endisset>Perempuan</option>
-                                        </select>
+                                        @if($role == 1)
+                                            <select class="form-control select2 mb-3 w-100" style="width: 100%;" id="dataGender" name="dataGender">
+                                                <option value="Laki-laki" @if(isset($data) && $data->gender == 'Laki-laki') selected="selected" @endisset>Laki-laki</option>
+                                                <option value="Perempuan" @if(isset($data) && $data->gender == 'Perempuan') selected="selected" @endisset>Perempuan</option>
+                                            </select>
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->gender}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Pekerjaan</b></h6>
-                                        <select class="form-control select2 mb-3 w-100" style="width: 100%;" id="dataJob" name="dataJob">
-                                            <option value="Karyawan" @if(isset($data) && $data->job == 'Karyawan') selected="selected" @endisset>Karyawan</option>
-                                            <option value="Ibu Rumah Tangga" @if(isset($data) && $data->job == 'Ibu Rumah Tangga') selected="selected" @endisset>Ibu Rumah Tangga</option>
-                                            <option value="Lainnya" @if(isset($data) && $data->job == 'Lainnya') selected="selected" @endisset>Lainnya...</option>
-                                        </select>
+                                        @if($role == 1)
+                                            <select class="form-control select2 mb-3 w-100" style="width: 100%;" id="dataJob" name="dataJob">
+                                                <option value="Karyawan" @if(isset($data) && $data->job == 'Karyawan') selected="selected" @endisset>Karyawan</option>
+                                                <option value="Ibu Rumah Tangga" @if(isset($data) && $data->job == 'Ibu Rumah Tangga') selected="selected" @endisset>Ibu Rumah Tangga</option>
+                                                <option value="Lainnya" @if(isset($data) && $data->job == 'Lainnya') selected="selected" @endisset>Lainnya...</option>
+                                            </select>
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->job}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Perusahaan/Instansi</b></h6>
-                                        <input type="text" class="mb-3 w-100 form-control" id="dataCompany" name="dataCompany" value="@if(isset($data)) {{$data->company}} @endisset">
+                                        @if($role == 1)
+                                            <input type="text" class="mb-3 w-100 form-control" id="dataCompany" name="dataCompany" value="@if(isset($data)) {{$data->company}} @endisset">
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->company}} @else - @endisset</p>
+                                        @endif
                                     </div>
                                     <div class="col-md-6 mt-4">
                                         <h6><b>KONTAK</b></h6>
                                         <hr>
                                         <h6 class="mt-2"><b>No. Telp.</b></h6>
-                                        <input type="text" class="mb-3 w-100 form-control" id="dataPhone" name="dataPhone" value="@if(isset($data)) {{$data->phone}} @endisset">
+                                        @if($role == 1)
+                                            <input type="text" class="mb-3 w-100 form-control" id="dataPhone" name="dataPhone" value="@if(isset($data)) {{$data->phone}} @endisset">
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->phone}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Email</b></h6>
-                                        <input type="email" class="mb-3 w-100 form-control" id="dataEmail" name="dataEmail" value="@if(isset($data)) {{$data->email}} @endisset">
+                                        @if($role == 1)
+                                            <input type="email" class="mb-3 w-100 form-control" id="dataEmail" name="dataEmail" value="@if(isset($data)) {{$data->email}} @endisset">
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->email}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Tanggal Lahir</b></h6>
-                                        <input type="date" class="mb-3 w-100 form-control" id="dataDOB" name="dataDOB" value="{{$data->dob}}">
+                                        @if($role == 1)
+                                            <input type="date" class="mb-3 w-100 form-control" id="dataDOB" name="dataDOB" value="{{$data->dob}}">
+                                        @else
+                                            <p class="mb-3 mt-3">@if(isset($data)) {{$data->dob}} @else - @endisset</p>
+                                        @endif
 
                                         <h6><b>Catatan</b></h6>
+
                                         <textarea class="form-control w-100" id="dataUserNote" name="dataUserNote" rows="6" placeholder="Catatan Member...">@if(isset($data->member_notes)){{ $data->member_notes }}@endisset</textarea>
 
                                     </div>
@@ -147,24 +176,29 @@
                                         <h6><b>ADDITIONAL INFO</b></h6>
                                         <hr>
                                         <h6 class="mt-2"><b>Marketing</b></h6>
-                                        <select class="form-control select2" style="width: 100%;" id="dataMarketing" name="dataMarketing">
-                                            <option value="nothing" @if(isset($marketing)) @else selected @endisset> - </option>
-                                            @if(isset($marketing))
-                                                <option value="{{ $marketing->mark_id }}" data-name="{{ $marketing->name }}" selected>{{ $marketing->name }}</option>
-                                            @endisset
-
-                                            <?php
-                                            foreach($marketingList as $marketing_boy){?>
-                                            @if(isset($marketing))
-                                                @if($marketing_boy->mark_id != $marketing->mark_id)
-                                                    <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
-                                                @endif
+                                            @if($role == 1)
+                                                <select class="form-control select2" style="width: 100%;" id="dataMarketing" name="dataMarketing">
+                                                    <option value="nothing" @if(isset($marketing)) @else selected @endisset> - </option>
+                                                    @if(isset($marketing))
+                                                        <option value="{{ $marketing->mark_id }}" data-name="{{ $marketing->name }}" selected>{{ $marketing->name }}</option>
+                                                    @endisset
+                                                    <?php
+                                                    foreach($marketingList as $marketing_boy){?>
+                                                    @if(isset($marketing))
+                                                        @if($marketing_boy->mark_id != $marketing->mark_id)
+                                                            <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
+                                                        @endif
+                                                    @else
+                                                        <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
+                                                    @endisset
+                                                    <?php
+                                                    }?>
+                                                </select>
                                             @else
-                                                <option value="{{ $marketing_boy->mark_id }}" data-name="{{ $marketing_boy->name }}">{{ $marketing_boy->name }}</option>
-                                            @endisset
-                                             <?php
-                                            }?>
-                                        </select><br>
+                                                <p class="mb-3 mt-3">@if(isset($marketing)) {{$marketing->name}} @else - @endisset</p>
+                                            @endif
+
+                                        <br>
                                     </div>
 
                                     @if($role == 1)
@@ -586,12 +620,41 @@
     }
 
     function edit(){
-        if($("#dataNama").val() == "" || $("#dataGender").val() == "" || $("#dataJob").val() == "" ||
-            $("#dataPhone").val() == "" || $("#dataEmail").val() == ""){
-            messagingError();
-        }else{
-            if(isEmail($("#dataEmail").val())){
-                const EditSwal = Swal.mixin({
+        @if($role == 1)
+            if($("#dataNama").val() == "" || $("#dataGender").val() == "" || $("#dataJob").val() == "" ||
+                $("#dataPhone").val() == "" || $("#dataEmail").val() == ""){
+                messagingError();
+            }else{
+                if(isEmail($("#dataEmail").val())){
+                    const EditSwal = Swal.mixin({
+                        customClass: {
+                            confirmButton: 'btn btn-primary mr-2',
+                            cancelButton: 'btn btn-danger mr-2'
+                        },
+                        buttonsStyling: false
+                    })
+
+                    EditSwal.fire({
+                        icon: 'warning',
+                        html: 'Apakah Anda yakin ingin mengubah data ini?',
+                        showCancelButton: true,
+                        cancelButtonText: `Batal`,
+                        confirmButtonText: `<i class="fas fa-edit fa-sm"></i> Ubah`,
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.confirm
+                        ) {
+                            $("#editMemberForm").submit();
+                        }else{
+                            return false;
+                        }
+                    });
+                }else{
+                    messagingErrorCustom('Format Email Tidak Sesuai!');
+                }
+            }
+        @else
+            const EditSwal = Swal.mixin({
                     customClass: {
                         confirmButton: 'btn btn-primary mr-2',
                         cancelButton: 'btn btn-danger mr-2'
@@ -599,25 +662,22 @@
                     buttonsStyling: false
                 })
 
-                EditSwal.fire({
-                    icon: 'warning',
-                    html: 'Apakah Anda yakin ingin mengubah data ini?',
-                    showCancelButton: true,
-                    cancelButtonText: `Batal`,
-                    confirmButtonText: `<i class="fas fa-edit fa-sm"></i> Ubah`,
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.dismiss === Swal.DismissReason.confirm
-                    ) {
-                        $("#editMemberForm").submit();
-                    }else{
-                        return false;
-                    }
-                });
-            }else{
-                messagingErrorCustom('Format Email Tidak Sesuai!');
-            }
-        }
+            EditSwal.fire({
+                icon: 'warning',
+                html: 'Apakah Anda yakin ingin mengubah data ini?',
+                showCancelButton: true,
+                cancelButtonText: `Batal`,
+                confirmButtonText: `<i class="fas fa-edit fa-sm"></i> Ubah`,
+                reverseButtons: true
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.confirm
+                ) {
+                    $("#editMemberForm").submit();
+                }else{
+                    return false;
+                }
+            });
+        @endif
     }
 
     @if($role == 1)
@@ -801,66 +861,68 @@
 
     }
 
-    function openWebcam(){
-        var videocam = document.querySelector("#memberCapture");
+    @if($role == 1)
+        function openWebcam(){
+            var videocam = document.querySelector("#memberCapture");
 
-        if (navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function (stream) {
-                    videocam.srcObject = stream;
-                })
-                .catch(function (err0r) {
-                    console.log("Something went wrong!");
-                });
-        }
-    }
-
-    function closeCam(){
-        var videocam = document.querySelector("#memberCapture");
-        var stream = videocam.srcObject;
-        var tracks = stream.getTracks();
-
-        for (var i = 0; i < tracks.length; i++) {
-            var track = tracks[i];
-            track.stop();
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        videocam.srcObject = stream;
+                    })
+                    .catch(function (err0r) {
+                        console.log("Something went wrong!");
+                    });
+            }
         }
 
-        videocam.srcObject = null;
-    }
+        function closeCam(){
+            var videocam = document.querySelector("#memberCapture");
+            var stream = videocam.srcObject;
+            var tracks = stream.getTracks();
 
-    video = document.getElementById('memberCapture');
-    canvas = document.getElementById('canvas');
-    photo = document.getElementById('photo');
-    width = 400;
-    height = 400;
+            for (var i = 0; i < tracks.length; i++) {
+                var track = tracks[i];
+                track.stop();
+            }
 
-    function takePicture() {
-        var context = canvas.getContext('2d');
-        if (width && height) {
-            canvas.width = width;
-            canvas.height = height;
-            context.drawImage(video, 0, 0, width, height);
+            videocam.srcObject = null;
+        }
+
+        video = document.getElementById('memberCapture');
+        canvas = document.getElementById('canvas');
+        photo = document.getElementById('photo');
+        width = 400;
+        height = 400;
+
+        function takePicture() {
+            var context = canvas.getContext('2d');
+            if (width && height) {
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(video, 0, 0, width, height);
+
+                var data = canvas.toDataURL('image/png');
+                photo.setAttribute('src', data);
+                closeCam();
+                $("#webcamModal").modal('hide');
+                $("#photoFile").val(data);
+            } else {
+                clearPhoto();
+                closeCam();
+                $("#webcamModal").modal('hide');
+            }
+        }
+
+        function clearPhoto() {
+            var context = canvas.getContext('2d');
+            context.fillStyle = "#AAA";
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
             var data = canvas.toDataURL('image/png');
             photo.setAttribute('src', data);
-            closeCam();
-            $("#webcamModal").modal('hide');
-            $("#photoFile").val(data);
-        } else {
-            clearPhoto();
-            closeCam();
-            $("#webcamModal").modal('hide');
         }
-    }
-
-    function clearPhoto() {
-        var context = canvas.getContext('2d');
-        context.fillStyle = "#AAA";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        var data = canvas.toDataURL('image/png');
-        photo.setAttribute('src', data);
-    }
+    @endif
 
     function tambahSesi(){
         $("#modal-pt").modal("hide");

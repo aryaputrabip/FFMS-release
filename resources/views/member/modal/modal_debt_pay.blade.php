@@ -58,12 +58,16 @@
                         <h6 class="font-weight-bold">Pembayaran Cicilan</h6>
                         <select id="paymentType" class="form-control float-left select2 w-auto mr-2" style="width: 100%;" name="paymentType">
                             <option value="cicilan" selected>Bayar Bulanan</option>
-                            <option value="tunda">Tunda Bayar (30 hari)</option>
                             <option value="penuh">Bayar Penuh</option>
+                            <option value="manual">Pembayaran Manual</option>
                         </select>
-                          <div id="paymentFullGroup">
+                        <div id="paymentFullGroup">
                             <input id="paymentDuration" type="number" class="float-left form-control w-auto mr-2" style="max-width: 70px;" min="1" value="1">
                             <h6 class="float-left mt-2">Bulan</h6>
+                        </div>
+                        <div id="paymentManualGroup" style="display: none;">
+                            <h6 class="float-left mt-2 mr-2">Rp. </h6>
+                            <input id="paymentManualPrice" type="number" class="float-left form-control w-100 mr-2" style="max-width: 100px;" min="0" value="0">
                         </div>
                     </div>
                 </div>

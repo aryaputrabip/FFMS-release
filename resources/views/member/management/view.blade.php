@@ -36,10 +36,17 @@
                     </button>
                 @endif
 
-                <a @if($role == 1) href="{{ route('suadmin.member.edit', $data->member_id) }}" @elseif($role == 2) href="#"
-                   @elseif($role == 3) href="{{ route('cs.member.edit', $data->member_id) }}" @endif type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="">
-                    <i class="fas fa-edit fa-sm mr-1"></i> Edit Data
-                </a>
+                @if($role == 1)
+                    <a href="{{ route('suadmin.member.edit', $data->member_id) }}" type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="">
+                        <i class="fas fa-edit fa-sm mr-1"></i> Edit Data
+                    </a>
+                @else
+                    <a href="{{ route('cs.member.edit', $data->member_id) }}" type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="">
+                        <i class="fas fa-edit fa-sm mr-1"></i> Edit Data
+                    </a>
+                @endif
+
+
                 <a @if($role == 1) href="{{ route('suadmin.member.index') }}" @elseif($role == 2) href="#"
                    @elseif($role == 3) href="{{ route('cs.member.index') }}" @endif type="button"
                    class="btn btn-outline-dark mb-2" style="width: 250px;">

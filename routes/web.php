@@ -133,6 +133,7 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::post('changePT', 'MemberDataController@changePT')->name('changePT');
 
     Route::get('exportExcelData', 'MemberDataController@exportExcelData')->name('exportExcelData');
+    Route::get('exportCheckinExcelData', 'MemberDataController@exportCheckinExcelData')->name('exportCheckinExcelData');
 
     Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
         Route::post('store', 'MemberRegisterController@store')->name('store');

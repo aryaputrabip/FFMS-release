@@ -139,8 +139,11 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <a href="{{ route('member.exportExcelData') }}" class="btn btn-primary w-100">
-                            <i class="fas fa-print fa-sm mr-1"></i> Export to Excel
+                        <a href="{{ route('member.exportExcelData') }}" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-print fa-sm mr-1"></i> Data Member (Excel)
+                        </a>
+                        <a href="{{ route('member.exportCheckinExcelData') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-print fa-sm mr-1"></i> Member Check-In (Excel)
                         </a>
                     </div>
                 </div>
