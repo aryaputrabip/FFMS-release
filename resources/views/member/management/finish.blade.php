@@ -31,7 +31,7 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <a href="{{ route('member.registration.print', Request::get('mdata')) }}" type="button" class="btn btn-primary mt-2 w-100" id="continueToPrint">
+                        <a href="{{ route('member.printRegister', Request::get('mdata')) }}" type="button" class="btn btn-primary mt-2 w-100" id="continueToPrint">
                             <i class="fas fa-print fa-sm mr-1"></i> Cetak Invoice
                         </a>
                     </div>

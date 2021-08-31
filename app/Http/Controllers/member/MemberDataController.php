@@ -734,7 +734,10 @@ class MemberDataController extends Controller
             ]);
         }else{
             $data = MemberModel::where('member_id', $r->hiddenID)->update([
-                'member_notes' => $r->dataUserNote
+                'photo' => $r->photoFile,
+                'member_notes' => $r->dataUserNote,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
             ]);
         }
 

@@ -242,12 +242,25 @@ class MemberRegisterController extends Controller
             $restData = $chargePrice - ($chargePrice / $r->paymentCicilanDuration);
             $restDataTransaction = $chargePrice / $r->paymentCicilanDuration;
 
-            if ($sessionPrice != null || $sessionPrice > 0) {
-                $restDataMembership = ($chargePrice / $r->paymentCicilanDuration) / 2;
-                $restDataSesi = (int)($chargePrice / $r->paymentCicilanDuration) / 2;
-            } else {
-                $restDataMembership = $chargePrice / $r->paymentCicilanDuration;
-                $restDataSesi = null;
+            if($r->firstPaymentMethodGroup == "manual"){
+                $restData = $chargePrice - $r->firstPaymentManualInput;
+                $restDataTransaction = $r->firstPaymentManualInput;
+
+                if ($sessionPrice != null || $sessionPrice > 0) {
+                    $restDataMembership = (int) $r->firstPaymentManualInput/ 2;
+                    $restDataSesi = (int) $r->firstPaymentManualInput / 2;
+                } else {
+                    $restDataMembership = $r->firstPaymentManualInput;
+                    $restDataSesi = null;
+                }
+            }else{
+                if ($sessionPrice != null || $sessionPrice > 0) {
+                    $restDataMembership = ($chargePrice / $r->paymentCicilanDuration) / 2;
+                    $restDataSesi = (int)($chargePrice / $r->paymentCicilanDuration) / 2;
+                } else {
+                    $restDataMembership = $chargePrice / $r->paymentCicilanDuration;
+                    $restDataSesi = null;
+                }
             }
         }else if($r->paymentMethodGroup == "tunda"){
             $statusBayar = "Dalam Cicilan";

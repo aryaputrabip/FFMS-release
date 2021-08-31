@@ -510,6 +510,27 @@
                                         <h6 class="float-left mt-2 ml-2">Bulan</h6>
                                     </div>
                                 </div>
+
+                                <div id="firstPaymentGroup" style="display: none">
+                                    <div class="row pt-3 pr-3 pb-2 pl-3">
+                                        <label class="col-sm-9 col-form-label">
+                                            Pembayaran Pertama<span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                    <div class="card-body pt-0" id="firstPaymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
+                                        <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="firstPaymentMethodGroup" name="firstPaymentMethodGroup">
+                                            <option value="auto" selected>Perhitungan Otomatis</option>
+                                            <option value="manual">Manual</option>
+                                        </select>
+                                        <div id="firstPaymentAutoContainer">
+                                            <h6 class="float-left mt-2 ml-2 mr-2" id="firstPaymentAutoLabel">Rp. 0</h6>
+                                        </div>
+                                        <div id="firstPaymentManualContainer" style="display: none;">
+                                            <h6 class="float-left mt-2 ml-2 mr-2">Rp. </h6>
+                                            <input class="form-control w-auto float-left" type="number" min="0" value="0" style="max-width: 160px;" id="firstPaymentManualInput" name="firstPaymentManualInput">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="card">
@@ -696,8 +717,9 @@
 
     $("#paymentMethodGroup").on("change", function(){
        if($(this).val() == "cicilan"){
-           $("#paymentCicilanDuration").val(1);
+           $("#paymentCicilanDuration").val(2);
            $("#paymentCicilanDurationContainer").show();
+           $("#firstPaymentGroup").show();
 
            var tMembership = 0;
            var tSesi = 0;
@@ -718,41 +740,74 @@
 
            if($("#paymentCicilanDuration").val() > 0){
                $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+               $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
            }
 
            $("#cicilanChargeContainer").show();
        }else{
            $("#paymentCicilanDuration").val("");
            $("#paymentCicilanDurationContainer").hide();
+           $("#firstPaymentGroup").hide();
 
            $("#cicilanChargeContainer").hide();
        }
     });
 
-    $("#paymentCicilanDuration").on("keyup change", function(){
-        if($(this).val() > 0){
-            var tMembership = 0;
-            var tSesi = 0;
+    $("#firstPaymentMethodGroup").on("change", function(){
+        $("#firstPaymentManualInput").val(0);
 
-            if($("#cacheMemberApproval").val() != ""){
-                tMembership = $("#approvalPrice").val();
-            }else{
-                tMembership = $("#cacheMembershipPrice").val();
-            }
-
-            if($("#dataUserPTToggler").prop("checked")){
-                if($("#cachePTApproval").val() != ""){
-                    tSesi = $("#approvalSesiPrice").val();
-                }else{
-                    tSesi = $("#dataUserPTSession").find(':selected').data('price');
-                }
-            }
-
+        if($(this).val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+            $("#firstPaymentAutoContainer").hide();
+            $("#firstPaymentManualContainer").show();
+            cekCicilanPerBulan(0);
+        }else{
             if($("#paymentCicilanDuration").val() > 0){
-                $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                $("#firstPaymentManualContainer").hide();
+                $("#firstPaymentAutoContainer").show();
+                cekCicilanPerBulan(0);
             }
         }
     });
+
+    $("#paymentCicilanDuration").on("keyup change", function(){
+        if($(this).val() > 0){
+            cekCicilanPerBulan(0);
+        }
+    });
+
+    $("#firstPaymentManualInput").on("keyup change", function(){
+        if($("#firstPaymentMethodGroup").val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+            cekCicilanPerBulan($(this).val());
+        }
+    });
+
+    function cekCicilanPerBulan(first_payment){
+        var tMembership = 0;
+        var tSesi = 0;
+
+        if($("#cacheMemberApproval").val() != ""){
+            tMembership = $("#approvalPrice").val();
+        }else{
+            tMembership = $("#cacheMembershipPrice").val();
+        }
+
+        if($("#dataUserPTToggler").prop("checked")){
+            if($("#cachePTApproval").val() != ""){
+                tSesi = $("#approvalSesiPrice").val();
+            }else{
+                tSesi = $("#dataUserPTSession").find(':selected').data('price');
+            }
+        }
+
+        if($("#firstPaymentMethodGroup").val() == "auto"){
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership) + parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+        }else{
+            $("#cicilan_per_bulan").html(asRupiah(((parseInt(tMembership) + parseInt(tSesi) - first_payment) / $("#paymentCicilanDuration").val()).toFixed(0)));
+        }
+    }
 
     $("#approvalPrice").on('change', function(){
         refreshApprovalBtn("#changeApprovalBtn");

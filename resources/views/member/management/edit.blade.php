@@ -29,7 +29,7 @@
     <div class="container-fluid ml-2">
         <div class="row">
             <div class="col-photo">
-                <img @if(isset($data->photo)) src="{{ $data->photo }}" @endisset width="250" height="250" data-target="@if($role == 1) #webcamModal @endif" data-toggle="modal" data-backdrop="static" style="background-color: gray;" onclick="@if($role == 1) openWebcam(); @endif" id="photo">
+                <img @if(isset($data->photo)) src="{{ $data->photo }}" @endisset width="250" height="250" data-target="#webcamModal" data-toggle="modal" data-backdrop="static" style="background-color: gray;" onclick="openWebcam();" id="photo">
                 <button type="button" class="btn btn-danger mb-2 mt-3" style="width: 250px;" id="editBtn" onclick="edit();">
                     <i class="fas fa-edit fa-sm mr-1"></i> Ubah
                 </button>
@@ -861,68 +861,66 @@
 
     }
 
-    @if($role == 1)
-        function openWebcam(){
-            var videocam = document.querySelector("#memberCapture");
+    function openWebcam(){
+        var videocam = document.querySelector("#memberCapture");
 
-            if (navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function (stream) {
-                        videocam.srcObject = stream;
-                    })
-                    .catch(function (err0r) {
-                        console.log("Something went wrong!");
-                    });
-            }
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    videocam.srcObject = stream;
+                })
+                .catch(function (err0r) {
+                    console.log("Something went wrong!");
+                });
+        }
+    }
+
+    function closeCam(){
+        var videocam = document.querySelector("#memberCapture");
+        var stream = videocam.srcObject;
+        var tracks = stream.getTracks();
+
+        for (var i = 0; i < tracks.length; i++) {
+            var track = tracks[i];
+            track.stop();
         }
 
-        function closeCam(){
-            var videocam = document.querySelector("#memberCapture");
-            var stream = videocam.srcObject;
-            var tracks = stream.getTracks();
+        videocam.srcObject = null;
+    }
 
-            for (var i = 0; i < tracks.length; i++) {
-                var track = tracks[i];
-                track.stop();
-            }
+    video = document.getElementById('memberCapture');
+    canvas = document.getElementById('canvas');
+    photo = document.getElementById('photo');
+    width = 400;
+    height = 400;
 
-            videocam.srcObject = null;
-        }
-
-        video = document.getElementById('memberCapture');
-        canvas = document.getElementById('canvas');
-        photo = document.getElementById('photo');
-        width = 400;
-        height = 400;
-
-        function takePicture() {
-            var context = canvas.getContext('2d');
-            if (width && height) {
-                canvas.width = width;
-                canvas.height = height;
-                context.drawImage(video, 0, 0, width, height);
-
-                var data = canvas.toDataURL('image/png');
-                photo.setAttribute('src', data);
-                closeCam();
-                $("#webcamModal").modal('hide');
-                $("#photoFile").val(data);
-            } else {
-                clearPhoto();
-                closeCam();
-                $("#webcamModal").modal('hide');
-            }
-        }
-
-        function clearPhoto() {
-            var context = canvas.getContext('2d');
-            context.fillStyle = "#AAA";
-            context.fillRect(0, 0, canvas.width, canvas.height);
+    function takePicture() {
+        var context = canvas.getContext('2d');
+        if (width && height) {
+            canvas.width = width;
+            canvas.height = height;
+            context.drawImage(video, 0, 0, width, height);
 
             var data = canvas.toDataURL('image/png');
             photo.setAttribute('src', data);
+            closeCam();
+            $("#webcamModal").modal('hide');
+            $("#photoFile").val(data);
+        } else {
+            clearPhoto();
+            closeCam();
+            $("#webcamModal").modal('hide');
         }
-    @endif
+    }
+
+    function clearPhoto() {
+        var context = canvas.getContext('2d');
+        context.fillStyle = "#AAA";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        var data = canvas.toDataURL('image/png');
+        photo.setAttribute('src', data);
+    }
 
     function tambahSesi(){
         $("#modal-pt").modal("hide");

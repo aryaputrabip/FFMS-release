@@ -198,12 +198,12 @@ function asRupiah($value) {
 {{--    </div>--}}
     <div class="col-3 text-center" style="float: right;">
         <h6 style="font-weight: normal;">Prepared by,</h6><br><br>
-        <h6 style="font-weight: normal;">(
+        {{--<h6 style="font-weight: normal;">(
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             )
-        </h6>
+        </h6>--}}
     </div>
 </div>
 @if(isset($log->notes))
