@@ -100,6 +100,7 @@
             <form id="pembayaranCicilanForm" method="POST" action="{{ route('member.cicilan.bayarCicilan') }}" class="row pb-0">
                 @csrf
 
+                <input type="hidden" id="master" name="master" readonly>
                 <input type="hidden" id="hiddenID" name="hiddenID" readonly>
                 <input type="hidden" id="hiddenDataPrice" name="hiddenDataPrice" readonly>
                 <input type="hidden" id="hiddenDataPaymentType" name="hiddenDataPaymentType" readonly>
@@ -192,13 +193,13 @@
         }
     });
 
-    function payDebt(member){
+    function payDebt(cicilan_data){
         $.ajax({
             type: 'GET',
             dataType: 'html',
             url: "{{ route('member.cicilan.getMemberCicilanData') }}",
             data: {
-                member_id: member,
+                id: cicilan_data,
             },
             success: function(data){
                 getMemberContentData(data);
@@ -232,6 +233,7 @@
         $("#cachePaymentModel").val("");
 
         $("#hiddenID").val(obj.data.member_id);
+        $("#master").val(obj.data.id);
         $("#hiddenDataPrice").val(obj.data.sisa_cicilan);
         $("#hiddenDataResDuration").val(obj.data.tenor);
     }

@@ -278,8 +278,29 @@
                                     <option value="cicilan">Cicilan</option>
                                 </select>
                                 <div id="paymentCicilanDurationContainer" style="display: none;">
-                                    <input class="form-control w-auto float-left" type="number" min="1" value="1" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
+                                    <input class="form-control w-auto float-left" type="number" min="2" value="2" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
                                     <h6 class="float-left mt-2 ml-2">Bulan</h6>
+                                </div>
+                            </div>
+
+                            <div id="firstPaymentGroup" style="display: none">
+                                <div class="row pt-3 pr-3 pb-2 pl-3">
+                                    <label class="col-sm-9 col-form-label">
+                                        Pembayaran Pertama<span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                <div class="card-body pt-0" id="firstPaymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
+                                    <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="firstPaymentMethodGroup" name="firstPaymentMethodGroup">
+                                        <option value="auto" selected>Perhitungan Otomatis</option>
+                                        <option value="manual">Manual</option>
+                                    </select>
+                                    <div id="firstPaymentAutoContainer">
+                                        <h6 class="float-left mt-2 ml-2 mr-2" id="firstPaymentAutoLabel">Rp. 0</h6>
+                                    </div>
+                                    <div id="firstPaymentManualContainer" style="display: none;">
+                                        <h6 class="float-left mt-2 ml-2 mr-2">Rp. </h6>
+                                        <input class="form-control w-auto float-left" type="number" min="0" value="0" style="max-width: 160px;" id="firstPaymentManualInput" name="firstPaymentManualInput">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -366,6 +387,9 @@
                         <input type="hidden" id="paymentMethodGroup2" name="paymentMethodGroup" readonly>
                         <input type="hidden" id="durasiCicilan" name="durasiCicilan" readonly>
                         <input type="hidden" id="jumlahCicilan" name="jumlahCicilan" readonly>
+
+                        <input type="hidden" id="firstPaySet" name="firstPaySet" readonly>
+                        <input type="hidden" id="firstPayData" name="firstPayData" readonly>
 
                         <input type="hidden" id="upgradeRecord" name="upgradeRecord" readonly>
                     </form>

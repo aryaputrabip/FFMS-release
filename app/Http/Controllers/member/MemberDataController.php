@@ -1205,7 +1205,12 @@ class MemberDataController extends Controller
                     $jumlah_transaksi = $r->mShipApproval;
                 }
 
-                $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                if($r->firstPaySet == "manual"){
+                    $rest_data = $r->firstPayData;
+                }else{
+                    $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                }
+
                 $rest_pt = 'Pembelian Sesi PT - ' . $fullSessionName;
 
                 $cicilanData = CicilanDataModel::create([
@@ -1327,7 +1332,12 @@ class MemberDataController extends Controller
                     $jumlah_transaksi = $r->mShipApproval;
                 }
 
-                $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                if($r->firstPaySet == "manual"){
+                    $rest_data = $r->firstPayData;
+                }else{
+                    $rest_data = ($jumlah_transaksi / $r->durasiCicilan);
+                }
+
                 $rest_pt = 'Pembelian Paket Personal Trainer - ' . $fullSessionName;
 
                 $cicilanData = CicilanDataModel::create([
@@ -1422,7 +1432,13 @@ class MemberDataController extends Controller
                 $status_transaksi = "Dalam Cicilan";
                 $jumlah_transaksi = (int)$r->jumlahCicilan;
 
-                $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+                if($r->firstPaySet == "manual"){
+                    $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->firstPayData;
+                }else{
+                    $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+                }
+
+
                 $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
                 $rest_membership = "Pembelian Paket Member";
 

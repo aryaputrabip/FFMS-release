@@ -58,6 +58,7 @@ class CicilanManagerController extends Controller
                 ->join("memberdata as MEMBER", "MEMBER.member_id", "=", "CICILAN.author")
                 ->join("member_status as STATUS", "STATUS.mstatus_id", "=", "MEMBER.status")
                 ->select(
+                    'CICILAN.id as id',
                     'MEMBER.member_id as member_id',
                     'MEMBER.name as name',
                     'MEMBER.gender as gender',
@@ -92,7 +93,7 @@ class CicilanManagerController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     return '<div class="align-middle pl-0 pr-0">
-                                <button class="btn edit-user-group btn-outline-success btn-sm" onclick="payDebt(`'.$data->member_id.'`)">
+                                <button class="btn edit-user-group btn-outline-success btn-sm" onclick="payDebt(`'.$data->id.'`)">
                                     <i class="fas fa-pencil-alt fa-sm"></i> Bayar
                                 </button>
                             </div>';
@@ -109,13 +110,14 @@ class CicilanManagerController extends Controller
         $data['data'] = MemberModel::from("memberdata as MEMBER")
                             ->join("cicilandata as CICILAN", "CICILAN.author", "=", "MEMBER.member_id")
                             ->select([
+                                "CICILAN.id as id",
                                 "MEMBER.member_id as member_id",
                                 "MEMBER.name as name",
                                 "MEMBER.gender as gender",
                                 "CICILAN.rest_duration as tenor",
                                 "CICILAN.rest_price as total_cicilan",
                                 "CICILAN.rest_data as sisa_cicilan"
-                            ])->where('MEMBER.member_id', $r->member_id)->first();
+                            ])->where('CICILAN.id', $r->id)->first();
 
         return $data;
     }
@@ -124,20 +126,19 @@ class CicilanManagerController extends Controller
         date_default_timezone_set("Asia/Jakarta");
         $date_now = Carbon::now();
 
-        $data['data'] = CicilanDataModel::where('author', $r->hiddenID)->first();
+        $data['data'] = CicilanDataModel::where('id', $r->master)->first();
         $data['logcount'] = MemberLogModel::where('category', 5)->count();
-
 
         if($r->hiddenDataPaymentType == "manual"){
             $data['price_source'] = $data['data']->rest_data - $r->hiddenDataPrice;
 
-            $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+            $data['result'] = CicilanDataModel::where('id', $r->master)->update([
                 'rest_data' => (int) $data['price_source'],
                 'updated_at' => $date_now
             ]);
 
             if((int) $data['price_source'] <= 0){
-                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->delete();
+                $data['result'] = CicilanDataModel::where('id', $r->master)->delete();
                 $data['paymentStatus'] = "Lunas";
             }else{
                 $data['paymentStatus'] = "Dalam Cicilan";
@@ -168,20 +169,20 @@ class CicilanManagerController extends Controller
             if((int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)) <= 0){
 
 
-                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->delete();
+                $data['result'] = CicilanDataModel::where('id', $r->master)->delete();
                 $data['paymentStatus'] = "Lunas";
             }else{
                 $data['paymentStatus'] = "Dalam Cicilan";
             }
 
             if($data['data']->rest_duration - $r->hiddenDataDuration > 1){
-                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+                $data['result'] = CicilanDataModel::where('id', $r->master)->update([
                     'rest_duration' => ($data['data']->rest_duration - $r->hiddenDataDuration),
                     'rest_data' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)),
                     'updated_at' => $date_now
                 ]);
             }else{
-                $data['result'] = CicilanDataModel::where('author', $r->hiddenID)->update([
+                $data['result'] = CicilanDataModel::where('id', $r->master)->update([
                     'rest_data' => (int) ($data['data']->rest_data - ($data['price_source'] * $r->hiddenDataDuration)),
                     'updated_at' => $date_now
                 ]);

@@ -1407,8 +1407,9 @@
 
     $("#paymentMethodGroup").on("change", function(){
         if($(this).val() == "cicilan"){
-            $("#paymentCicilanDuration").val(1);
+            $("#paymentCicilanDuration").val(2);
             $("#paymentCicilanDurationContainer").show();
+            $("#firstPaymentGroup").show();
 
             var tMembership = $("#cacheMembershipPrice").val();
             var tSesi = 0;
@@ -1441,14 +1442,40 @@
 
             if($("#paymentCicilanDuration").val() > 0){
                 $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
             }
 
             $("#cicilanChargeContainer").show();
         }else{
             $("#paymentCicilanDuration").val("");
             $("#paymentCicilanDurationContainer").hide();
+            $("#firstPaymentGroup").hide();
 
             $("#cicilanChargeContainer").hide();
+        }
+    });
+
+    $("#firstPaymentMethodGroup").on("change", function(){
+        $("#firstPaymentManualInput").val(0);
+
+        if($(this).val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+            $("#firstPaymentAutoContainer").hide();
+            $("#firstPaymentManualContainer").show();
+            $("#firstPaySet").val("manual");
+            $("#firstPayData").val(0);
+            cekCicilanPerBulan(0);
+
+
+            console.log($("#firstPaySet").val());
+        }else{
+            $("#firstPaySet").val("auto");
+
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#firstPaymentManualContainer").hide();
+                $("#firstPaymentAutoContainer").show();
+                $("#firstPayData").val(0);
+                cekCicilanPerBulan(0);
+            }
         }
     });
 
@@ -1463,6 +1490,8 @@
 
                 if ($("#paymentCicilanDuration").val() > 0) {
                     $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    cekCicilanPerBulan(0);
                 }
             }else if($("#confirmPayment").data("action") == 'extend-session'){
                 var tSesi = $("#dataUserPTSession option:selected").data("price");
@@ -1473,6 +1502,8 @@
 
                 if ($("#paymentCicilanDuration").val() > 0) {
                     $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    cekCicilanPerBulan(0);
                 }
             }else{
                 var tMembership = $("#cacheMembershipPrice").val();
@@ -1484,10 +1515,67 @@
 
                 if($("#paymentCicilanDuration").val() > 0){
                     $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+                    cekCicilanPerBulan(0);
                 }
             }
         }
     });
+
+    $("#firstPaymentManualInput").on("keyup change", function(){
+        if($("#firstPaymentMethodGroup").val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+            cekCicilanPerBulan($(this).val());
+            $("#firstPayData").val($(this).val());
+        }
+    });
+
+    function cekCicilanPerBulan(first_payment){
+        if($("#confirmPayment").data("action") == 'register-session') {
+            var tSesi = $("#dataPTRegSession option:selected").data("price");
+
+            if ($("#approvalPTPrice").val() != "") {
+                tSesi = $("#approvalPTPrice").val();
+            }
+
+            if($("#firstPaymentMethodGroup").val() != "auto"){
+                tSesi = tSesi - first_payment;
+            }
+
+            if ($("#paymentCicilanDuration").val() > 0) {
+                $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+
+            }
+        }else if($("#confirmPayment").data("action") == 'extend-session'){
+            var tSesi = $("#dataUserPTSession option:selected").data("price");
+
+            if ($("#approvalSesiPrice").val() != "") {
+                tSesi = $("#approvalSesiPrice").val();
+            }
+
+            if($("#firstPaymentMethodGroup").val() != "auto"){
+                tSesi = tSesi - first_payment;
+            }
+
+            if ($("#paymentCicilanDuration").val() > 0) {
+                $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+        }else{
+            var tMembership = $("#cacheMembershipPrice").val();
+            var tSesi = 0;
+
+            if($("#approvalPrice").val() != ""){
+                tMembership = $("#approvalPrice").val();
+            }
+
+            if($("#firstPaymentMethodGroup").val() != "auto"){
+                tMembership = tMembership - first_payment;
+            }
+
+            if($("#paymentCicilanDuration").val() > 0){
+                $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+            }
+        }
+    }
 
     function asRupiah(value){
         var formatter = new Intl.NumberFormat('en-US', {
