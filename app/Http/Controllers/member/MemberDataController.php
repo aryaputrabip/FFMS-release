@@ -1184,7 +1184,7 @@ class MemberDataController extends Controller
 
         if($r->sTransaction == "extend-session") {
             $data = MemberModel::where('member_id', $r->sHiddenID)->update([
-                'session_reg' => ($r->sOld + $r->nSession),
+                'session_reg' => ($r->lOld + $r->nSession),
                 'session' => ($r->sOld + $r->nSession),
                 'updated_at' => $date_now,
                 'updated_by' => Auth::user()->id
@@ -1426,20 +1426,20 @@ class MemberDataController extends Controller
             $successMessage = "Pembelian Paket Personal Trainer Berhasil!";
 
         }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
-            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
+            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first(); 
 
             if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam Cicilan";
                 $jumlah_transaksi = (int)$r->jumlahCicilan;
 
                 if($r->firstPaySet == "manual"){
-                    $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->firstPayData;
+                    $rest_data = ($r->jumlahCicilan * $r->durasiCicilan) - $r->firstPayData;
                 }else{
-                    $rest_price = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
+                    $rest_data = ($r->jumlahCicilan * $r->durasiCicilan) - $r->jumlahCicilan;
                 }
 
 
-                $rest_data = $r->jumlahCicilan * $r->durasiCicilan;
+                $rest_price = $r->jumlahCicilan * $r->durasiCicilan;
                 $rest_membership = "Pembelian Paket Member";
 
                 $cicilanData = CicilanDataModel::create([

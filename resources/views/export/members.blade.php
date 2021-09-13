@@ -5,7 +5,7 @@
 <table class="table table-bordered w-100" style="border: solid 1px #000000;">
     <thead>
     <tr>
-        <th colspan="11" align="center" valign="top middle" height="30" style="background-color: #c00000; color: #ffffff; font-size: 16px; border: 1px solid #000000;">
+        <th colspan="12" align="center" valign="top middle" height="30" style="background-color: #c00000; color: #ffffff; font-size: 16px; border: 1px solid #000000;">
             <b>MEMBER DATA</b>
         </th>
     </tr>
@@ -21,6 +21,7 @@
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>FC</b></th>
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>CS</b></th>
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>PT</b></th>
+        <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>Expired Date</b></th>
     </tr>
     </thead>
     <tbody>
@@ -45,6 +46,7 @@
             <td align="left" style="border: 1px solid #000000;">{{ $member->FC }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->CS }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->PT }}</td>
+            <td align="left" style="border: 1px solid #000000;">@if(isset($member->expired_date)) {{ date("d M Y", strtotime($member->expired_date)) }} @else - @endif</td>
         </tr>
         @endforeach
     </tbody>

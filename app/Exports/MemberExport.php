@@ -64,7 +64,8 @@ class MemberExport implements FromView
                 'LOG.transaction as total_payment_2',
                 'MARKETING.name as FC',
                 'CS.name as CS',
-                'PT.name as PT'
+                'PT.name as PT',
+                'm_enddate as expired_date'
             )
             ->orderBy('LOG.date', 'ASC')
             ->orderBy('MSHIP_LIST.start_date', 'ASC')
