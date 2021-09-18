@@ -462,7 +462,7 @@ class MemberDataController extends Controller
                 })
                 ->addColumn('category', function ($data) {
                     if($data->category == null){
-                        return '<div class="text-left">Aktivitas</div>';
+                        return '<div class="text-left">Check-In</div>';
                     }else{
                         return '<div class="text-left">'.$data->category.'</div>';
                     }
@@ -1426,7 +1426,7 @@ class MemberDataController extends Controller
             $successMessage = "Pembelian Paket Personal Trainer Berhasil!";
 
         }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
-            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first(); 
+            $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
 
             if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam Cicilan";
