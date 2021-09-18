@@ -250,19 +250,8 @@ class MemberDataController extends Controller
                             <a href="'.$editLink.'" class="btn btn-warning w-100">
                                 <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
                             </a>';
-                }else if($data['data']->status == 3){
+                }else if($data['data']->status == 3 || $data['data']->status == 4){
                     return '<a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
-                                <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
-                            </a>
-                            <a href="'.$editLink.'" class="btn btn-warning w-100">
-                                <i class="fas fa-pencil-alt fa-sm mr-1"></i> Edit Data Member
-                            </a>';
-                }else if($data['data']->status == 4){
-                    return '<button href="#" class="btn btn-success w-100 mb-2 font-weight-bold" onclick="extendMembership(`'.$r->id.'`, '.$r->duration.')">
-                                <i class="fas fa-calendar-plus fa-sm mr-1"></i> Perpanjang Paket Member
-                            </button>
-                            <hr>
-                            <a href="'.$viewLink.'" class="btn btn-dark mb-2 w-100">
                                 <i class="fas fa-eye fa-sm mr-1"></i> Lihat Data Member
                             </a>
                             <a href="'.$editLink.'" class="btn btn-warning w-100">
