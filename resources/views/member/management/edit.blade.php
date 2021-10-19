@@ -1371,22 +1371,20 @@
     }
 
     function calcUpgradePrice(){
-        if({{ $membership_cache->end_date }}){
-            var olddate = new Date("{{ $membership_cache->end_date }}");
-            var month_rest = Math.round(moment(olddate).diff(moment(new Date()), 'months', true));
+        var olddate = new Date('@if(isset($membership_cache)){{ $membership_cache->end_date }}@else 01-01-1999 @endisset');
+        var month_rest = Math.round(moment(olddate).diff(moment(new Date()), 'months', true));
 
-            if(month_rest == 0){
-                month_rest = 1;
-            }
+        if(month_rest == 0){
+            month_rest = 1;
+        }
 
-            changeData.upgrade_duration = month_rest;
+        changeData.upgrade_duration = month_rest;
 
-            var price_per_moth = changeData.price / changeData.membership_duration;
-            var price_after_disc = (price_per_moth * month_rest).toFixed(0);
+        var price_per_moth = changeData.price / changeData.membership_duration;
+        var price_after_disc = (price_per_moth * month_rest).toFixed(0);
 
-            if(month_rest > 0){
-                changeData.discount = parseInt(price_after_disc);
-            }
+        if(month_rest > 0){
+            changeData.discount = parseInt(price_after_disc);
         }
     }
 
