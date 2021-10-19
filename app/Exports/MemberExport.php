@@ -60,6 +60,7 @@ class MemberExport implements FromView
                 'MSHIP.name as type_membership',
                 'MSHIP2.name as type_membership_2',
                 'MDATA.phone',
+                'MDATA.session as session',
                 'MSHIP_LIST.payment as total_payment',
                 'LOG.transaction as total_payment_2',
                 'MARKETING.name as FC',

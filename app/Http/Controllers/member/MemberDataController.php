@@ -764,12 +764,18 @@ class MemberDataController extends Controller
                 return null;
                 break;
             case 4:
+                //'<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="extendPaket();">
+                //                        <i class="fas fa-sync mr-1 fa-sm"></i>  Renewal Paket
+                //                     </button>
+                //                     <button type="button" class="btn btn-outline-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
+                //                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti / Upgrade Paket
+                //                     </button>';
                 return
-                    '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="extendPaket();">
+                    '<button type="button" class="btn btn-dark mt-0 mb-2 ml-1 w-100" data-dismiss="modal" onclick="renewPaket();">
                         <i class="fas fa-sync mr-1 fa-sm"></i>  Renewal Paket
                      </button>
                      <button type="button" class="btn btn-outline-dark mt-0 ml-1 w-100" data-dismiss="modal" onclick="ubahPaket();">
-                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti / Upgrade Paket
+                        <i class="fas fa-edit mr-1 fa-sm"></i> Ganti Paket
                      </button>';
                 break;
         }
@@ -1417,6 +1423,9 @@ class MemberDataController extends Controller
         }else if($r->sTransaction == "change-membership" || $r->sTransaction == "extend-membership"){
             $member['member'] = MemberModel::where('member_id', $r->sHiddenID)->first();
 
+            $deg = membershipListCacheModel::where('author', $r->sHiddenID)->orderBy('start_date', 'ASC')->first();
+            $hhh = MembershipModel::where('mship_id', $deg->membership_id)->first();
+
             if($r->paymentMethodGroup == "cicilan") {
                 $status_transaksi = "Dalam Cicilan";
                 $jumlah_transaksi = (int)$r->jumlahCicilan;
@@ -1899,6 +1908,193 @@ class MemberDataController extends Controller
             }
 
             return redirect()->route('suadmin.member.edit', $r->dateHiddenID)->with(['success' => 'Tanggal Mulai / Berakhir Member Berhasil Diubah!']);
+        }
+    }
+
+    function registerSession(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now();
+
+        $member['memberdata'] = MemberModel::where('member_id', $r->uHiddenID)->first();
+
+        if($r->payment_method == "cicilan"){
+            if($r->debt_first_pay != "null"){
+                $jumlah_transaksi = $r->debt_first_pay;
+            }else{
+                $jumlah_transaksi = ($r->price - $r->discount) / $r->debt_length;
+            }
+
+            $sisa_durasi = ($r->debt_length - 1);
+
+        }else if($r->payment_method == "tunda"){
+            $jumlah_transaksi = 0;
+            $sisa_durasi = $r->debt_length;
+        }else{
+            $jumlah_transaksi = ($r->price - $r->discount);
+            $sisa_durasi = 0;
+        }
+
+        if($r->payment_method == "cicilan" || $r->payment_method =="tunda"){
+            //JIKA PEMBAYARAN MENGGUNAKAN CICILAN ATAU TUNDA BAYAR = SET STATUS MENJADI DALAM CICILAN
+            $status_transaksi = "Dalam Cicilan";
+            $rest_membership = "Daftar Paket PT";
+
+            CicilanDataModel::create([
+                'author' => $r->uHiddenID,
+                'rest_duration' => $sisa_durasi ,
+                'rest_price' => $r->price,
+                'rest_data' => ($r->price - $jumlah_transaksi),
+                'rest_membership' => $rest_membership,
+                'created_at' => $date_now
+            ]);
+        }else{
+            // JIKA PEMBAYARAN LUNAS = SET STATUS MENJADI LUNAS
+            $status_transaksi = "lunas";
+        }
+
+        MemberModel::where('member_id', $r->uHiddenID)->update([
+            'session_reg' => $r->session_data,
+            'session' => $r->session_data,
+            'updated_at' => $date_now,
+            'updated_by' => Auth::user()->id
+        ]);
+
+        if($r->pt == "nothing" || $r->pt == null){
+            MemberCacheModel::where('author', $r->uHiddenID)->update([
+                'session_title' => $r->session_title,
+                'session_price' => $r->price
+            ]);
+        }else{
+            MemberCacheModel::where('author', $r->uHiddenID)->update([
+                'id_pt' => $r->pt,
+                'session_title' => $r->session_title,
+                'session_price' => $r->price
+            ]);
+        }
+
+        if($r->session_title){
+            $logRegisterSessionTitle = $r->session_title." - ".$r->session_data." Sesi";
+        }else{
+            $logRegisterSessionTitle = $r->session_data." Sesi";
+        }
+
+        MemberLogModel::create([
+            'date' => $date_now,
+            'desc' => 'Daftar Paket Personal Trainer ('.$logRegisterSessionTitle.')',
+            'category' => 5,
+            'transaction' => $jumlah_transaksi,
+            'status' => $status_transaksi,
+            'author' => $r->uHiddenID,
+            'additional' => $r->payment_addition,
+            'reg_no' => ($r->regNo + 1),
+            'aksi' => 'membership',
+            't_membership' => $jumlah_transaksi,
+            'notes' => $r->note
+        ]);
+
+        $successMessage = 'Daftar Paket PT Berhasil!';
+        $redirectNotif = 'success';
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }
+    }
+
+    function buySession(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now();
+
+        $member['memberdata'] = MemberModel::where('member_id', $r->uHiddenID)->first();
+
+        if($r->payment_method == "cicilan"){
+            if($r->debt_first_pay != "null"){
+                $jumlah_transaksi = $r->debt_first_pay;
+            }else{
+                $jumlah_transaksi = ($r->price - $r->discount) / $r->debt_length;
+            }
+
+            $sisa_durasi = ($r->debt_length - 1);
+
+        }else if($r->payment_method == "tunda"){
+            $jumlah_transaksi = 0;
+            $sisa_durasi = $r->debt_length;
+        }else{
+            $jumlah_transaksi = ($r->price - $r->discount);
+            $sisa_durasi = 0;
+        }
+
+        if($r->payment_method == "cicilan" || $r->payment_method =="tunda"){
+            //JIKA PEMBAYARAN MENGGUNAKAN CICILAN ATAU TUNDA BAYAR = SET STATUS MENJADI DALAM CICILAN
+            $status_transaksi = "Dalam Cicilan";
+            $rest_membership = "Pembelian Sesi Latihan";
+
+            CicilanDataModel::create([
+                'author' => $r->uHiddenID,
+                'rest_duration' => $sisa_durasi ,
+                'rest_price' => $r->price,
+                'rest_data' => ($r->price - $jumlah_transaksi),
+                'rest_membership' => $rest_membership,
+                'created_at' => $date_now
+            ]);
+        }else{
+            // JIKA PEMBAYARAN LUNAS = SET STATUS MENJADI LUNAS
+            $status_transaksi = "lunas";
+        }
+
+        if($member['memberdata']->session){
+            $buySessionCountNew = $member['memberdata']->session_reg + $r->session_data;
+            $buySessionNew = $member['memberdata']->session + $r->session_data;
+        }else{
+            $buySessionCountNew = $member['memberdata']->session_reg + $r->session_data;
+            $buySessionNew = $r->session_data;
+        }
+
+        MemberModel::where('member_id', $r->uHiddenID)->update([
+            'session_reg' => $buySessionCountNew,
+            'session' => $buySessionNew,
+            'updated_at' => $date_now,
+            'updated_by' => Auth::user()->id
+        ]);
+
+        if($r->session_title){
+            $logBuySessionTitle = $r->session_title." - ".$r->session_data." Sesi";
+        }else{
+            $logBuySessionTitle = $r->session_data." Sesi";
+        }
+
+        MemberLogModel::create([
+            'date' => $date_now,
+            'desc' => 'Beli Sesi Latihan ('.$logBuySessionTitle.')',
+            'category' => 5,
+            'transaction' => $jumlah_transaksi,
+            'status' => $status_transaksi,
+            'author' => $r->uHiddenID,
+            'additional' => $r->payment_addition,
+            'reg_no' => ($r->regNo + 1),
+            'aksi' => 'membership',
+            't_membership' => $jumlah_transaksi,
+            'notes' => $r->note
+        ]);
+
+        $successMessage = 'Tambah Sesi Berhasil!';
+        $redirectNotif = 'success';
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
         }
     }
 }

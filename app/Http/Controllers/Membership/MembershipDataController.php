@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Membership;
 use App\Http\Controllers\Auth\ValidateRole;
 use App\Model\gstatus\GlobalStatusModel;
 use App\Model\marketing\MarketingModel;
+use App\Model\member\CicilanDataModel;
 use App\Model\member\MemberCategoryModel;
 use App\Model\member\MemberLogModel;
 use App\Model\member\MemberModel;
@@ -203,6 +204,406 @@ class MembershipDataController extends Controller
 //              //
         }elseif(Auth::user()->role_id == 3){
             return redirect()->route('cs.index');
+        }
+    }
+
+    function showMembershipList(Request $r){
+
+    }
+
+    function changeMembership(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now();
+
+        $member['memberdata'] = MemberModel::where('member_id', $r->uHiddenID)->first();
+
+        $membership['membership'] = MembershipModel::where('mship_id', $r->membership)->first();
+        $member['membershipcache'] = membershipListCacheModel::where('author', $r->uHiddenID)->orderBy('start_date', 'ASC');
+
+        if($r->payment_method == "cicilan"){
+            if($r->debt_first_pay != "null"){
+                $jumlah_transaksi = $r->debt_first_pay;
+            }else{
+                $jumlah_transaksi = ($r->price - $r->discount) / $r->debt_length;
+            }
+
+            $sisa_durasi = ($r->debt_length - 1);
+
+        }else if($r->payment_method == "tunda"){
+            $jumlah_transaksi = 0;
+            $sisa_durasi = $r->debt_length;
+        }else{
+            $jumlah_transaksi = ($r->price - $r->discount);
+            $sisa_durasi = 0;
+        }
+
+        if($r->payment_method == "cicilan" || $r->payment_method =="tunda"){
+            //JIKA PEMBAYARAN MENGGUNAKAN CICILAN ATAU TUNDA BAYAR = SET STATUS MENJADI DALAM CICILAN
+            $status_transaksi = "Dalam Cicilan";
+            $rest_membership = "Ubah Paket Member";
+
+            CicilanDataModel::create([
+                'author' => $r->uHiddenID,
+                'rest_duration' => $sisa_durasi ,
+                'rest_price' => $r->price,
+                'rest_data' => ($r->price - $jumlah_transaksi),
+                'rest_membership' => $rest_membership,
+                'created_at' => $date_now
+            ]);
+        }else{
+            // JIKA PEMBAYARAN LUNAS = SET STATUS MENJADI LUNAS
+            $status_transaksi = "lunas";
+        }
+
+        if($member['memberdata']->status == 4) {
+            //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE TO TODAY + MEMBERSHIP DURATION
+            $expired_date = Carbon::now()->addMonths($membership['membership']->duration)->toDateString();
+
+            //UPDATE MEMBER NEW START AND EXPIRED DATE
+            MemberModel::where('member_id', $r->uHiddenID)->update([
+                'status' => 1, //ACTIVE
+                'membership' => $r->membership,
+                'm_startdate' => $date_now,
+                'm_enddate' => $expired_date,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
+
+            membershipListCacheModel::create([
+                'author' => $r->uHiddenID,
+                'membership_id' => $r->membership,
+                'start_date' => $date_now,
+                'end_date' => $expired_date,
+                'payment' => $jumlah_transaksi
+            ]);
+
+            MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Perpanjangan Paket Member - '.$membership['membership']->name,
+                'category' => 5,
+                'transaction' => $jumlah_transaksi,
+                'status' => $status_transaksi,
+                'author' => $r->uHiddenID,
+                'additional' => $r->payment_addition,
+                'reg_no' => ($r->regNo + 1),
+                'aksi' => 'membership',
+                't_membership' => $jumlah_transaksi,
+                'notes' => $r->note
+            ]);
+
+            $successMessage = 'Ganti Paket Member Berhasil!';
+            $redirectNotif = 'success';
+        }else if($member['memberdata']->status == 1){
+            // IF MEMBER ACTIVE, THEN ADD NEW MEMBERSHIP INTO QUEUE
+            $start_date     = Carbon::parse($member['memberdata']->m_enddate)->addDays(1)->toDate();
+            $expired_date   = Carbon::parse($member['memberdata']->m_enddate)->addMonths($membership['membership']->duration)->toDateString();
+
+            //echo("rest_duration : ".$sisa_durasi." | rest_price : ".$r->price." | rest_data : ".($r->price - $jumlah_transaksi)." | ");
+            //echo("expired : ".$member['memberdata']->m_enddate." | new expired : ".$expired_date);
+           // dd("membership active");
+
+            //UPDATE MEMBER NEW START AND EXPIRED DATE
+            MemberModel::where('member_id', $r->uHiddenID)->update([
+                'm_enddate' => $expired_date,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
+
+            membershipListCacheModel::create([
+                'author' => $r->uHiddenID,
+                'membership_id' => $r->membership,
+                'start_date' => $start_date,
+                'end_date' => $expired_date,
+                'payment' => $jumlah_transaksi
+            ]);
+
+            MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Perpanjangan Paket Member - '.$membership['membership']->name,
+                'category' => 5,
+                'transaction' => $jumlah_transaksi,
+                'status' => $status_transaksi,
+                'author' => $r->uHiddenID,
+                'additional' => $r->payment_addition,
+                'reg_no' => ($r->regNo + 1),
+                'aksi' => 'membership',
+                't_membership' => $jumlah_transaksi,
+                'notes' => $r->note
+            ]);
+
+            $successMessage = 'Ganti Paket Member Berhasil!';
+            $redirectNotif = 'success';
+        }else{
+            // IF MEMBER CUTI OR NOT ACTIVATED, THE CHANGE MEMBERSHIP REQUEST REJECTED
+            $successMessage = 'Terjadi Kesalahan Ketika Ganti Paket Member!';
+            $redirectNotif = 'error';
+        }
+
+//        //IF MEMBER EXPIRED
+//        if($member['membership']->status == 4){
+//            //IF MEMBER EXPIRED, THEN CHANGE MEMBERSHIP END DATE TO TODAY + MEMBERSHIP DURATION
+//
+//
+//        }else{
+//            //IF MEMBER IS STILL ACTIVE / CUTI THEN CHANGE MEMBERSHIP END DATE TO LATEST MEMBERSHIP END DATE + MEMBERSHIP DURATION
+//            $start_date     = Carbon::parse($member['member']->m_enddate)->addDays(1)->toDate();
+//            $expired_date   = Carbon::parse($member['member']->m_enddate)->addMonths($membership['membership']->duration)->toDateString();
+//
+//            MemberModel::where('member_id', $r->uHiddenID)->update([
+//                'membership' => $r->mHiddenID,
+//                'm_enddate' => $start_date,
+//                'updated_at' => $date_now,
+//                'updated_by' => Auth::user()->id
+//            ]);
+//        }
+//
+//        membershipListCacheModel::create([
+//            'author' => $r->uHiddenID,
+//            'membership_id' => $r->mHiddenID,
+//            'start_date' => $start_date,
+//            'end_date' => $expired_date,
+//            'payment' => $jumlah_transaksi
+//        ]);
+
+//        $successMessage = 'Pembelian Paket Member Berhasil!';
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with(['success' => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->uHiddenID)->with(['success' => $successMessage]);
+        }
+    }
+
+    function extendMembership(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now();
+
+
+        $member['memberdata'] = MemberModel::where('member_id', $r->uHiddenID)->first();
+
+        $membership['membership'] = MembershipModel::where('mship_id', $r->membership)->first();
+
+        if($r->payment_method == "cicilan"){
+            if($r->debt_first_pay != "null"){
+                $jumlah_transaksi = $r->debt_first_pay;
+            }else{
+                $jumlah_transaksi = ($r->price - $r->discount) / $r->debt_length;
+            }
+
+            $sisa_durasi = ($r->debt_length - 1);
+
+        }else if($r->payment_method == "tunda"){
+            $jumlah_transaksi = 0;
+            $sisa_durasi = $r->debt_length;
+        }else{
+            $jumlah_transaksi = ($r->price - $r->discount);
+            $sisa_durasi = 0;
+        }
+
+        //echo("rest_duration : ".$sisa_durasi." | rest_price : ".$r->price." | rest_data : ".($r->price - $jumlah_transaksi));
+
+        if($r->payment_method == "cicilan" || $r->payment_method =="tunda"){
+            //JIKA PEMBAYARAN MENGGUNAKAN CICILAN ATAU TUNDA BAYAR = SET STATUS MENJADI DALAM CICILAN
+            $status_transaksi = "Dalam Cicilan";
+            $rest_membership = "Perpanjang Paket Member";
+
+            CicilanDataModel::create([
+                'author' => $r->uHiddenID,
+                'rest_duration' => $sisa_durasi ,
+                'rest_price' => $r->price,
+                'rest_data' => ($r->price - $jumlah_transaksi),
+                'rest_membership' => $rest_membership,
+                'created_at' => $date_now
+            ]);
+        }else{
+            // JIKA PEMBAYARAN LUNAS = SET STATUS MENJADI LUNAS
+            $status_transaksi = "lunas";
+        }
+
+        //echo("membership : ".$r->membership." | m_startdate : ".$date_now." | m_enddate : ".$expired_date);
+
+        if($member['memberdata']->status == 4) {
+            //IF MEMBER EXPIRED, THEN RENEW MEMBERSHIP END DATE TO TODAY + MEMBERSHIP DURATION
+            $start_date = $date_now;
+            $expired_date = Carbon::now()->addMonths($membership['membership']->duration)->toDateString();
+
+            //UPDATE MEMBER NEW START AND EXPIRED DATE
+            MemberModel::where('member_id', $r->uHiddenID)->update([
+                'status' => 1, //ACTIVE
+                'membership' => $r->membership,
+                'm_startdate' => $date_now,
+                'm_enddate' => $expired_date,
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
+
+            membershipListCacheModel::create([
+                'author' => $r->uHiddenID,
+                'membership_id' => $r->membership,
+                'start_date' => $date_now,
+                'end_date' => $expired_date,
+                'payment' => $jumlah_transaksi
+            ]);
+
+            MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Perpanjangan Paket Member - '.$membership['membership']->name,
+                'category' => 5,
+                'transaction' => $jumlah_transaksi,
+                'status' => $status_transaksi,
+                'author' => $r->uHiddenID,
+                'additional' => $r->payment_addition,
+                'reg_no' => ($r->regNo + 1),
+                'aksi' => 'membership',
+                't_membership' => $jumlah_transaksi,
+                'notes' => $r->note
+            ]);
+
+            $successMessage = 'Perpanjangan Paket Member Berhasil!';
+            $redirectNotif = 'success';
+        }else {
+            $successMessage = 'Terjadi Kesalahan ketika Perpanjang Paket!';
+            $redirectNotif = 'error';
+        }
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }
+    }
+
+    function upgradeMembership(Request $r){
+        $validateRole = new ValidateRole;
+        $role = $validateRole->checkAuthALL();
+
+        date_default_timezone_set("Asia/Jakarta");
+        $date_now = Carbon::now();
+
+        $member['memberdata'] = MemberModel::where('member_id', $r->uHiddenID)->first();
+
+        $membership['membership'] = MembershipModel::where('mship_id', $r->membership)->first();
+        $member['membershipcache'] = membershipListCacheModel::where('author', $r->uHiddenID)->orderBy('start_date', 'ASC')->get();
+        $member['membershipcache_first'] = membershipListCacheModel::where('author', $r->uHiddenID)->orderBy('start_date', 'ASC')->first();
+
+        if($r->payment_method == "cicilan"){
+            if($r->debt_first_pay != "null"){
+                $jumlah_transaksi = $r->debt_first_pay;
+            }else{
+                $jumlah_transaksi = ($r->price - $r->discount) / $r->debt_length;
+            }
+
+            $sisa_durasi = ($r->debt_length - 1);
+
+        }else if($r->payment_method == "tunda"){
+            $jumlah_transaksi = 0;
+            $sisa_durasi = $r->debt_length;
+        }else{
+            $jumlah_transaksi = ($r->price - $r->discount);
+            $sisa_durasi = 0;
+        }
+
+        if($r->payment_method == "cicilan" || $r->payment_method =="tunda"){
+            //JIKA PEMBAYARAN MENGGUNAKAN CICILAN ATAU TUNDA BAYAR = SET STATUS MENJADI DALAM CICILAN
+            $status_transaksi = "Dalam Cicilan";
+            $rest_membership = "Upgrade Paket Member";
+
+            CicilanDataModel::create([
+                'author' => $r->uHiddenID,
+                'rest_duration' => $sisa_durasi ,
+                'rest_price' => $r->price,
+                'rest_data' => ($r->price - $jumlah_transaksi),
+                'rest_membership' => $rest_membership,
+                'created_at' => $date_now
+            ]);
+        }else{
+            // JIKA PEMBAYARAN LUNAS = SET STATUS MENJADI LUNAS
+            $status_transaksi = "lunas";
+        }
+
+
+        if($member['memberdata']->status != 4) {
+            //IF MEMBER IS NOT EXPIRED
+            $index = 0;
+            foreach ($member['membershipcache'] as $user_membership) {
+                //echo $user_membership->start_date." | ";
+                $new_start = "";
+                $new_end = "";
+
+                if($index == 0){
+                    $new_start = $user_membership->start_date;
+                    $new_end = Carbon::parse($user_membership->end_date)->addMonths($membership['membership']->duration)->subMonths($r->upgrade_duration)->toDateString();
+                    //echo "[".$index."] => OLD START : ".$user_membership->start_date.", NEW START : ".$user_membership->start_date;
+                    //echo" | [".$index."] => OLD END : ".$user_membership->end_date.", NEW END : ".Carbon::parse($user_membership->end_date)->addMonths($membership['membership']->duration)->toDateString();
+
+                    membershipListCacheModel::where('id', $user_membership->id)->update([
+                        'membership_id' => $r->membership,
+                        'start_date' => $new_start,
+                        'end_date' => $new_end
+                    ]);
+                }else{
+                    $new_start = Carbon::parse($user_membership->start_date)->addMonths($membership['membership']->duration)->subMonths($r->upgrade_duration)->toDateString();
+                    $new_end = Carbon::parse($user_membership->end_date)->addMonths($membership['membership']->duration)->subMonths($r->upgrade_duration)->toDateString();
+
+                    //echo " | [".$index."] => OLD START : ".$user_membership->start_date.", NEW START : ".Carbon::parse($user_membership->start_date)->addMonths($membership['membership']->duration)->toDateString();
+                    //echo " | [".$index."] => OLD END : ".$user_membership->end_date.", NEW END : ".Carbon::parse($user_membership->end_date)->addMonths($membership['membership']->duration)->toDateString();
+
+                    membershipListCacheModel::where('id', $user_membership->id)->update([
+                        'start_date' => $new_start,
+                        'end_date' => $new_end
+                    ]);
+                }
+
+                $index++;
+            }
+
+            MemberModel::where('member_id', $r->uHiddenID)->update([
+                'status' => 1, //ACTIVE
+                'membership' => $r->membership,
+                'm_enddate' => Carbon::parse($member['memberdata']->m_enddate)->addMonths($membership['membership']->duration)->subMonths($r->upgrade_duration)->toDateString(),
+                'updated_at' => $date_now,
+                'updated_by' => Auth::user()->id
+            ]);
+
+            MemberLogModel::create([
+                'date' => $date_now,
+                'desc' => 'Upgrade Paket Member - '.$membership['membership']->name,
+                'category' => 5,
+                'transaction' => $jumlah_transaksi,
+                'status' => $status_transaksi,
+                'author' => $r->uHiddenID,
+                'additional' => $r->payment_addition,
+                'reg_no' => ($r->regNo + 1),
+                'aksi' => 'membership',
+                't_membership' => $jumlah_transaksi,
+                'notes' => $r->note
+            ]);
+
+            //dd($member['membershipcache'][0]);
+
+            $successMessage = 'Upgrade Paket Member Berhasil!';
+            $redirectNotif = 'success';
+        }else {
+            $successMessage = 'Terjadi Kesalahan ketika Upgrade Paket!';
+            $redirectNotif = 'error';
+        }
+
+        if($this->checkAuth() == 1){
+            return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
+        }else if($this->checkAuth() == 2){
+            //STILL EMPTY
+        }else if($this->checkAuth() == 3){
+            return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
         }
     }
 

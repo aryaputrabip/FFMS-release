@@ -659,6 +659,8 @@
     function validateDelete(id, email){
         if(email == $("#deleteValidationInput").val()){
             actionMode = "delete";
+            $("#dataUserID").val(id);
+
             confirmDataAction(0);
         }else{
             deleteUserConfirmation(id, email);

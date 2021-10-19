@@ -135,6 +135,9 @@ Route::namespace('member')->prefix('member')->name('member.')->group(function ()
     Route::get('exportExcelData', 'MemberDataController@exportExcelData')->name('exportExcelData');
     Route::get('exportCheckinExcelData', 'MemberDataController@exportCheckinExcelData')->name('exportCheckinExcelData');
 
+    Route::post('registerSession', 'MemberDataController@registerSession')->name('registerSession');
+    Route::post('buySession', 'MemberDataController@buySession')->name('buySession');
+
     Route::namespace('registration')->prefix('registration')->name('registration.')->group(function () {
         Route::post('store', 'MemberRegisterController@store')->name('store');
         Route::get('print/{id}', 'MemberRegisterController@print')->name('print');
@@ -155,6 +158,10 @@ Route::namespace('membership')->prefix('membership')->name('membership.')->group
     Route::post('destroy', 'MembershipDataController@destroy')->name('destroy');
 
     Route::get('dataChecking', 'MembershipDataController@dataChecking')->name('dataChecking');
+
+    Route::post('changeMembership', 'MembershipDataController@changeMembership')->name('changeMembership');
+    Route::post('extendMembership', 'MembershipDataController@extendMembership')->name('extendMembership');
+    Route::post('upgradeMembership', 'MembershipDataController@upgradeMembership')->name('upgradeMembership');
 });
 
 Route::namespace('pt')->prefix('pt')->name('pt.')->group(function () {

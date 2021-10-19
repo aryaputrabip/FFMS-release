@@ -21,6 +21,7 @@
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>FC</b></th>
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>CS</b></th>
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>PT</b></th>
+        <th align="center" width="10" style="background-color: #ffc000; border: 2px solid #000000;"><b>SISA SESI</b></th>
         <th align="center" width="14" style="background-color: #ffc000; border: 2px solid #000000;"><b>Expired Date</b></th>
     </tr>
     </thead>
@@ -46,6 +47,7 @@
             <td align="left" style="border: 1px solid #000000;">{{ $member->FC }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->CS }}</td>
             <td align="left" style="border: 1px solid #000000;">{{ $member->PT }}</td>
+            <td align="center" style="border: 1px solid #000000;">{{ $member->session }}</td>
             <td align="left" style="border: 1px solid #000000;">@if(isset($member->expired_date)) {{ date("d M Y", strtotime($member->expired_date)) }} @else - @endif</td>
         </tr>
         @endforeach

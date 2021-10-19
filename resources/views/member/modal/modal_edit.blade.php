@@ -68,6 +68,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="modal-m-renew-content" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-calendar-plus fa-sm mr-1"></i> Renewal Paket Member
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h6>Paket Member Aktif</h6>
+                <div class="attachment-block clearfix" style="padding: 15px;">
+                    <input type="hidden" id="extend-membership-id" value="{{ $membership->mship_id }}" readonly>
+                    <h5 class="attachment-heading" id="extend-membership-name">{{ $membership->name }}</h5>
+                    <div class="attachment-text"><b>Durasi: </b> <span id="extend-membership-duration">{{ $membership->duration }}</span> Bulan</div>
+                    <div class="attachment-text"><b>Tipe: </b> <span id="extend-membership-type"> @if($membership->type == 1) GYM Only @else All Access @endif </span> </div>
+                    <div class="attachment-text mt-2"><b>Harga: </b><span id="extend-membership-price" data-price="{{ $membership->price }}"><?php echo asRupiah($membership->price); ?></span></div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #dde0e6!important;">
+                <button type="button" class="btn btn-primary w-100" onclick="confirmRenewPaket('{{ $membership->mship_id }}', {{ $membership->duration }}, {{ $membership->price }})">
+                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modal-pt-add" data-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -102,7 +132,11 @@
                     <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
                 </button>
 
-                <button type="button" class="btn btn-primary w-100" id="payPTRegister">
+{{--                <button type="button" class="btn btn-primary w-100" id="payPTRegister">--}}
+{{--                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran--}}
+{{--                </button>--}}
+
+                <button type="button" class="btn btn-primary w-100" onclick="confirmRegisterSession()">
                     <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
                 </button>
 
@@ -221,129 +255,132 @@
                     <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
                 </button>
 
-                <button type="button" id="addSessionConfirm" class="btn btn-primary w-100">
-                    <i class="fas fa-plus fa-sm mr-1"></i> Tambah Sesi
+{{--                <button type="button" id="addSessionConfirm" class="btn btn-primary w-100">--}}
+{{--                    <i class="fas fa-plus fa-sm mr-1"></i> Tambah Sesi--}}
+{{--                </button>--}}
+                <button type="button" class="btn btn-primary w-100" onclick="confirmBuySession()">
+                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modal-f-payment" data-backdrop="static">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content" id="modal-f-payment-content">
-            <div class="modal-header">
-                <h6 class="modal-title text-dark">
-                    <i class="fas fa-plus fa-sm mr-1"></i> Pembayaran
-                </h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('payment-return')">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="row pt-1 pl-3 pr-3 pb-2">
-                                <label for="paymentGroup" class="col-sm-9 col-form-label">
-                                    Pilih Pembayaran<span class="color-danger">*</span>
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                        <i class="fas fa-caret-up"></i>
-                                    </button>
-                                </label>
-                            </div>
-                            <div class="card-body pt-0 pb-2" id="paymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;"><?php
-                                foreach($payment as $pay){?>
-                                <div class="attachment-block attachment-block-selector clearfix" id="payment-{{ $pay->id }}"
-                                     style="padding: 15px; cursor: pointer;" data-payment="{{ $pay->payment }}" onclick="selectPaymentModel({{ $pay->id }}, this);">
-                                    <h6 class="attachment-heading" id="payment-{{ $pay->id }}-name">
-                                        <i class="{{ $pay->icon }} mr-2"></i>{{ $pay->payment }}
-                                    </h6>
-                                </div>
-                                <?php
-                                }
-                                ?>
-                            </div>
-                        </div>
+{{--<div class="modal fade" id="modal-f-payment" data-backdrop="static">--}}
+{{--    <div class="modal-dialog modal-dialog-scrollable modal-lg">--}}
+{{--        <div class="modal-content" id="modal-f-payment-content">--}}
+{{--            <div class="modal-header">--}}
+{{--                <h6 class="modal-title text-dark">--}}
+{{--                    <i class="fas fa-plus fa-sm mr-1"></i> Pembayaran--}}
+{{--                </h6>--}}
+{{--                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('payment-return')">--}}
+{{--                    <span aria-hidden="true">&times;</span>--}}
+{{--                </button>--}}
+{{--            </div>--}}
+{{--            <div class="modal-body">--}}
+{{--                <div class="row">--}}
+{{--                    <div class="col-12">--}}
+{{--                        <div class="card">--}}
+{{--                            <div class="row pt-1 pl-3 pr-3 pb-2">--}}
+{{--                                <label for="paymentGroup" class="col-sm-9 col-form-label">--}}
+{{--                                    Pilih Pembayaran<span class="color-danger">*</span>--}}
+{{--                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">--}}
+{{--                                        <i class="fas fa-caret-up"></i>--}}
+{{--                                    </button>--}}
+{{--                                </label>--}}
+{{--                            </div>--}}
+{{--                            <div class="card-body pt-0 pb-2" id="paymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;"><?php--}}
+{{--                                foreach($payment as $pay){?>--}}
+{{--                                <div class="attachment-block attachment-block-selector clearfix" id="payment-{{ $pay->id }}"--}}
+{{--                                     style="padding: 15px; cursor: pointer;" data-payment="{{ $pay->payment }}" onclick="selectPaymentModel({{ $pay->id }}, this);">--}}
+{{--                                    <h6 class="attachment-heading" id="payment-{{ $pay->id }}-name">--}}
+{{--                                        <i class="{{ $pay->icon }} mr-2"></i>{{ $pay->payment }}--}}
+{{--                                    </h6>--}}
+{{--                                </div>--}}
+{{--                                <?php--}}
+{{--                                }--}}
+{{--                                ?>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
 
-                        <div class="card">
-                            <div class="row pt-3 pr-3 pb-2 pl-3">
-                                <label for="paymentMethodGroup" class="col-sm-9 col-form-label">
-                                    Metode Pembayaran<span class="text-danger">*</span>
-                                </label>
-                            </div>
-                            <div class="card-body pt-0" id="paymentMGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
-                                <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="paymentMethodGroup">
-                                    <option value="full" selected>Lunas</option>
-                                    <option value="cicilan">Cicilan</option>
-                                </select>
-                                <div id="paymentCicilanDurationContainer" style="display: none;">
-                                    <input class="form-control w-auto float-left" type="number" min="2" value="2" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">
-                                    <h6 class="float-left mt-2 ml-2">Bulan</h6>
-                                </div>
-                            </div>
+{{--                        <div class="card">--}}
+{{--                            <div class="row pt-3 pr-3 pb-2 pl-3">--}}
+{{--                                <label for="paymentMethodGroup" class="col-sm-9 col-form-label">--}}
+{{--                                    Metode Pembayaran<span class="text-danger">*</span>--}}
+{{--                                </label>--}}
+{{--                            </div>--}}
+{{--                            <div class="card-body pt-0" id="paymentMGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">--}}
+{{--                                <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="paymentMethodGroup">--}}
+{{--                                    <option value="full" selected>Lunas</option>--}}
+{{--                                    <option value="cicilan">Cicilan</option>--}}
+{{--                                </select>--}}
+{{--                                <div id="paymentCicilanDurationContainer" style="display: none;">--}}
+{{--                                    <input class="form-control w-auto float-left" type="number" min="2" value="2" style="max-width: 70px;" id="paymentCicilanDuration" name="paymentCicilanDuration">--}}
+{{--                                    <h6 class="float-left mt-2 ml-2">Bulan</h6>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
 
-                            <div id="firstPaymentGroup" style="display: none">
-                                <div class="row pt-3 pr-3 pb-2 pl-3">
-                                    <label class="col-sm-9 col-form-label">
-                                        Pembayaran Pertama<span class="text-danger">*</span>
-                                    </label>
-                                </div>
-                                <div class="card-body pt-0" id="firstPaymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">
-                                    <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="firstPaymentMethodGroup" name="firstPaymentMethodGroup">
-                                        <option value="auto" selected>Perhitungan Otomatis</option>
-                                        <option value="manual">Manual</option>
-                                    </select>
-                                    <div id="firstPaymentAutoContainer">
-                                        <h6 class="float-left mt-2 ml-2 mr-2" id="firstPaymentAutoLabel">Rp. 0</h6>
-                                    </div>
-                                    <div id="firstPaymentManualContainer" style="display: none;">
-                                        <h6 class="float-left mt-2 ml-2 mr-2">Rp. </h6>
-                                        <input class="form-control w-auto float-left" type="number" min="0" value="0" style="max-width: 160px;" id="firstPaymentManualInput" name="firstPaymentManualInput">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                            <div id="firstPaymentGroup" style="display: none">--}}
+{{--                                <div class="row pt-3 pr-3 pb-2 pl-3">--}}
+{{--                                    <label class="col-sm-9 col-form-label">--}}
+{{--                                        Pembayaran Pertama<span class="text-danger">*</span>--}}
+{{--                                    </label>--}}
+{{--                                </div>--}}
+{{--                                <div class="card-body pt-0" id="firstPaymentGroup" style="max-height: 225px; overflow-y: auto; overflow-x: hidden;">--}}
+{{--                                    <select class="form-control select2 w-auto float-left mr-2" style="min-width: 200px;" id="firstPaymentMethodGroup" name="firstPaymentMethodGroup">--}}
+{{--                                        <option value="auto" selected>Perhitungan Otomatis</option>--}}
+{{--                                        <option value="manual">Manual</option>--}}
+{{--                                    </select>--}}
+{{--                                    <div id="firstPaymentAutoContainer">--}}
+{{--                                        <h6 class="float-left mt-2 ml-2 mr-2" id="firstPaymentAutoLabel">Rp. 0</h6>--}}
+{{--                                    </div>--}}
+{{--                                    <div id="firstPaymentManualContainer" style="display: none;">--}}
+{{--                                        <h6 class="float-left mt-2 ml-2 mr-2">Rp. </h6>--}}
+{{--                                        <input class="form-control w-auto float-left" type="number" min="0" value="0" style="max-width: 160px;" id="firstPaymentManualInput" name="firstPaymentManualInput">--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
 
-                        <div class="card">
-                            <div class="card-body pt-3 pb-3 pl-3 pr-3">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <b id="payment-title"> - </b>
-                                    </div>
-                                    <div class="col-md-8">
-                                        Rp. <span id="total_payment">0</span>
-                                        <span id="total_payment_rest" style="display: none;">0</span>
-                                    </div>
-                                </div>
-                                <div class="row text-right">
-                                    <div class="col-12">
-                                        <h6>Total Charge</h6>
-                                    </div>
-                                </div>
-                                <div class="row text-right">
-                                    <div class="col-12">
-                                        <h2 id="total_price_parent"><b>Rp. </b><b id="total_price">0</b></h2>
-                                        <h4 class="font-weight-bold" id="cicilanChargeContainer" style="display: none;">
-                                            <i><b>Rp. </b><b id="cicilan_per_bulan">0</b><small>/bulan</small></i>
-                                        </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                        <div class="card">--}}
+{{--                            <div class="card-body pt-3 pb-3 pl-3 pr-3">--}}
+{{--                                <div class="row">--}}
+{{--                                    <div class="col-md-4">--}}
+{{--                                        <b id="payment-title"> - </b>--}}
+{{--                                    </div>--}}
+{{--                                    <div class="col-md-8">--}}
+{{--                                        Rp. <span id="total_payment">0</span>--}}
+{{--                                        <span id="total_payment_rest" style="display: none;">0</span>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                                <div class="row text-right">--}}
+{{--                                    <div class="col-12">--}}
+{{--                                        <h6>Total Charge</h6>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                                <div class="row text-right">--}}
+{{--                                    <div class="col-12">--}}
+{{--                                        <h2 id="total_price_parent"><b>Rp. </b><b id="total_price">0</b></h2>--}}
+{{--                                        <h4 class="font-weight-bold" id="cicilanChargeContainer" style="display: none;">--}}
+{{--                                            <i><b>Rp. </b><b id="cicilan_per_bulan">0</b><small>/bulan</small></i>--}}
+{{--                                        </h4>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
 
-                        <button type="button" class="btn btn-primary w-100" data-dismiss="modal" aria-label="Close" onclick="toggleModal('notesModal')">
-                            <i class="fas fa-check fa-sm mr-1"></i> Selesai
-                        </button>
-                    </div>
-                </div>
+{{--                        <button type="button" class="btn btn-primary w-100" data-dismiss="modal" aria-label="Close" onclick="toggleModal('notesModal')">--}}
+{{--                            <i class="fas fa-check fa-sm mr-1"></i> Selesai--}}
+{{--                        </button>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
 
-                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>
-                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>
-            </div>
-        </div>
-    </div>
-</div>
+{{--                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>--}}
+{{--                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+{{--</div>--}}
 
 <div class="modal fade" id="notesModal" data-backdrop="static">
     <div class="modal-dialog">
@@ -359,7 +396,7 @@
             <div class="modal-body" style="max-height: 300px; overflow-y: auto;">
                 <div class="row">
                     <textarea class="form-control w-100 ml-2 mr-2" id="dataNote" name="dataNote" rows="6" placeholder="Tambah Catatan (optional)..."></textarea>
-
+                    pay_data.data_action
                     <form id="sAddForm" name="sAddForm" method="POST" action="{{ route('member.addTransaction') }}">
                         {{ csrf_field() }}
 
@@ -410,7 +447,7 @@
                 <h6 class="modal-title text-dark">
                     <i class="far fa-credit-card mr-1"></i>Pilih Nama Bank
                 </h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="" id="paymentDebitModal-btn-close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -418,7 +455,7 @@
                 <div class="row">
                     <?php
                     foreach($debitType as $bank){?>
-                    <div class="attachment-block attachment-block-selector clearfix w-100" style="padding: 15px; cursor: pointer;"
+                    <div class="attachment-block selected_payment_addition attachment-block-selector clearfix w-100" style="padding: 15px; cursor: pointer;"
                          data-bank="{{ $bank->name }}" onclick="selectPaymentType({{ $bank->id }}, this);"
                          id="bank-{{ $bank->id }}">
                         <h6 class="attachment-heading"><i class="{{ $bank->icon }} mr-2"></i>{{ $bank->name }}</h6>
@@ -444,7 +481,7 @@
                 <h6 class="modal-title text-dark">
                     <i class="far fa-credit-card mr-1"></i>Pilih Jenis Kartu
                 </h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"  onclick="" id="paymentCreditModal-btn-close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -452,7 +489,7 @@
                 <div class="row">
                     <?php
                     foreach($creditType as $card){?>
-                    <div class="attachment-block attachment-block-selector clearfix w-100" style="padding: 15px; cursor: pointer;"
+                    <div class="attachment-block selected_payment_addition attachment-block-selector clearfix w-100" style="padding: 15px; cursor: pointer;"
                          data-bank="{{ $card->name }}" onclick="selectPaymentType({{ $card->id }}, this);"
                          id="bank-{{ $card->id }}">
                         <h6 class="attachment-heading"><i class="{{ $card->icon }} mr-2"></i>{{ $card->name }}</h6>
@@ -516,6 +553,81 @@
                                     <div class="attachment-text @if($mship->type == "All Access") All-Access @else GYM-Only @endif"><b>Tipe: </b> <span id="membership-{{ $mship->type }}-type">{{ $mship->type }}</span></div>
                                     <div class="attachment-text"><b>Harga: </b><span id="membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
                                     <input type="hidden" id="membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
+                                </div>
+
+                                    <?php
+                                }?>
+                            </div>
+                            <input type="hidden" id="cacheMembershipID" name="cacheMembershipID" readonly>
+                            <input type="hidden" id="cacheMembership" name="cacheMembership" readonly>
+                            <input type="hidden" id="cacheMembershipPrice" name="cacheMembershipPrice" readonly>
+                            <input type="hidden" id="cacheMembershipDuration" name="cacheMembershipDuration" readonly>
+                            <input type="hidden" id="cacheMembershipType" name="cacheMembershipType" readonly>
+                            <input type="hidden" id="cacheMembershipCategory" name="cacheMembershipCategory" readonly>
+
+                            <input type="hidden" id="cacheMembershipAction" name="cacheMembershipAction" readonly>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+{{--                                <button type="button" class="btn btn-danger w-100" id="changeApprovalBtn" data-target="#approvalModal" data-toggle="modal" disabled="true">--}}
+{{--                                    <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga--}}
+{{--                                </button>--}}
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary w-100" id="payMembershipChange">
+                                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>
+                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-m-change-content" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title text-dark">
+                    <i class="fas fa-edit fa-xs mr-1"></i> Ganti Paket Member
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="row p-3">
+                                <label class="col-sm-9 col-form-label">
+                                    Paket Membership<span class="color-danger">*</span>
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-caret-up"></i>
+                                    </button>
+                                </label>
+                                <div class="col-sm-3">
+                                    <select class="form-control select2" id="membershipFilter" style="width: 100%;">
+                                        <option value="" selected>Semuanya</option>
+                                        <option value="All-Access">All Access</option>
+                                        <option value="GYM-Only">GYM Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body pt-0" style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                                <?php foreach($membership_data as $mship){?>
+                                <div class="attachment-block attachment-block-selector clearfix" id="change-membership-{{ $mship->mship_id }}" style="padding: 15px; cursor: pointer;" onclick="selectMembership({{$mship->mship_id}})">
+                                    <h5 class="attachment-heading" id="change-membership-{{ $mship->mship_id }}-name">{{ $mship->name }}</h5>
+                                    <div class="attachment-text"><b>Durasi: </b> <span id="change-membership-{{ $mship->mship_id }}-duration">{{ $mship->duration }}</span> Bulan</div>
+                                    <div class="attachment-text @if($mship->type == "All Access") All-Access @else GYM-Only @endif"><b>Tipe: </b> <span id="change-membership-{{ $mship->mship_id }}-type">{{ $mship->type }}</span></div>
+                                    <div class="attachment-text"><b>Harga: </b><span id="change-membership-{{ $mship->mship_id }}-price" data-price="{{ $mship->price }}"><?php echo asRupiah($mship->price); ?></span></div>
+                                    <input type="hidden" id="change-membership-{{ $mship->mship_id }}-category" value="{{ $mship->tMember }}" readonly>
                                 </div><?php
                                 }?>
                             </div>
@@ -531,12 +643,16 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <button type="button" class="btn btn-danger w-100" id="changeApprovalBtn" data-target="#approvalModal" data-toggle="modal" disabled="true">
+                                <button type="button" class="btn btn-danger w-100" id="changeApprovalBtn" data-target="#approvalModal" data-toggle="modal" data-return="#modal-m-change-content" disabled="true">
                                     <i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga
                                 </button>
                             </div>
                             <div class="col-md-6">
-                                <button type="button" class="btn btn-primary w-100" id="payMembershipChange">
+{{--                                <button type="button" class="btn btn-primary w-100" id="payMembershipChange">--}}
+{{--                                    <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran--}}
+{{--                                </button>--}}
+
+                                <button type="button" class="btn btn-primary w-100" id="modal-m-change-content-btn-pay" onclick="">
                                     <i class="fas fa-arrow-right fa-sm mr-1"></i> Pilih Pembayaran
                                 </button>
                             </div>
@@ -544,8 +660,8 @@
                     </div>
                 </div>
 
-{{--                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>--}}
-{{--                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>--}}
+                {{--                <input type="hidden" id="cachePaymentModel" name="cachePaymentModel" readonly>--}}
+                {{--                <input type="hidden" id="cachePaymentType" name="cachepaymentType" readonly>--}}
             </div>
         </div>
     </div>
@@ -558,7 +674,7 @@
                 <h6 class="modal-title text-dark">
                     <i class="fas fa-pencil-alt fa-sm mr-1"></i>Harga By Approval
                 </h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="toggleModal('modal-m-change');">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="" id="approvalModal-btn-close" data-return="">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

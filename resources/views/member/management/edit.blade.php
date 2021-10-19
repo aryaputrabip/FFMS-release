@@ -369,11 +369,15 @@
 @section('modal')
     @include('member.plugin.webcam')
     @include('member.modal.modal_edit')
+
+    @include('form.payment.payment_form')
 @endsection
 
 @section('import_script')
     @include('theme.default.import.modular.datatables.script')
     @include('chart.member_spending_chart')
+
+    <script src="{{ asset('/js/membership/membership-transaction.js') }}"></script>
 @endsection
 
 @section('message')
@@ -521,13 +525,7 @@
            resetPTTransaction();
         });
 
-        $('#paymentDebitModal').on('hide.bs.modal', function() {
-            toggleModal('modal-f-payment');
-        });
 
-        $('#paymentCreditModal').on('hide.bs.modal', function() {
-            toggleModal('modal-f-payment');
-        });
 
         $("#confirmPayment").on("click", function(){
             verifyPaymentRequirement($(this).data("action"));
@@ -549,7 +547,12 @@
         });
 
         $("#changeApprovalBtn").on("click", function() {
-           toggleModal("modal-m-change");
+           //toggleModal("modal-m-change");
+            $("#modal-m-change-content").modal("hide");
+
+            $("#approvalModal-btn-close").data("return", $(this).data("return"));
+
+            $("#approvalModal").modal("show");
         });
 
         $("#changeApprovalPTBtn").on("click", function() {
@@ -805,6 +808,34 @@
         }
     });
 
+    $("#dataPTReg").on("change", function(){
+        sessionData.pt = $(this).val();
+    });
+
+    $("#dataPTRegSession").on("change", function(){
+        sessionData.session_data = $(this).val();
+        sessionData.price = $(this).find(':selected').data("price");
+        sessionData.payment_title = "Paket<br>Personal Trainer<br> ("+$('#dataPTRegSession').find(':selected').html()+")";
+        sessionData.session_title = $("#dataPTRegSession").find(':selected').data("title");
+
+        $("#changeApprovalPTBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga</button>');
+        $("#approvalPTPrice").val("");
+    });
+
+    $("#dataUserPTSession").on("change", function(){
+        sessionData.session_data = $(this).val();
+        sessionData.price = $(this).find(':selected').data("price");
+        sessionData.payment_title = "Paket<br>Personal Trainer<br> ("+$('#dataUserPTSession').find(':selected').html()+")";
+        sessionData.session_title = $("#dataUserPTSession").find(':selected').data("title");
+
+        $("#changeApprovalPTBtn2").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i> Pasang Harga</button>');
+        $("#approvalSesiPrice").val("");
+    });
+
+    $("#approvalModal").on('hide.bs.modal', function() {
+        $($("#approvalModal-btn-close").data("return")).modal("show");
+    });
+
 
     function confirmStartEndDateChange(){
         var start_date = new Date($("#dataStartDateMember").val());
@@ -925,35 +956,56 @@
     function tambahSesi(){
         $("#modal-pt").modal("hide");
         $("#modal-s-add").modal("show");
+
+        resetSessionData();
+
+        sessionData.session_data = $("#dataUserPTSession").find(':selected').val();
+        sessionData.price = $("#dataUserPTSession").find(':selected').data("price");
+        sessionData.payment_title = "Paket<br>Personal Trainer<br> ("+$('#dataUserPTSession').find(':selected').html()+" )";
+        sessionData.session_title = $("#dataUserPTSession").find(':selected').data("title");
+
+        sessionData.data_action = "{{ route('member.buySession') }}";
     }
 
     function ubahPT(){
         $("#modal-pt").modal("hide");
         $("#modal-pt-change").modal("show");
+
+        resetSessionData();
     }
 
     function registerPT(){
         $("#modal-pt").modal("hide");
         $("#modal-pt-add").modal("show");
+
+        resetSessionData();
+
+        sessionData.pt = $("#dataPTReg").find(':selected').val();
+        sessionData.session_data = $("#dataPTRegSession").find(':selected').val();
+        sessionData.price = $("#dataPTRegSession").find(':selected').data("price");
+        sessionData.payment_title = "Paket<br>Personal Trainer<br> ("+$('#dataPTRegSession').find(':selected').html()+" )";
+        sessionData.session_title = $("#dataPTRegSession").find(':selected').data("title");
+
+        sessionData.data_action = "{{ route('member.registerSession') }}";
     }
 
-    function selectPaymentModel(type, element){
-        reselectPaymentCard(type);
-        $("#cachePaymentModel").val($(element).data('payment'));
-        $("#cachePaymentType").val("");
-
-        switch(type){
-            case 2:
-                $('#paymentDebitModal').modal('show');
-                toggleModal('modal-f-payment');
-                break;
-
-            case 3:
-                $('#paymentCreditModal').modal('show');
-                toggleModal('modal-f-payment');
-                break;
-        }
-    }
+    // function selectPaymentModel(type, element){
+    //     reselectPaymentCard(type);
+    //     $("#cachePaymentModel").val($(element).data('payment'));
+    //     $("#cachePaymentType").val("");
+    //
+    //     switch(type){
+    //         case 2:
+    //             $('#paymentDebitModal').modal('show');
+    //             toggleModal('modal-f-payment');
+    //             break;
+    //
+    //         case 3:
+    //             $('#paymentCreditModal').modal('show');
+    //             toggleModal('modal-f-payment');
+    //             break;
+    //     }
+    // }
 
     function toggleModal(modal){
         if(modal == 'payment-return'){
@@ -969,20 +1021,8 @@
         }
     }
 
-    function selectPaymentType(type, element){
-        reselectPaymentBank(type);
-        $("#cachePaymentType").val($(element).data('bank'));
-    }
-
     var selectedBank;
-    function reselectPaymentBank(selected) {
-        $("#bank-"+selected).addClass('block_active');
 
-        if(selectedBank != null){
-            $(selectedBank).removeClass('block_active');
-        }
-        selectedBank = "#bank-"+selected;
-    }
 
     var selectedPayment;
     function reselectPaymentCard(selected){
@@ -1108,14 +1148,6 @@
         });
     }
 
-    function setPaymentLoad(){
-        $("#modal-f-payment-content").append(
-            '<div class="overlay d-flex justify-content-center align-items-center">' +
-            '   <i class="fas fa-2x fa-sync fa-spin"></i>' +
-            '</div>'
-        );
-    }
-
     function setEditPTLoad(){
         $("#modal-pt-change-content").append(
             '<div class="overlay d-flex justify-content-center align-items-center">' +
@@ -1128,13 +1160,16 @@
     function setApprovalPrice(){
         $("#changeApprovalBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalPrice").val()));
         mShipApprovalPrice = $("#approvalPrice").val();
+        changeData.price = $("#approvalPrice").val();
 
-        toggleModal('modal-m-change');
+        // toggleModal('modal-m-change');
+        //$("#modal-m-change-content").modal("show");
     }
     var ptApprovalPrice;
     function setApprovalPTPrice(){
         $("#changeApprovalPTBtn").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalPTPrice").val()));
         ptApprovalPrice = $("#approvalPTPrice").val();
+        sessionData.price = $("#approvalPTPrice").val();
 
         toggleModal('modal-pt-add');
     }
@@ -1142,6 +1177,7 @@
     function setApprovalSesiPrice(){
         $("#changeApprovalPTBtn2").html('<i class="fas fa-pencil-alt fa-sm mr-1"></i>' + ' Rp. ' + asRupiah($("#approvalSesiPrice").val()));
         ptApprovalPrice = $("#approvalSesiPrice").val();
+        sessionData.price = $("#approvalSesiPrice").val();
 
         toggleModal('modal-s-add');
     }
@@ -1195,17 +1231,17 @@
         $("#mShipCategory").val("");
     }
 
-    function asRupiah(value){
-        var formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'IDR',
-        });
-
-        var split = formatter.format(value).split(".00");
-        var splitCurrency = split[0].split("IDR");
-
-        return splitCurrency[1];
-    }
+    // function asRupiah(value){
+    //     var formatter = new Intl.NumberFormat('en-US', {
+    //         style: 'currency',
+    //         currency: 'IDR',
+    //     });
+    //
+    //     var split = formatter.format(value).split(".00");
+    //     var splitCurrency = split[0].split("IDR");
+    //
+    //     return splitCurrency[1];
+    // }
 
     function editPTNameConfirm(){
         const ConfirmSwal = Swal.mixin({
@@ -1276,40 +1312,93 @@
     function ubahPaket(){
         $("#upgradeRecord").val("");
 
-        $("#modal-m-change").modal("show");
+        resetChangeData();
+        changeData.data_action = "{{ route('membership.changeMembership') }}";
+
+        //$("#modal-m-change").modal("show");
+        $("#modal-m-change-content").modal("show");
+        $("#modal-m-change-content-btn-pay").attr("onclick", "confirmChangePaket(" + changeData.membership + "," + changeData.membership_duration + "," + changeData.price + ")");
         $("#cacheMembershipAction").val("change-membership");
     }
 
     function upgradePaket(){
         $("#upgradeRecord").val("");
 
-        $("#modal-m-change").modal("show");
+        resetChangeData();
+        changeData.data_action = "{{ route('membership.upgradeMembership') }}";
+
+        //$("#modal-m-change").modal("show");
+        $("#modal-m-change-content").modal("show");
+        $("#modal-m-change-content-btn-pay").attr("onclick", "calcUpgradePrice(); confirmUpgradePaket(" + changeData.membership + "," + changeData.membership_duration + "," + changeData.price + ");");
+        // $("#upgradeRecord").val("upgrade-paket");
         $("#cacheMembershipAction").val("change-membership");
-        $("#upgradeRecord").val("upgrade-paket");
+    }
+
+    function registerSession(){
+        sessionData.data_action = "{{ route('member.registerSession') }}";
+
+        //$("#modal-m-change").modal("show");
+        $("#modal-m-change-content").modal("show");
+        $("#modal-m-change-content-btn-pay").attr("onclick", "confirmRegisterSession(" + sessionData.pt + "," + sessionData.session_data + "," + sessionData.price + ")");
     }
 
     var selectedMembership;
     function selectMembership(selected){
-        $("#cacheMembership").val($("#membership-"+selected+"-name").html());
+        // $("#cacheMembership").val($("#membership-"+selected+"-name").html());
+        // $("#cacheMembershipID").val(selected);
+        // $("#cacheMembershipDuration").val($("#membership-"+selected+"-duration").html());
+        // $("#cacheMembershipType").val($("#membership-"+selected+"-type").html());
+        // $("#cacheMembershipPrice").val($("#membership-"+selected+"-price").data('price'));
+        // $("#cacheMembershipCategory").val($("#membership-"+selected+"-category").val());
+        // $("#changeApprovalBtn").prop("disabled", false);
+
+        $("#cacheMembership").val($("#change-membership-"+selected+"-name").html());
         $("#cacheMembershipID").val(selected);
-        $("#cacheMembershipDuration").val($("#membership-"+selected+"-duration").html());
-        $("#cacheMembershipType").val($("#membership-"+selected+"-type").html());
-        $("#cacheMembershipPrice").val($("#membership-"+selected+"-price").data('price'));
-        $("#cacheMembershipCategory").val($("#membership-"+selected+"-category").val());
+        $("#cacheMembershipDuration").val($("#change-membership-"+selected+"-duration").html());
+        $("#cacheMembershipType").val($("#change-membership-"+selected+"-type").html());
+        $("#cacheMembershipPrice").val($("#change-membership-"+selected+"-price").data('price'));
+        $("#cacheMembershipCategory").val($("#change-membership-"+selected+"-category").val());
         $("#changeApprovalBtn").prop("disabled", false);
 
         reselectMembershipCard(selected);
+
+        changeData.payment_title = $("#change-membership-"+selected+"-name").html() + "<br>(" + $("#change-membership-"+selected+"-type").html() + ")";
+
+        changeData.membership = selected;
+        changeData.membership_duration = $("#change-membership-"+selected+"-duration").html();
+        changeData.price = $("#change-membership-"+selected+"-price").data('price');
+        //changeData.payment_title = "Paket Member <br>" + ' membership->duration ' + " Bulan<br>(" + $("#change-membership-"+selected+"-type").html() + ")"
+    }
+
+    function calcUpgradePrice(){
+        var olddate = new Date("{{ $membership_cache->end_date }}");
+        var month_rest = Math.round(moment(olddate).diff(moment(new Date()), 'months', true));
+
+        if(month_rest == 0){
+            month_rest = 1;
+        }
+
+        changeData.upgrade_duration = month_rest;
+
+        var price_per_moth = changeData.price / changeData.membership_duration;
+        var price_after_disc = (price_per_moth * month_rest).toFixed(0);
+
+        if(month_rest > 0){
+            changeData.discount = parseInt(price_after_disc);
+        }
     }
 
     function reselectMembershipCard(selected){
-        $("#membership-"+selected).addClass('block_active');
+        // $("#membership-"+selected).addClass('block_active');
+        $("#change-membership-"+selected).addClass('block_active');
         resetApprovalPrice();
 
         if(selectedMembership != null){
             $(selectedMembership).removeClass('block_active');
         }
 
-        selectedMembership = "#membership-"+selected;
+        //selectedMembership = "#membership-"+selected;
+        selectedMembership = "#change-membership-"+selected;
     }
 
     function resetApprovalPrice(){
@@ -1405,129 +1494,129 @@
         selectedMembership = null;
     });
 
-    $("#paymentMethodGroup").on("change", function(){
-        if($(this).val() == "cicilan"){
-            $("#paymentCicilanDuration").val(2);
-            $("#paymentCicilanDurationContainer").show();
-            $("#firstPaymentGroup").show();
+    // $("#paymentMethodGroup").on("change", function(){
+    //     if($(this).val() == "cicilan"){
+    //         $("#paymentCicilanDuration").val(2);
+    //         $("#paymentCicilanDurationContainer").show();
+    //         $("#firstPaymentGroup").show();
+    //
+    //         var tMembership = $("#cacheMembershipPrice").val();
+    //         var tSesi = 0;
+    //
+    //         if($("#confirmPayment").data("action") == 'register-session'){
+    //             if($("#approvalPTPrice").val() != ""){
+    //                 tMembership = $("#approvalPTPrice").val();
+    //             }else{
+    //                 tMembership = $("#dataPTRegSession option:selected").data("price");
+    //             }
+    //         }else if($("#confirmPayment").data("action") == 'extend-session'){
+    //             if($("#approvalSesiPrice").val() != ""){
+    //                 tMembership = $("#approvalSesiPrice").val();
+    //             }else{
+    //                 tMembership = $("#dataUserPTSession option:selected").data("price");
+    //             }
+    //         }else{
+    //             if($("#approvalPrice").val() != ""){
+    //                 tMembership = $("#approvalPrice").val();
+    //             }
+    //         }
+    //
+    //         // if($("#dataUserPTToggler").prop("checked")){
+    //         //     if($("#cachePTApproval").val() != ""){
+    //         //         tSesi = $("#approvalSesiPrice").val();
+    //         //     }else{
+    //         //         tSesi = $("#dataUserPTSession").find(':selected').data('price');
+    //         //     }
+    //         // }
+    //
+    //         if($("#paymentCicilanDuration").val() > 0){
+    //             $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //             $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //         }
+    //
+    //         $("#cicilanChargeContainer").show();
+    //     }else{
+    //         $("#paymentCicilanDuration").val("");
+    //         $("#paymentCicilanDurationContainer").hide();
+    //         $("#firstPaymentGroup").hide();
+    //
+    //         $("#cicilanChargeContainer").hide();
+    //     }
+    // });
 
-            var tMembership = $("#cacheMembershipPrice").val();
-            var tSesi = 0;
+    // $("#firstPaymentMethodGroup").on("change", function(){
+    //     $("#firstPaymentManualInput").val(0);
+    //
+    //     if($(this).val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+    //         $("#firstPaymentAutoContainer").hide();
+    //         $("#firstPaymentManualContainer").show();
+    //         $("#firstPaySet").val("manual");
+    //         $("#firstPayData").val(0);
+    //         cekCicilanPerBulan(0);
+    //
+    //
+    //         console.log($("#firstPaySet").val());
+    //     }else{
+    //         $("#firstPaySet").val("auto");
+    //
+    //         if($("#paymentCicilanDuration").val() > 0){
+    //             $("#firstPaymentManualContainer").hide();
+    //             $("#firstPaymentAutoContainer").show();
+    //             $("#firstPayData").val(0);
+    //             cekCicilanPerBulan(0);
+    //         }
+    //     }
+    // });
 
-            if($("#confirmPayment").data("action") == 'register-session'){
-                if($("#approvalPTPrice").val() != ""){
-                    tMembership = $("#approvalPTPrice").val();
-                }else{
-                    tMembership = $("#dataPTRegSession option:selected").data("price");
-                }
-            }else if($("#confirmPayment").data("action") == 'extend-session'){
-                if($("#approvalSesiPrice").val() != ""){
-                    tMembership = $("#approvalSesiPrice").val();
-                }else{
-                    tMembership = $("#dataUserPTSession option:selected").data("price");
-                }
-            }else{
-                if($("#approvalPrice").val() != ""){
-                    tMembership = $("#approvalPrice").val();
-                }
-            }
+    // $("#paymentCicilanDuration").on("keyup change", function(){
+    //     if($(this).val() > 0){
+    //         if($("#confirmPayment").data("action") == 'register-session') {
+    //             var tSesi = $("#dataPTRegSession option:selected").data("price");
+    //
+    //             if ($("#approvalPTPrice").val() != "") {
+    //                 tSesi = $("#approvalPTPrice").val();
+    //             }
+    //
+    //             if ($("#paymentCicilanDuration").val() > 0) {
+    //                 $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 cekCicilanPerBulan(0);
+    //             }
+    //         }else if($("#confirmPayment").data("action") == 'extend-session'){
+    //             var tSesi = $("#dataUserPTSession option:selected").data("price");
+    //
+    //             if ($("#approvalSesiPrice").val() != "") {
+    //                 tSesi = $("#approvalSesiPrice").val();
+    //             }
+    //
+    //             if ($("#paymentCicilanDuration").val() > 0) {
+    //                 $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 cekCicilanPerBulan(0);
+    //             }
+    //         }else{
+    //             var tMembership = $("#cacheMembershipPrice").val();
+    //             var tSesi = 0;
+    //
+    //             if($("#approvalPrice").val() != ""){
+    //                 tMembership = $("#approvalPrice").val();
+    //             }
+    //
+    //             if($("#paymentCicilanDuration").val() > 0){
+    //                 $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
+    //                 cekCicilanPerBulan(0);
+    //             }
+    //         }
+    //     }
+    // });
 
-            // if($("#dataUserPTToggler").prop("checked")){
-            //     if($("#cachePTApproval").val() != ""){
-            //         tSesi = $("#approvalSesiPrice").val();
-            //     }else{
-            //         tSesi = $("#dataUserPTSession").find(':selected').data('price');
-            //     }
-            // }
-
-            if($("#paymentCicilanDuration").val() > 0){
-                $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
-            }
-
-            $("#cicilanChargeContainer").show();
-        }else{
-            $("#paymentCicilanDuration").val("");
-            $("#paymentCicilanDurationContainer").hide();
-            $("#firstPaymentGroup").hide();
-
-            $("#cicilanChargeContainer").hide();
-        }
-    });
-
-    $("#firstPaymentMethodGroup").on("change", function(){
-        $("#firstPaymentManualInput").val(0);
-
-        if($(this).val() == "manual" && $("#paymentCicilanDuration").val() > 0){
-            $("#firstPaymentAutoContainer").hide();
-            $("#firstPaymentManualContainer").show();
-            $("#firstPaySet").val("manual");
-            $("#firstPayData").val(0);
-            cekCicilanPerBulan(0);
-
-
-            console.log($("#firstPaySet").val());
-        }else{
-            $("#firstPaySet").val("auto");
-
-            if($("#paymentCicilanDuration").val() > 0){
-                $("#firstPaymentManualContainer").hide();
-                $("#firstPaymentAutoContainer").show();
-                $("#firstPayData").val(0);
-                cekCicilanPerBulan(0);
-            }
-        }
-    });
-
-    $("#paymentCicilanDuration").on("keyup change", function(){
-        if($(this).val() > 0){
-            if($("#confirmPayment").data("action") == 'register-session') {
-                var tSesi = $("#dataPTRegSession option:selected").data("price");
-
-                if ($("#approvalPTPrice").val() != "") {
-                    tSesi = $("#approvalPTPrice").val();
-                }
-
-                if ($("#paymentCicilanDuration").val() > 0) {
-                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    cekCicilanPerBulan(0);
-                }
-            }else if($("#confirmPayment").data("action") == 'extend-session'){
-                var tSesi = $("#dataUserPTSession option:selected").data("price");
-
-                if ($("#approvalSesiPrice").val() != "") {
-                    tSesi = $("#approvalSesiPrice").val();
-                }
-
-                if ($("#paymentCicilanDuration").val() > 0) {
-                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tSesi) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tSesi)) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    cekCicilanPerBulan(0);
-                }
-            }else{
-                var tMembership = $("#cacheMembershipPrice").val();
-                var tSesi = 0;
-
-                if($("#approvalPrice").val() != ""){
-                    tMembership = $("#approvalPrice").val();
-                }
-
-                if($("#paymentCicilanDuration").val() > 0){
-                    $("#cicilan_per_bulan").html(asRupiah((parseInt(tMembership) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    $("#firstPaymentAutoLabel").html("Rp. " + asRupiah(((parseInt(tMembership)) / $("#paymentCicilanDuration").val()).toFixed(0)));
-                    cekCicilanPerBulan(0);
-                }
-            }
-        }
-    });
-
-    $("#firstPaymentManualInput").on("keyup change", function(){
-        if($("#firstPaymentMethodGroup").val() == "manual" && $("#paymentCicilanDuration").val() > 0){
-            cekCicilanPerBulan($(this).val());
-            $("#firstPayData").val($(this).val());
-        }
-    });
+    // $("#firstPaymentManualInput").on("keyup change", function(){
+    //     if($("#firstPaymentMethodGroup").val() == "manual" && $("#paymentCicilanDuration").val() > 0){
+    //         cekCicilanPerBulan($(this).val());
+    //         $("#firstPayData").val($(this).val());
+    //     }
+    // });
 
     function cekCicilanPerBulan(first_payment){
         if($("#confirmPayment").data("action") == 'register-session') {
@@ -1577,17 +1666,17 @@
         }
     }
 
-    function asRupiah(value){
-        var formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'IDR',
-        });
-
-        var split = formatter.format(value).split(".00");
-        var splitCurrency = split[0].split("IDR");
-
-        return splitCurrency[1];
-    }
+    // function asRupiah(value){
+    //     var formatter = new Intl.NumberFormat('en-US', {
+    //         style: 'currency',
+    //         currency: 'IDR',
+    //     });
+    //
+    //     var split = formatter.format(value).split(".00");
+    //     var splitCurrency = split[0].split("IDR");
+    //
+    //     return splitCurrency[1];
+    // }
 
     var dtd = {
         labels: ['qweq', 'qweq', 'weq', 'wq', 'qw', 'Juen', 'Jwul', 'few', 'Sesp', 'Oact', 'Nodv', 'g'],
@@ -1631,6 +1720,110 @@
     });
 
     var historyChartMonthly = new Chart(ctx, chartData);
+
+    var pay_data;
+    var renewData = {
+        membership:             {{ $membership->mship_id }},
+        price:                  {{ $membership->price }},
+        discount:               0,
+        membership_duration:    {{ $membership->duration }},
+        data_action:            "{{ route('membership.extendMembership') }}",
+        payment_type:           null,
+        payment_addition:       null,
+        payment_method:         null,
+        payment_title:          "Paket Member <br>" + '{{ $membership->duration }}' + " Bulan<br>(" + $("#extend-membership-type").html() + ")",
+        debt_first_pay:         null,
+        debt_length:            null,
+        note_after_pay:         true,
+        note:                   null,
+        _token:                  '{{ csrf_token() }}',
+        uHiddenID:              {{ $data->member_id }},
+        regNo:                  {{ $reg_no }},
+    }
+
+    var changeData = {
+        membership:             {{ $membership->mship_id }},
+        price:                  {{ $membership->price }},
+        discount:               0,
+        membership_duration:    {{ $membership->duration }},
+        upgrade_duration:       0,
+        data_action:            null,
+        payment_type:           null,
+        payment_addition:       null,
+        payment_method:         null,
+        payment_title:          null,
+        debt_first_pay:         null,
+        debt_length:            null,
+        note_after_pay:         true,
+        note:                   null,
+        _token:                  '{{ csrf_token() }}',
+        uHiddenID:              {{ $data->member_id }},
+        regNo:                  {{ $reg_no }},
+    }
+
+    var sessionData = {
+        pt:                     @if(isset($pt->id)) {{ $pt->id }} @else null @endisset,
+        session_data:           @if(isset($data->session)) {{ $data->session }} @else null @endisset,
+        session_title:          null,
+        price:                  0,
+        discount:               0,
+        data_action:            null,
+        payment_type:           null,
+        payment_addition:       null,
+        payment_method:         null,
+        payment_title:          null,
+        debt_first_pay:         null,
+        debt_length:            null,
+        note_after_pay:         true,
+        note:                   null,
+        _token:                  '{{ csrf_token() }}',
+        uHiddenID:              {{ $data->member_id }},
+        regNo:                  {{ $reg_no }},
+    }
+
+    function resetSessionData(){
+        sessionData = {
+            pt:                     @if(isset($pt->id)) {{ $pt->id }} @else null @endisset,
+            session_data:           @if(isset($data->session)) {{ $data->session }} @else null @endisset,
+            session_title:          null,
+            price:                  0,
+            discount:               0,
+            data_action:            null,
+            payment_type:           null,
+            payment_addition:       null,
+            payment_method:         null,
+            payment_title:          null,
+            debt_first_pay:         null,
+            debt_length:            null,
+            note_after_pay:         true,
+            note:                   null,
+            _token:                  '{{ csrf_token() }}',
+            uHiddenID:              {{ $data->member_id }},
+            regNo:                  {{ $reg_no }},
+        }
+    }
+
+    function resetChangeData(){
+        changeData = {
+            membership:             {{ $membership->mship_id }},
+            price:                  {{ $membership->price }},
+            discount:               0,
+            membership_duration:    {{ $membership->duration }},
+            upgrade_duration:       0,
+            data_action:            null,
+            payment_type:           null,
+            payment_addition:       null,
+            payment_method:         null,
+            payment_title:          null,
+            debt_first_pay:         null,
+            debt_length:            null,
+            note_after_pay:         true,
+            note:                   null,
+            _token:                  '{{ csrf_token() }}',
+            uHiddenID:              {{ $data->member_id }},
+            regNo:                  {{ $reg_no }},
+        }
+    }
 
     function isEmail(email){
         return /^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*$/.test( email );
