@@ -1371,8 +1371,10 @@
     }
 
     function calcUpgradePrice(){
-        var olddate = new Date('@if(isset($membership_cache)){{ $membership_cache->end_date }}@else 01-01-1999 @endisset');
-        var month_rest = Math.round(moment(olddate).diff(moment(new Date()), 'months', true));
+        //var olddate = new Date('@if(isset($membership_cache)){{ $membership_cache->end_date }}@else 01-01-1999 @endisset');
+        //var month_rest = Math.round(moment(olddate).diff(moment(new Date()), 'months', true));
+
+        var month_rest = {{ $membership->duration }};
 
         if(month_rest == 0){
             month_rest = 1;
@@ -1736,8 +1738,8 @@
         debt_length:            null,
         note_after_pay:         true,
         note:                   null,
-        _token:                  '{{ csrf_token() }}',
-        uHiddenID:              {{ $data->member_id }},
+        _token:                 '{{ csrf_token() }}',
+        uHiddenID:              '{{ $data->member_id }}',
         regNo:                  {{ $reg_no }},
     }
 
@@ -1757,7 +1759,7 @@
         note_after_pay:         true,
         note:                   null,
         _token:                  '{{ csrf_token() }}',
-        uHiddenID:              {{ $data->member_id }},
+        uHiddenID:              '{{ $data->member_id }}',
         regNo:                  {{ $reg_no }},
     }
 
@@ -1776,8 +1778,8 @@
         debt_length:            null,
         note_after_pay:         true,
         note:                   null,
-        _token:                  '{{ csrf_token() }}',
-        uHiddenID:              {{ $data->member_id }},
+        _token:                 '{{ csrf_token() }}',
+        uHiddenID:              '{{ $data->member_id }}',
         regNo:                  {{ $reg_no }},
     }
 
@@ -1797,8 +1799,8 @@
             debt_length:            null,
             note_after_pay:         true,
             note:                   null,
-            _token:                  '{{ csrf_token() }}',
-            uHiddenID:              {{ $data->member_id }},
+            _token:                 '{{ csrf_token() }}',
+            uHiddenID:              '{{ $data->member_id }}',
             regNo:                  {{ $reg_no }},
         }
     }
@@ -1819,8 +1821,8 @@
             debt_length:            null,
             note_after_pay:         true,
             note:                   null,
-            _token:                  '{{ csrf_token() }}',
-            uHiddenID:              {{ $data->member_id }},
+            _token:                 '{{ csrf_token() }}',
+            uHiddenID:              '{{ $data->member_id }}',
             regNo:                  {{ $reg_no }},
         }
     }
