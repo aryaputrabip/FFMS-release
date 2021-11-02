@@ -1998,11 +1998,11 @@ class MemberDataController extends Controller
         $successMessage = 'Daftar Paket PT Berhasil!';
         $redirectNotif = 'success';
 
-        if($this->checkAuth() == 1){
+        if(Auth::user()->role_id == 1){
             return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
-        }else if($this->checkAuth() == 2){
+        }else if(Auth::user()->role_id == 2){
             //STILL EMPTY
-        }else if($this->checkAuth() == 3){
+        }else if(Auth::user()->role_id == 3){
             return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
         }
     }
@@ -2089,11 +2089,11 @@ class MemberDataController extends Controller
         $successMessage = 'Tambah Sesi Berhasil!';
         $redirectNotif = 'success';
 
-        if($this->checkAuth() == 1){
+        if(Auth::user()->role_id == 1){
             return redirect()->route('suadmin.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
-        }else if($this->checkAuth() == 2){
+        }else if(Auth::user()->role_id == 2){
             //STILL EMPTY
-        }else if($this->checkAuth() == 3){
+        }else if(Auth::user()->role_id == 3){
             return redirect()->route('cs.member.edit', $r->uHiddenID)->with([$redirectNotif => $successMessage]);
         }
     }
